@@ -8,6 +8,12 @@ Option Explicit
 
 Public rrGame            As New cGame       ' Main game flow control (loading/exiting levels, etc)
 
+Public pckGenFiles            As New cFilePackage
+Public pckOrigThemeFiles      As New cFilePackage
+Public pckLevelsFiles         As New cFilePackage
+
+
+
 ' ToDo: Put all following in 'cGame'::
 
 Public Type type_Transporter
@@ -34,9 +40,15 @@ Public tLevelTrans()     As type_LevelTrans
 Public sPrimPlayerName   As String
 Public intPlayerLives    As Integer
 
-Dim intWallAround_LOOKUP(1, 1, 1, 1) As Integer       ' (2,4,6,8) - wall is there(1) or not(0) for each
+Public fxParticles(15)   As New cGameFxParticle
+
+
+'Dim intWallAround_LOOKUP(1, 1, 1, 1) As Integer       ' (2,4,6,8) - wall is there(1) or not(0) for each
                                                       '  Down [2], Left [4], Right [6], Up [8]  (KeyPad)
                                                       '  Used in 'GetWallAroundInfo'
+
+Dim timRockSndPlaying As New exTools_Timer
+Public bRockSndPlaying As Boolean
 
 Dim iFPScount As Integer
 Dim iFPSval As Integer
@@ -122,14 +134,20 @@ Function DrawFrame()
         Next intX
     End If
     
-    ' Render spirts
-    For intX = 0 To rrMap.intTotSpirits
-        rrSpirit(intX).Render
-    Next intX
+    ' Render spirits
+    If rrMap.intTotSpirits <> 0 Then
+        For intX = 0 To rrMap.intTotSpirits
+            rrSpirit(intX).Render
+        Next intX
+    End If
     
     ' Update and Render the visual player
     rrRepton.UpDate
     
+    ' Visual FXs
+    For intX = 0 To UBound(fxParticles)
+        fxParticles(intX).RenderInstences
+    Next intX
     
     rrMap.RenderSceneryPieces
     
@@ -147,7 +165,11 @@ Function DrawFrame()
     ExTxtGUI.Render
     
     ExTxtGUI.position 600, 10
-    ExTxtGUI.Text "LIVES: " & Str(intPlayerLives)
+    If intPlayerLives < 200 Then
+        ExTxtGUI.Text "LIVES: " & Str(intPlayerLives)
+    Else
+        ExTxtGUI.Text "LIVES: Unlimited"
+    End If
     ExTxtGUI.Render
     
     ' Time remaining
@@ -172,7 +194,7 @@ Function DrawFrame()
 '    ' Debug helper
 '    For y = rrMap.intMapSizeY To 1 Step -1
 '        sT = ""
-'        For x = rrMap.intMapSizeX To 1 Step -1
+'        For x = 1 To rrMap.intMapSizeX
 '            sT = sT & rrMap.GetData(x, y)
 '        Next x
 '        ExTxtMsg.Text sT
@@ -229,7 +251,69 @@ Function UserInteraction() As Boolean
     
 End Function
 
+' This may be out of place
+Function StartParticleFountian(x As Integer, y As Integer, sType As String) As Integer
+    Dim n As Integer
+    
+    ' Find an availible emitter
+    StartParticleFountian = -1
+    Do
+        StartParticleFountian = StartParticleFountian + 1
+        If StartParticleFountian > UBound(fxParticles) Then StartParticleFountian = -1: Debug.Print "no particles": Exit Function
+    Loop While fxParticles(StartParticleFountian).bIsAlive
 
+    Select Case sType
+        Case "repton_walk8"     ' Up
+            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+                                0, 0, 1.5, _
+                                0, -0.4, -1, _
+                                0.25 / rrGame.sngGameSpeed
+                                
+        Case "repton_walk2"     ' Down
+            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+                                0, 0, 1.5, _
+                                0, 0.4, -1, _
+                                0.25 / rrGame.sngGameSpeed
+                            
+        Case "repton_walk4"     ' Left
+            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+                                0, 0, 1.5, _
+                                -0.4, 0, -1, _
+                                0.25 / rrGame.sngGameSpeed
+                                
+        Case "repton_walk6"     ' Right
+            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+                                0, 0, 1.5, _
+                                0.4, 0, -1, _
+                                0.25 / rrGame.sngGameSpeed
+                                
+        Case "dig8"     ' Up
+            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+                                0, 0, 1.5, _
+                                0, -0.4, -1, _
+                                0.25 / rrGame.sngGameSpeed
+                                
+        Case "dig2"     ' Down
+            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+                                0, 0, 1.5, _
+                                0, 0.4, -1, _
+                                0.25 / rrGame.sngGameSpeed
+                            
+        Case "dig4"     ' Left
+            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+                                0, 0, 1.5, _
+                                -0.4, 0, -1, _
+                                0.25 / rrGame.sngGameSpeed
+                                
+        Case "dig6"     ' Right
+            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+                                0, 0, 1.5, _
+                                0.4, 0, -1, _
+                                0.25 / rrGame.sngGameSpeed
+        
+        
+    End Select
+End Function
 
 
 Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
@@ -241,13 +325,19 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     
     Dim strThemeDir As String
     
+    'Dim aVisTheme As New cPackedFile
+    
+    
     Randomize
     
     ' Get Full Dir Path of theme
     rrGame.strVisualTheme = App.Path & "\data\themes\origonal"
     strThemeDir = App.Path & "\data\themes\origonal"
-    
-   
+
+    ExCam.position 0.001, -150, -1300, True
+    ExCam.LookAt 0.001, -200, -999
+  StartFader 0.3
+  DisplayLoadingScr 1, 17 + rrMap.intMapSizeY
     
     ' Load meshes...   (note that Ex-Perspective horizontaliy flips the screen output and that the
     '                    actual file data does not respect this; NB: walls will use their opposit
@@ -255,113 +345,141 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     
     'Ex3DP(enmPieceType.Space).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\space.bmp"
     
-    Ex3DP(enmPieceType.Dimond).InitXFile strThemeDir & "\meshes\dimond.x"  ', strThemeDir & "\dimond.bmp"
+    Ex3DP(enmPieceType.Dimond).InitXFile pckOrigThemeFiles.GetPackedFile("diamond.x")
+    'Ex3DP(enmPieceType.Dimond).RotateVecs 180, 3, 0
     
-    Ex3DP(enmPieceType.Wall).InitXFile strThemeDir & "\meshes\std_wall\w5.x", strThemeDir & "\textures\wall.bmp"
-    Ex3DP(enmPieceType.Wall8).InitXFile strThemeDir & "\meshes\std_wall\w8.x", strThemeDir & "\textures\wall8.bmp"
-    Ex3DP(enmPieceType.Wall2).InitXFile strThemeDir & "\meshes\std_wall\w2.x", strThemeDir & "\textures\wall2.bmp"
-    Ex3DP(enmPieceType.Wall4).InitXFile strThemeDir & "\meshes\std_wall\w6.x", strThemeDir & "\textures\wall6.bmp"
-    Ex3DP(enmPieceType.Wall6).InitXFile strThemeDir & "\meshes\std_wall\w4.x", strThemeDir & "\textures\wall4.bmp"
-    Ex3DP(enmPieceType.Wall9).InitXFile strThemeDir & "\meshes\std_wall\w7.x", strThemeDir & "\textures\wall7.bmp"
-    Ex3DP(enmPieceType.Wall7).InitXFile strThemeDir & "\meshes\std_wall\w9.x", strThemeDir & "\textures\wall9.bmp"
-    Ex3DP(enmPieceType.Wall3).InitXFile strThemeDir & "\meshes\std_wall\w1.x", strThemeDir & "\textures\wall1.bmp"
-    Ex3DP(enmPieceType.Wall1).InitXFile strThemeDir & "\meshes\std_wall\w3.x", strThemeDir & "\textures\wall3.bmp"
-
-    Ex3DP(11).InitXFile strThemeDir & "\meshes\earth\0.x", strThemeDir & "\textures\earth.bmp"
+    Ex3DP(enmPieceType.Wall).InitXFile pckOrigThemeFiles.GetPackedFile("w5.x"), pckOrigThemeFiles.GetPackedFile("wall.bmp")
+    Ex3DP(enmPieceType.Wall8).InitXFile pckOrigThemeFiles.GetPackedFile("w8.x"), pckOrigThemeFiles.GetPackedFile("wall8.bmp")
+    Ex3DP(enmPieceType.Wall2).InitXFile pckOrigThemeFiles.GetPackedFile("w2.x"), pckOrigThemeFiles.GetPackedFile("wall2.bmp")
+    Ex3DP(enmPieceType.Wall4).InitXFile pckOrigThemeFiles.GetPackedFile("w6.x"), pckOrigThemeFiles.GetPackedFile("wall6.bmp")
+    Ex3DP(enmPieceType.Wall6).InitXFile pckOrigThemeFiles.GetPackedFile("w4.x"), pckOrigThemeFiles.GetPackedFile("wall4.bmp")
+    Ex3DP(enmPieceType.Wall9).InitXFile pckOrigThemeFiles.GetPackedFile("w7.x"), pckOrigThemeFiles.GetPackedFile("wall7.bmp")
+    Ex3DP(enmPieceType.Wall7).InitXFile pckOrigThemeFiles.GetPackedFile("w9.x"), pckOrigThemeFiles.GetPackedFile("wall9.bmp")
+    Ex3DP(enmPieceType.Wall3).InitXFile pckOrigThemeFiles.GetPackedFile("w1.x"), pckOrigThemeFiles.GetPackedFile("wall1.bmp")
+    Ex3DP(enmPieceType.Wall1).InitXFile pckOrigThemeFiles.GetPackedFile("w3.x"), pckOrigThemeFiles.GetPackedFile("wall3.bmp")
+  
+  DisplayLoadingScr 2, 17 + rrMap.intMapSizeY
+  
+    Ex3DP(11).InitXFile pckOrigThemeFiles.GetPackedFile("earth0.x"), pckOrigThemeFiles.GetPackedFile("earth.bmp")
     Ex3DP(11).Rotate 90, 0, 0, True
     
+  DisplayLoadingScr 3, 17 + rrMap.intMapSizeY
 
-    Ex3DP(13).InitXFile strThemeDir & "\meshes\safe.x"
-    Ex3DP(14).InitXFile strThemeDir & "\meshes\key.x"
+    Ex3DP(13).InitXFile pckOrigThemeFiles.GetPackedFile("safe.x")
+    Ex3DP(14).InitXFile pckOrigThemeFiles.GetPackedFile("key.x")
     
-    Ex3DP(17).InitXFile strThemeDir & "\meshes\crown.x"
-    Ex3DP(18).InitXFile strThemeDir & "\meshes\cage.x"
-    Ex3DP(19).InitXFile strThemeDir & "\meshes\spirit.x", strThemeDir & "\textures\spirit.bmp"
-    Ex3DP(20).InitXFile strThemeDir & "\meshes\time-bomb.x", strThemeDir & "\textures\time-bomb.bmp"
+  DisplayLoadingScr 4, 17 + rrMap.intMapSizeY
+  
+    Ex3DP(17).InitXFile pckOrigThemeFiles.GetPackedFile("crown.x")
+    Ex3DP(18).InitXFile pckOrigThemeFiles.GetPackedFile("cage.x")
+    Ex3DP(19).InitXFile pckOrigThemeFiles.GetPackedFile("spirit.x"), pckOrigThemeFiles.GetPackedFile("spirit.bmp")
+  DisplayLoadingScr 5, 17 + rrMap.intMapSizeY
+    Ex3DP(20).InitXFile pckOrigThemeFiles.GetPackedFile("time-bomb.x"), pckOrigThemeFiles.GetPackedFile("time-bomb.bmp")
     Ex3DP(20).Rotate 90, 0, 0, True
-    Ex3DP(21).InitXFile strThemeDir & "\meshes\fungus.x", strThemeDir & "\textures\fungus.bmp"
+    Ex3DP(21).InitXFile pckOrigThemeFiles.GetPackedFile("fungus.x"), pckOrigThemeFiles.GetPackedFile("fungus.bmp")
     Ex3DP(21).Rotate 90, 180, 0, True
-    Ex3DP(22).InitXFile strThemeDir & "\meshes\skull.x"
-    Ex3DP(23).InitXFile strThemeDir & "\meshes\barrier.x"
-    Ex3DP(24).InitXFile strThemeDir & "\meshes\monster.x", strThemeDir & "\textures\monster.bmp"
+    Ex3DP(22).InitXFile pckOrigThemeFiles.GetPackedFile("skull.x")
+    Ex3DP(23).InitXFile pckOrigThemeFiles.GetPackedFile("barrier.x")
+    Ex3DP(24).InitXFile pckOrigThemeFiles.GetPackedFile("monster.x"), pckOrigThemeFiles.GetPackedFile("monster.bmp")
     Ex3DP(24).Rotate 90, 0, 0, True
-    Ex3DP(25).InitXFile strThemeDir & "\meshes\transporter.x", strThemeDir & "\textures\transporter.bmp"
+    Ex3DP(25).InitXFile pckOrigThemeFiles.GetPackedFile("transporter.x"), pckOrigThemeFiles.GetPackedFile("transporter.bmp")
     Ex3DP(25).Rotate 90, 0, 0, True
-    Ex3DP(26).InitXFile strThemeDir & "\meshes\time-capsule.x"
+    Ex3DP(26).InitXFile pckOrigThemeFiles.GetPackedFile("time-capsule.x")
     Ex3DP(26).Rotate 90, 0, 0, True
-
+    
+  DisplayLoadingScr 6, 17 + rrMap.intMapSizeY
     
     
-    Ex3DP(27).InitXFile strThemeDir & "\meshes\stags\5.x", strThemeDir & "\textures\stags.bmp"
-    Ex3DP(28).InitXFile strThemeDir & "\meshes\stags\7.x", strThemeDir & "\textures\stags.bmp"
-    Ex3DP(29).InitXFile strThemeDir & "\meshes\stags\9.x", strThemeDir & "\textures\stags.bmp"
-    Ex3DP(30).InitXFile strThemeDir & "\meshes\stags\1.x", strThemeDir & "\textures\stags.bmp"
-    Ex3DP(31).InitXFile strThemeDir & "\meshes\stags\3.x", strThemeDir & "\textures\stags.bmp"
+    Ex3DP(27).InitXFile pckOrigThemeFiles.GetPackedFile("stag5.x"), pckOrigThemeFiles.GetPackedFile("stags.bmp")
+    Ex3DP(28).InitXFile pckOrigThemeFiles.GetPackedFile("stag1.x"), pckOrigThemeFiles.GetPackedFile("stags.bmp")
+    Ex3DP(29).InitXFile pckOrigThemeFiles.GetPackedFile("stag3.x"), pckOrigThemeFiles.GetPackedFile("stags.bmp")
+    Ex3DP(30).InitXFile pckOrigThemeFiles.GetPackedFile("stag7.x"), pckOrigThemeFiles.GetPackedFile("stags.bmp")
+    Ex3DP(31).InitXFile pckOrigThemeFiles.GetPackedFile("stag9.x"), pckOrigThemeFiles.GetPackedFile("stags.bmp")
+  DisplayLoadingScr 7, 17 + rrMap.intMapSizeY
     For intX = 27 To 31
         Ex3DP(intX).Rotate 90, 0, 0, True
     Next intX
     
     'Ex3DP(32).InitXFile strThemeDir & "\meshes\nav-map.x", strThemeDir & "\textures\nav-map.bmp"
     
-    Ex3DP(33).InitXFile strThemeDir & "\meshes\level-trans.x"
-    
+    Ex3DP(33).InitXFile pckOrigThemeFiles.GetPackedFile("level-trans.x")
+  DisplayLoadingScr 8, 17 + rrMap.intMapSizeY
     ' Ground meshes
-    For intX = 0 To 15
-        Ex3DGround(intX).InitXFile strThemeDir & "\meshes\ground\" & Trim(Str(intX)) & ".x", strThemeDir & "\textures\ground.bmp"
-        Ex3DGround(intX).Rotate 90, 0, 0, True
-    Next intX
+    'For intX = 0 To 15
+        Ex3DGround(0).InitXFile pckOrigThemeFiles.GetPackedFile("ground.x"), pckOrigThemeFiles.GetPackedFile("grounds.bmp")
+        Ex3DGround(0).Rotate 90, 0, 0, True
+    'Next intX
+
+  DisplayLoadingScr 9, 17 + rrMap.intMapSizeY
     
     ' Wall sides
     
-    Ex3DWallSides(0).InitXFile strThemeDir & "\meshes\wall_sides\s2.x", strThemeDir & "\textures\stdwall_side.bmp"
-    Ex3DWallSides(1).InitXFile strThemeDir & "\meshes\wall_sides\s4.x", strThemeDir & "\textures\stdwall_side.bmp"
-    Ex3DWallSides(2).InitXFile strThemeDir & "\meshes\wall_sides\s6.x", strThemeDir & "\textures\stdwall_side.bmp"
-    Ex3DWallSides(3).InitXFile strThemeDir & "\meshes\wall_sides\s8.x", strThemeDir & "\textures\stdwall_side.bmp"
+    Ex3DWallSides(0).InitXFile pckOrigThemeFiles.GetPackedFile("s2.x"), pckOrigThemeFiles.GetPackedFile("stdwall_side.bmp")
+    Ex3DWallSides(1).InitXFile pckOrigThemeFiles.GetPackedFile("s4.x"), pckOrigThemeFiles.GetPackedFile("stdwall_side.bmp")
+    Ex3DWallSides(2).InitXFile pckOrigThemeFiles.GetPackedFile("s6.x"), pckOrigThemeFiles.GetPackedFile("stdwall_side.bmp")
+    Ex3DWallSides(3).InitXFile pckOrigThemeFiles.GetPackedFile("s8.x"), pckOrigThemeFiles.GetPackedFile("stdwall_side.bmp")
     Ex3DWallSides(0).Rotate 90, 180, 0, True
+    'Ex3DWallSides(0).RotateVecs 0, 180, 0
     Ex3DWallSides(1).Rotate 90, 180, 0, True
     Ex3DWallSides(2).Rotate 90, 180, 0, True
     Ex3DWallSides(3).Rotate 90, 180, 0, True
     
     
+    Ex3DParticles(0).InitXFile App.Path & "\part_rubble1.x", pckOrigThemeFiles.GetPackedFile("grounds.bmp")
+'    Ex3DParticles(0).InitXFile App.Path & "\part.x", App.Path & "\green_part.bmp"
+'    Ex3DParticles(0).InitXFile App.Path & "\part.x", App.Path & "\green_part.bmp"
+
+    
+  
+  DisplayLoadingScr 10, 17 + rrMap.intMapSizeY
+    
     ' Scenery pieces
     rrMap.LoadSceneryPieces
-    
+
+  DisplayLoadingScr 11, 17 + rrMap.intMapSizeY
     
     rrRepton.Init
     rrRepton.bVisFocus = True
     
     modRR_GameEvents.FungusNewTime
     
+  DisplayLoadingScr 12, 17 + rrMap.intMapSizeY
     
     ' Load sounds...
-    ExSnds(0).InitSound strThemeDir & "\sounds\m_dimond.wav"
-    ExSnds(1).InitSound strThemeDir & "\sounds\m_dimond.wav"
-    ExSnds(2).InitSound strThemeDir & "\sounds\m_dimond.wav"
-    ExSnds(3).InitSound strThemeDir & "\sounds\m_dimond.wav"
-    ExSnds(4).InitSound strThemeDir & "\sounds\rock_fall.wav"
-    ExSnds(5).InitSound strThemeDir & "\sounds\rock_crash.wav"
-    ExSnds(6).InitSound strThemeDir & "\sounds\crown.wav"
-    ExSnds(7).InitSound strThemeDir & "\sounds\egg_cracking.wav"
-    ExSnds(8).InitSound strThemeDir & "\sounds\egg_crunch.wav"
-    ExSnds(9).InitSound strThemeDir & "\sounds\spirit_caught.wav"
-    ExSnds(10).InitSound strThemeDir & "\sounds\spirit_near.wav"
-    ExSnds(11).InitSound strThemeDir & "\sounds\time_cap.wav"
-    ExSnds(12).InitSound strThemeDir & "\sounds\transporter.wav"
-    If Not (bTransporting) Then ExSnds(13).InitSound strThemeDir & "\sounds\level-trans.wav"
-    ExSnds(14).InitSound strThemeDir & "\sounds\key.wav"
-    ExSnds(15).InitSound strThemeDir & "\sounds\fungus.wav"
-    ExSnds(16).InitSound strThemeDir & "\sounds\dig.wav"
-    ExSnds(17).InitSound strThemeDir & "\sounds\monster_awake.wav"
-    ExSnds(18).InitSound strThemeDir & "\sounds\monster_die.wav"
-    ExSnds(19).InitSound strThemeDir & "\sounds\rep_die.wav"
+    ExSnds(0).InitSound pckOrigThemeFiles.GetPackedFile("m_dimond.wav")
+    ExSnds(1).InitSound pckOrigThemeFiles.GetPackedFile("m_dimond.wav")
+    ExSnds(2).InitSound pckOrigThemeFiles.GetPackedFile("m_dimond.wav")
+    ExSnds(3).InitSound pckOrigThemeFiles.GetPackedFile("m_dimond.wav")
+    ExSnds(4).InitSound pckOrigThemeFiles.GetPackedFile("rock_fall.wav")
+    ExSnds(5).InitSound pckOrigThemeFiles.GetPackedFile("rock_crash.wav")
+    ExSnds(6).InitSound pckOrigThemeFiles.GetPackedFile("crown.wav")
+  DisplayLoadingScr 13, 17 + rrMap.intMapSizeY
+    ExSnds(7).InitSound pckOrigThemeFiles.GetPackedFile("egg_cracking.wav")
+    ExSnds(8).InitSound pckOrigThemeFiles.GetPackedFile("egg_crunch.wav")
+    ExSnds(9).InitSound pckOrigThemeFiles.GetPackedFile("spirit_caught.wav")
+    ExSnds(10).InitSound pckOrigThemeFiles.GetPackedFile("spirit_near.wav")
+    ExSnds(11).InitSound pckOrigThemeFiles.GetPackedFile("time_cap.wav")
+    ExSnds(12).InitSound pckOrigThemeFiles.GetPackedFile("transporter.wav")
+  DisplayLoadingScr 14, 17 + rrMap.intMapSizeY
+    If Not (bTransporting) Then ExSnds(13).InitSound pckOrigThemeFiles.GetPackedFile("level-trans.wav")
+    ExSnds(14).InitSound pckOrigThemeFiles.GetPackedFile("key.wav")
+    ExSnds(15).InitSound pckOrigThemeFiles.GetPackedFile("fungus.wav")
+    ExSnds(16).InitSound pckOrigThemeFiles.GetPackedFile("dig.wav")
+    ExSnds(17).InitSound pckOrigThemeFiles.GetPackedFile("monster_awake.wav")
+  DisplayLoadingScr 15, 17 + rrMap.intMapSizeY
+    ExSnds(18).InitSound pckOrigThemeFiles.GetPackedFile("monster_die.wav")
+    ExSnds(19).InitSound pckOrigThemeFiles.GetPackedFile("rep_die.wav")
+    ExSnds(20).InitSound pckOrigThemeFiles.GetPackedFile("bomb_explosion.wav")
     
     For intX = 0 To UBound(ExSnds)
         ExSnds(intX).VolumeFadeTo rrGame.sngSfxVol, 0.001
     Next intX
     
-    ExMsgBoard.InitXFile App.Path & "\data\gui\msg_board.x", App.Path & "\data\gui\msg_boar.bmp"
-    
-    
+    ExMsgBoard.InitXFile pckGenFiles.GetPackedFile("msg_board.x")
+  
+  DisplayLoadingScr 16, 17 + rrMap.intMapSizeY
+  StartFader 3
+  
     rrMap.intTotRocksOrEggs = 0
     rrMap.intTotEggs = 0
     rrMap.intTotMonstersAlive = 0
@@ -373,7 +491,12 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     rrMap.intTotLevelTrans = 0
     
     
+    timRockSndPlaying.ReSet
+    
    For intY = 1 To rrMap.intMapSizeY
+  
+      DisplayLoadingScr 16 + intY, 17 + rrMap.intMapSizeY
+  
       For intX = 1 To rrMap.intMapSizeX
         
          rrPieces(intX, intY).intRockOrEggID = -1
@@ -431,10 +554,10 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
             Case "i"   'Repton stating point
                
                 ' Set starting position of objects...
-                rrRepton.SetPosition intX, intY
-                ExCam.position -((rrRepton.GetXPos - 1) * 95.5), -((rrRepton.GetYPos - 1) * 95.5) - 200, 700, True
-                ExCam.LookAt -((rrRepton.GetXPos - 1) * 95.5), -((rrRepton.GetYPos - 1) * 95.5), 0
-
+                rrRepton.intOldX = intX
+                rrRepton.intOldY = intY
+               
+               
                 
             Case "t"   'Crown
                 rrMap.intTotCrowns = rrMap.intTotCrowns + 1
@@ -479,6 +602,9 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
       Next intX
    Next intY
    
+   ' Now properly set Repton starting position (this is done here, because it moves the cam and effects nice lever loading fader)
+   rrRepton.SetPosition rrRepton.intOldX, rrRepton.intOldY
+   
    ' Start time-bomb
    rrMap.timTimeBomb.ReSet
 
@@ -502,25 +628,26 @@ Function DeinitLevel() As Integer
     'rrGame.strVisualTheme = App.Path & "\data\themes\origonal"
      'strThemeDir = App.Path & "\data\themes\origonal"
     
+    
     For n = 1 To UBound(Ex3DP)
         Set Ex3DP(n) = Nothing
     Next n
         
-    For n = 0 To 15
-        Set Ex3DGround(n) = Nothing
+'    For n = 0 To 15
+        Set Ex3DGround(0) = Nothing
+'    Next n
+    
+    ' Visual FXs
+    For n = 0 To UBound(fxParticles)
+        Set fxParticles(n) = Nothing
     Next n
     
     For n = 0 To 3
         Set Ex3DWallSides(n) = Nothing
     Next n
-     
-    
-    
     ' Scenery pieces
     rrMap.DeinitScenery
-    
     Set rrMap = Nothing
-    
     Set rrRepton = Nothing
     
     ReDim rrSpirits(0)
@@ -528,7 +655,6 @@ Function DeinitLevel() As Integer
     
     ReDim rrRockOrEggs(0)
     Set rrRockOrEggs(0) = Nothing
-        
     Set ExMsgBoard = Nothing
 
 End Function
@@ -540,17 +666,17 @@ Function GetPlayerOffsetPiece(intX As Integer, intY As Integer) As Integer
 ' -1 = No piece (off the edge of the map)
 ' Else the piece int ID is returned
 
-    Dim iX As Integer
+    Dim ix As Integer
     Dim iY As Integer
 
     ' Calculate its position
-    iX = rrRepton.GetXPos + intX
+    ix = rrRepton.GetXPos + intX
     iY = rrRepton.GetYPos + intY
 
     ' Check if this is a piece off the edge of the map...
     '  Left, Top, Right, Bottom
  
-    If iX < 1 Or iY < 1 Or iX > rrMap.intMapSizeX Or iY > rrMap.intMapSizeY Then
+    If ix < 1 Or iY < 1 Or ix > rrMap.intMapSizeX Or iY > rrMap.intMapSizeY Then
        
             ' Flat wall
             GetPlayerOffsetPiece = -1  'enmPieceType.Wall
@@ -566,47 +692,47 @@ Function GetPlayerOffsetPiece(intX As Integer, intY As Integer) As Integer
     
 End Function
 
-Sub SetupWallAroundInfo_LookUpTable()
-                                             
-    '                    2  4  6  8    TypeOfFloor
-    intWallAround_LOOKUP(0, 0, 0, 0) = 5
-    intWallAround_LOOKUP(0, 0, 0, 1) = 8
-    intWallAround_LOOKUP(0, 0, 1, 0) = 6
-    intWallAround_LOOKUP(0, 0, 1, 1) = 9
-    
-    intWallAround_LOOKUP(0, 1, 0, 0) = 4
-    intWallAround_LOOKUP(0, 1, 0, 1) = 7
-    intWallAround_LOOKUP(0, 1, 1, 0) = 10
-    intWallAround_LOOKUP(0, 1, 1, 1) = 14
-    
-    intWallAround_LOOKUP(1, 0, 0, 0) = 2
-    intWallAround_LOOKUP(1, 0, 0, 1) = 11
-    intWallAround_LOOKUP(1, 0, 1, 0) = 3
-    intWallAround_LOOKUP(1, 0, 1, 1) = 15
-    
-    intWallAround_LOOKUP(1, 1, 0, 0) = 1
-    intWallAround_LOOKUP(1, 1, 0, 1) = 13
-    intWallAround_LOOKUP(1, 1, 1, 0) = 12
-    intWallAround_LOOKUP(1, 1, 1, 1) = 0
-    
-End Sub
-Function GetWallAroundInfo(intX As Integer, intY As Integer) As Integer
-' Selects the correct meshID for 'specal case' map piece. Eg. need to know what type of ground should be
-'  rendered with consideration to the surrounding walls
-
-    Dim blnOffWall(4) As Boolean
-
-
-    ' Dermine what walls are present
-    blnOffWall(1) = (rrMap.GetGeneralPieceType(intX, intY + 1) = enmPieceType.Wall)     ' 2
-    blnOffWall(2) = (rrMap.GetGeneralPieceType(intX - 1, intY) = enmPieceType.Wall)     ' 4
-    blnOffWall(3) = (rrMap.GetGeneralPieceType(intX + 1, intY) = enmPieceType.Wall)     ' 6
-    blnOffWall(4) = (rrMap.GetGeneralPieceType(intX, intY - 1) = enmPieceType.Wall)     ' 8
-    
-    ' 'Look-Up' the type of ground mesh using our lookup table
-    GetWallAroundInfo = intWallAround_LOOKUP(CInt(blnOffWall(1) * -1), CInt(blnOffWall(2) * -1), Int(blnOffWall(3)) * -1, Int(blnOffWall(4)) * -1)
-                                                'CInt' needed  ???
-End Function
+'Sub SetupWallAroundInfo_LookUpTable()
+'
+'    '                    2  4  6  8    TypeOfFloor
+'    intWallAround_LOOKUP(0, 0, 0, 0) = 5
+'    intWallAround_LOOKUP(0, 0, 0, 1) = 8
+'    intWallAround_LOOKUP(0, 0, 1, 0) = 6
+'    intWallAround_LOOKUP(0, 0, 1, 1) = 9
+'
+'    intWallAround_LOOKUP(0, 1, 0, 0) = 4
+'    intWallAround_LOOKUP(0, 1, 0, 1) = 7
+'    intWallAround_LOOKUP(0, 1, 1, 0) = 10
+'    intWallAround_LOOKUP(0, 1, 1, 1) = 14
+'
+'    intWallAround_LOOKUP(1, 0, 0, 0) = 2
+'    intWallAround_LOOKUP(1, 0, 0, 1) = 11
+'    intWallAround_LOOKUP(1, 0, 1, 0) = 3
+'    intWallAround_LOOKUP(1, 0, 1, 1) = 15
+'
+'    intWallAround_LOOKUP(1, 1, 0, 0) = 1
+'    intWallAround_LOOKUP(1, 1, 0, 1) = 13
+'    intWallAround_LOOKUP(1, 1, 1, 0) = 12
+'    intWallAround_LOOKUP(1, 1, 1, 1) = 0
+'
+'End Sub
+'Function GetWallAroundInfo(intX As Integer, intY As Integer) As Integer
+'' Selects the correct meshID for 'specal case' map piece. Eg. need to know what type of ground should be
+''  rendered with consideration to the surrounding walls
+'
+'    Dim blnOffWall(4) As Boolean
+'
+'
+'    ' Dermine what walls are present
+'    blnOffWall(1) = (rrMap.GetGeneralPieceType(intX, intY + 1) = enmPieceType.Wall)     ' 2
+'    blnOffWall(2) = (rrMap.GetGeneralPieceType(intX - 1, intY) = enmPieceType.Wall)     ' 4
+'    blnOffWall(3) = (rrMap.GetGeneralPieceType(intX + 1, intY) = enmPieceType.Wall)     ' 6
+'    blnOffWall(4) = (rrMap.GetGeneralPieceType(intX, intY - 1) = enmPieceType.Wall)     ' 8
+'
+'    ' 'Look-Up' the type of ground mesh using our lookup table
+'    GetWallAroundInfo = intWallAround_LOOKUP(CInt(blnOffWall(1) * -1), CInt(blnOffWall(2) * -1), Int(blnOffWall(3)) * -1, Int(blnOffWall(4)) * -1)
+'                                                'CInt' needed  ???
+'End Function
 
 
 
@@ -704,3 +830,46 @@ Function DataStr2Int(strIn As String) As Integer
 End Function
 
 
+Sub PlayFallingSnd()
+    'Debug.Print timRockSndPlaying.LocalTime
+    If bRockSndPlaying = False Or timRockSndPlaying.LocalTime > 3.911 Then
+        ExSnds(4).PlaySound True
+        bRockSndPlaying = True
+        timRockSndPlaying.ReSet
+    End If
+End Sub
+
+Function DisplayLoadingScr(iCur As Integer, iMax As Integer)
+    
+    Dim n As Integer
+    Dim b As Single
+   
+    ExPrj.Render
+    
+    ' Control fader
+    ExTxtMsg.Colour &HFF11FF11
+    ExTxtMsg.position 90, frmMain.iYsize * 0.5
+    ExTxtMsg.Text "Loading..."
+    ExTxtMsg.Render
+
+    ExTxtMsg.position frmMain.iXsize * 0.4 * (1 / iMax) - 1, frmMain.iYsize * 0.6
+    ExTxtMsg.Text "|"
+    ExTxtMsg.Render
+
+    n = Int((frmMain.iXsize * 0.99) * (iCur / iMax))
+
+    For b = 0 To n Step 2
+        ExTxtMsg.position b, frmMain.iYsize * 0.6
+        ExTxtMsg.Text "|"
+        ExTxtMsg.Render
+    Next b
+
+    ExTxtMsg.position (frmMain.iXsize * 0.99) - 2, frmMain.iYsize * 0.6
+    ExTxtMsg.Text "|"
+    ExTxtMsg.Render
+    
+    RenderFader (iCur <= 16)
+
+    ExPrj.Sync
+
+End Function
