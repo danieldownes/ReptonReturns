@@ -31,6 +31,8 @@ Public ExSnds(5) As New exSound
 
 Public ExMsgBoard As New exMesh
 
+Public ExScenery() As New exMesh
+
 
 ' GUI stuff - make into class object?
 Public ExTxtGUI As New ex2DText
@@ -38,7 +40,20 @@ Public ExTxtMsg As New ex2DText
 
 ''Public ExSnd As exSound
 
+Function InitExperspectiveObjects()
+    ExPrj.Init frmMain.hwnd, "timeomatic"
+    ExPrj.BackColour &H0
 
+    ExInp.InitKeyboardInput
+
+
+    ExTxtGUI.InitText "", frmMain.lblGUIRef.Font
+    ExTxtGUI.Colour &HFF00A000
+    
+    ExTxtMsg.InitText "", frmMain.lblMsgRef.Font
+    ExTxtMsg.Colour &HFF00A000
+    
+End Function
 
 
 Function Ret3DPos(intMapPos As Integer) As Single
