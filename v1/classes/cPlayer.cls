@@ -124,6 +124,8 @@ Function UpDate()
                 
                 ' Start FX
                 
+            Case "z"                                            ' Time capsule; reset time bomb timer
+                rrMap.TimeBombControl 3
                 
                 
         End Select
@@ -138,7 +140,7 @@ Function UpDate()
         
         
         ' In-games message trigger?
-        rrMap.MessageCheckAndShow intCurX - 1, intCurY
+        rrMap.MessageCheckAndShow intCurX, intCurY
         
         
         GameEvents
@@ -166,7 +168,12 @@ Function SetPosition(intX As Integer, intY As Integer)
     intOldY = intY
     
     ' Update visual player
-    ex3DPlayer.Position Ret3DPos(intX), Ret3DPos(intY), -240, True
+    ex3DPlayer.position Ret3DPos(intX), Ret3DPos(intY), -240, True
+    exPlayer_logic.position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+        
+    enmPlayerState = Walk
+    
+    UpDate
     
 End Function
 
@@ -266,6 +273,7 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
             
     End Select
     If intTemp >= 3 And intTemp <= 10 Then MoveableTo = False       ' Sides of normal type wall
+    If intTemp >= 27 And intTemp <= 31 Then MoveableTo = False       ' Stagnights
     
     
     ' Movable pieces...
@@ -327,7 +335,7 @@ Sub Init()
     int3DDirection = Down
     
     ' Init visual based objects
-    ex3DPlayer.InitXFile App.Path + "\data\themes\meshes\repton.x"
+    ex3DPlayer.InitXFile rrGame.strVisualTheme & "\meshes\repton.x"
     exPlayer_logic.InitXFile ""                                 ' Blank object so that animations are smooth
     
     exTimPlayerCont.Start
@@ -343,9 +351,9 @@ Private Function Render()
     
     'if bFocus = True
         
-        ExCam.Position exPlayer_logic.Position.x, exPlayer_logic.Position.y - 350, 350, True
+        ExCam.position exPlayer_logic.position.x, exPlayer_logic.position.y - 350, 350, True
         
-        ExCam.LookAt exPlayer_logic.Position.x, exPlayer_logic.Position.y, ex3DPlayer.Position.Z
+        ExCam.LookAt exPlayer_logic.position.x, exPlayer_logic.position.y, ex3DPlayer.position.z
             
         'ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), 0), ex3DPlayer.Position, cintTimeToMove   'ex3DPlayer.Position.X, ex3DPlayer.Position.Y - 200, 700, True
         
@@ -354,7 +362,7 @@ Private Function Render()
     
     'end if
 
-    ex3DPlayer.Position exPlayer_logic.Position.x, exPlayer_logic.Position.y, exPlayer_logic.Position.Z, True
+    ex3DPlayer.position exPlayer_logic.position.x, exPlayer_logic.position.y, exPlayer_logic.position.z, True
     
     ' Control Animation
     If intAniN > intAniMax Then intAniN = intAniMin
@@ -382,7 +390,7 @@ Private Function Move3D()
 
     ' Update position (if changed)
     If intCurX <> intOldX Or intCurY <> intOldY Then
-        exPlayer_logic.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), -240), ex3DPlayer.Position, cintTimeToMove
+        exPlayer_logic.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), -240), ex3DPlayer.position, cintTimeToMove
         'exTimPlayerCont.Stop_
         exTimPlayerCont.ReSet
         'exTimPlayerCont.Start
