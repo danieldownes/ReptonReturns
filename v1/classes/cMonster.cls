@@ -86,8 +86,6 @@ Function Init(intX As Integer, intY As Integer)
 
     
     enmMonsterState = StillInEgg
-    
-    'rrMap.SetData intCurX, intCurY, Egg
    
 End Function
 
@@ -211,6 +209,8 @@ Function CheckIfMove()
             enmMonsterState = MonsterWaking
             timMonsterSpawnCont.ReSet
             
+            ExSnds(17).PlaySound False
+            
         End If
         
     ElseIf enmMonsterState = MonsterWaking Then
@@ -315,6 +315,8 @@ Function Spawn(intX As Integer, intY As Integer)
     
     enmMonsterState = EggIsCracking
     
+    ExSnds(7).PlaySound False
+    
     timMonsterSpawnCont.ReSet
     
 End Function
@@ -323,6 +325,8 @@ Function Die() As Boolean
     If enmMonsterState = SeekingRepton Or enmMonsterState = MonsterWaking Then
         DieForced
         Die = True
+        
+        ExSnds(18).PlaySound False
     Else
         Die = False
     End If
