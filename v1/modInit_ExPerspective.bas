@@ -17,7 +17,7 @@ Public ExFader          As New exMesh
 
 Public Ex3DP(33) As New exMesh
 
-Public Ex3DGround(15) As New exMesh      ' Visual Ground
+Public Ex3DGround(0) As New exMesh      ' Visual Ground
                                          '  10 = 4-6
                                          '  11 = 8-2
                                          '  12 = 4-6-8
@@ -28,7 +28,9 @@ Public Ex3DGround(15) As New exMesh      ' Visual Ground
 
 Public Ex3DWallSides(3) As New exMesh    ' Visual Wall sides (large stones)
 
-Public ExSnds(19) As New exSound
+Public Ex3DParticles(0) As New exMesh    ' Load the different types of particle
+    
+Public ExSnds(20) As New exSound
 ' 0 - Dimond1
 ' 1 - Dimond2
 ' 2 - Dimond3
@@ -49,6 +51,7 @@ Public ExSnds(19) As New exSound
 '17 - monster awake
 '18 - monster die
 '19 - rep die
+'20 - bomb explosion
 
 Public ExMsgBoard As New exMesh
 
@@ -61,9 +64,10 @@ Public ExTxtMsg As New ex2DText
 
 ''Public ExSnd As exSound
 
-
 Dim TimFaderCont    As New exTools_Timer
 Dim sngFadeTime     As Single
+
+
 
 Function InitExperspectiveObjects()
     ExPrj.Init frmMain.hwnd, "timeomatic"
@@ -78,7 +82,7 @@ Function InitExperspectiveObjects()
     ExTxtMsg.InitText "", frmMain.lblMsgRef.Font
     ExTxtMsg.Colour &HFF00A000
     
-    ExFader.InitXFile App.Path & "\data\gui\fader.x"
+    ExFader.InitXFile pckGenFiles.GetPackedFile("fader.x")
     
 End Function
 
