@@ -105,7 +105,11 @@ Function UpDate()
                 Me.Die
                 
             Case "n"                                            ' Transporter; reposition
-               
+            
+                ' Remove transporter from map
+                rrMap.SetData intCurX, intCurY, Repton
+                rrPieces(intCurX, intCurY).TypeID = "0"
+                
                 intCurY = rrPieces(intCurX, intCurY).intTransporterID
                 
                 intCurX = tTransporters(intCurY).iToX
@@ -114,6 +118,11 @@ Function UpDate()
                 Move3D
                 
                 Me.SetPosition intCurX, intCurY
+                
+                ' Start pause
+                rrGame.Pause 2.5
+                
+                ' Start FX
                 
                 
                 
@@ -126,6 +135,11 @@ Function UpDate()
         
         ' Update the realtime map piece of the old position
         rrMap.SetData intOldX, intOldY, Space
+        
+        
+        ' In-games message trigger?
+        rrMap.MessageCheckAndShow intCurX - 1, intCurY
+        
         
         GameEvents
         UserInteraction   ' Still moving?
@@ -232,7 +246,7 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
     
         Case enmPieceType.Bomb
             If rrRepton.intDimondsCollected <> rrMap.intTotDimonds _
-               Or rrMap.intTotCrowns <> 0 Or rrMap.intTotEggs <> 0 Or rrMap.intTotMonsters <> 0 Then
+               Or rrMap.intTotCrowns <> 0 Or rrMap.intTotEggs <> 0 Or rrMap.intTotMonstersAlive <> 0 Then
                
                 MoveableTo = False
             End If
@@ -261,16 +275,33 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
             MoveableTo = False
         Else
             If intDirection = Left Then
-                If rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Space) Or rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Monster) Then
+                If rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Space) Then
                     rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Left
                 Else
                     MoveableTo = False
                 End If
+                
+                If rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Monster) Then
+                    If rrMonster(rrPieces(intX - 1, intY).intMonsterID).Killable = True Then
+                        rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Left
+                    
+                    Else
+                        MoveableTo = False
+                    End If
+                End If
             Else
-                If rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Space) Or rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Monster) Then
+                If rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Space) Then
                     rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
                 Else
                     MoveableTo = False
+                End If
+                
+                If rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Monster) Then
+                    If rrMonster(rrPieces(intX + 1, intY).intMonsterID).Killable = True Then
+                        rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
+                    Else
+                        MoveableTo = False
+                    End If
                 End If
             End If
         End If
@@ -312,9 +343,9 @@ Private Function Render()
     
     'if bFocus = True
         
-        ExCam.Position exPlayer_logic.Position.X, exPlayer_logic.Position.Y - 350, 350, True
+        ExCam.Position exPlayer_logic.Position.x, exPlayer_logic.Position.y - 350, 350, True
         
-        ExCam.LookAt exPlayer_logic.Position.X, exPlayer_logic.Position.Y, ex3DPlayer.Position.Z
+        ExCam.LookAt exPlayer_logic.Position.x, exPlayer_logic.Position.y, ex3DPlayer.Position.Z
             
         'ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), 0), ex3DPlayer.Position, cintTimeToMove   'ex3DPlayer.Position.X, ex3DPlayer.Position.Y - 200, 700, True
         
@@ -323,7 +354,7 @@ Private Function Render()
     
     'end if
 
-    ex3DPlayer.Position exPlayer_logic.Position.X, exPlayer_logic.Position.Y, exPlayer_logic.Position.Z, True
+    ex3DPlayer.Position exPlayer_logic.Position.x, exPlayer_logic.Position.y, exPlayer_logic.Position.Z, True
     
     ' Control Animation
     If intAniN > intAniMax Then intAniN = intAniMin
