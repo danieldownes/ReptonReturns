@@ -43,8 +43,8 @@ Function GameEvents()
         If rrMap.sngTimeBombOut <> -1 Then
             If rrMap.sngTimeLeft <= 0 Then
                 ' Time has ran out
-               ' ExSnds(20).PlaySound False
-               ' rrRepton.Die False
+                ExSnds(20).PlaySound False
+                rrRepton.Die False
             End If
         End If
         
@@ -211,7 +211,7 @@ Function TryRockFalls()
     On Error Resume Next
     
     For Y = rrMap.intMapSizeY To 1 Step -1
-        ExTxtMsg.Text ""
+        'ExTxtMsg.Text ""
         For X = rrMap.intMapSizeX To 1 Step -1
             If rrPieces(X, Y).intRockOrEggID <> -1 Then
                 rrRocksOrEggs(rrPieces(X, Y).intRockOrEggID).CheckIfFall
@@ -219,7 +219,7 @@ Function TryRockFalls()
             End If
             
         Next X
-        ExTxtMsg.position 200, 40 + (20 * Y)
+        'ExTxtMsg.position 200, 40 + (20 * Y)
     Next Y
     
     
@@ -228,7 +228,7 @@ Function TryRockFalls()
 End Function
 
 Function FungusNewTime()
-    sngNextFungusTime = Rnd() * 10 + 5
+    sngNextFungusTime = (Rnd() * 10 + 5) * rrGame.sngGameSpeed
     
     ' Reset timer
     
