@@ -1,0 +1,2561 @@
+Document Type: WSE
+item: Global
+  Version=8.11
+  Title=Repton Returns v1 BETA 1 Installation
+  Flags=00010100
+  Languages=65 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  Copy Default=1
+  Japanese Font Name=MS Gothic
+  Japanese Font Size=9
+  Progress Bar DLL=%_WISE_%\Progress\WIZ%_EXE_OS_TYPE_%.DLL
+  Start Gradient=0 0 0
+  End Gradient=0 74 0
+  Windows Flags=00000100000000110010110000001000
+  Log Pathname=%MAINDIR%\INSTALL.LOG
+  Message Font=MS Sans Serif
+  Font Size=8
+  Pages Modified=00000000001100000000001110101001
+  Extra Pages=00000000000000000000000000100000
+  Disk Label=Default
+  Disk Filename=SETUP
+  Patch Flags=0000000000000001
+  Patch Threshold=85
+  Patch Memory=4000
+  FTP Cluster Size=20
+  Per-User Version ID=1
+  Dialogs Version=7
+  Crystal Format=10111100101100000010001001001001
+  Crystal Destination=00000000000000000000000000001011
+  Step View=Properties
+  Variable Name1=_SYS_
+  Variable Default1=C:\WINDOWS\System32
+  Variable Flags1=00001000
+  Variable Name2=_WIN_
+  Variable Default2=C:\WINDOWS
+  Variable Flags2=00001000
+  Variable Name3=_WISE_
+  Variable Default3=C:\Program Files\Wise InstallMaster 8.1
+  Variable Flags3=00001000
+  Variable Name4=_VB4WIN32DIR_
+  Variable Default4=C:\Program Files\Microsoft Visual Studio\VB98
+  Variable Flags4=00001000
+  Variable Name5=_VB4WIN32OPT_
+  Variable Default5=A
+  Variable Flags5=00001000
+  Variable Name6=_VB4WIN32DAO_
+  Variable Default6=C:\Program Files\Common Files\Microsoft Shared\DAO
+  Variable Flags6=00001000
+  Variable Name7=_ODBC16_
+  Variable Default7=C:\WINDOWS\System32
+  Variable Flags7=00001000
+  Variable Name8=_ODBC32_
+  Variable Default8=C:\WINDOWS\System32
+  Variable Flags8=00001000
+end
+item: Include Script
+  Pathname=%_WISE_%\INCLUDE\vb6check.wse
+end
+item: Remark
+  Text=If you do not want Rem statements to appear when you create a new installation,
+end
+item: Remark
+  Text=open Empty Project.wse from the Template folder in the Wise application
+end
+item: Remark
+  Text=directory, delete the Rem statements, and select Save from the File menu.
+end
+item: Open/Close INSTALL.LOG
+  Flags=00000001
+end
+item: Remark
+  Text=If the destination system does not have a writable Windows\System directory, system files will be written to the Windows\ directory
+end
+item: Check if File/Dir Exists
+  Pathname=%SYS%
+  Flags=10000100
+end
+item: Set Variable
+  Variable=SYS
+  Value=%WIN%
+end
+item: End Block
+end
+item: Remark
+  Text=APPTITLE is the application title of the installation
+end
+item: Set Variable
+  Variable=APPTITLE
+  Value=Repton Returns v1 BETA 1
+  Flags=10000000
+end
+item: Remark
+  Text=GROUP is the variable that holds the Program Files Group that shortcuts will be placed on the Windows Start Menu
+end
+item: Set Variable
+  Variable=GROUP
+  Value=Ex-D Software Development
+  Flags=10000000
+end
+item: Remark
+  Text=DISABLED variable is initialized for backward compatability
+end
+item: Set Variable
+  Variable=DISABLED
+  Value=!
+end
+item: Remark
+  Text=MAINDIR is the variable that holds the default destination directory
+end
+item: Set Variable
+  Variable=MAINDIR
+  Value=Ex-D Software Development\Repton Returns BETA 1
+  Flags=10000000
+end
+item: Remark
+  Text=USERNAME is the variable that holds the Windows Logon name
+end
+item: Get System Information
+  Variable=USERNAME
+  Flags=00010001
+end
+item: Remark
+  Text=This IF/THEN/ELSE blocks reads the default Program Files and Common directories from the registry
+end
+item: Check Configuration
+  Flags=10111011
+end
+item: Get Registry Key Value
+  Variable=COMMON
+  Key=SOFTWARE\Microsoft\Windows\CurrentVersion
+  Default=C:\Program Files\Common Files
+  Value Name=CommonFilesDir
+  Flags=00000100
+end
+item: Get Registry Key Value
+  Variable=PROGRAM_FILES
+  Key=SOFTWARE\Microsoft\Windows\CurrentVersion
+  Default=C:\Program Files
+  Value Name=ProgramFilesDir
+  Flags=00000100
+end
+item: Set Variable
+  Variable=MAINDIR
+  Value=%PROGRAM_FILES%\%MAINDIR%
+  Flags=00001100
+end
+item: Set Variable
+  Variable=EXPLORER
+  Value=1
+end
+item: Else Statement
+end
+item: Set Variable
+  Variable=MAINDIR
+  Value=C:\%MAINDIR%
+  Flags=00001100
+end
+item: End Block
+end
+item: Remark
+  Text=BACKUP is the variable that holds the path that all backup files will be copied to when overwritten
+end
+item: Set Variable
+  Variable=BACKUP
+  Value=%MAINDIR%\BACKUP
+  Flags=10000000
+end
+item: Remark
+  Text=DOBACKUP determines if a backup will be performed.  The possible values are A (do backup) or B (do not do backup)
+end
+item: Set Variable
+  Variable=DOBACKUP
+  Value=B
+  Flags=10000000
+end
+item: Remark
+  Text=If COMPONENTS are enabled, the COMPONENTS variable is initialized with possible selections
+end
+item: Set Variable
+  Variable=COMPONENTS
+  Flags=10000000
+end
+item: Remark
+  Text=BRANDING determines if the installation will be branded with a name and company.  By default, this is written to the INST directory (installation media).
+end
+item: Set Variable
+  Variable=BRANDING
+  Value=0
+end
+item: If/While Statement
+  Variable=BRANDING
+  Value=1
+end
+item: Read INI Value
+  Variable=NAME
+  Pathname=%INST%\CUSTDATA.INI
+  Section=Registration
+  Item=Name
+end
+item: Read INI Value
+  Variable=COMPANY
+  Pathname=%INST%\CUSTDATA.INI
+  Section=Registration
+  Item=Company
+end
+item: If/While Statement
+  Variable=NAME
+end
+item: Set Variable
+  Variable=DOBRAND
+  Value=1
+end
+item: Get System Information
+  Variable=NAME
+  Flags=00000110
+end
+item: Get System Information
+  Variable=COMPANY
+  Flags=00000111
+end
+item: End Block
+end
+item: End Block
+end
+item: Display Graphic
+  Pathname=C:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Pictures\Ex-D ce - smaller.bmp
+  X Position=16
+  Y Position=16
+  Flags=0000000010000000
+end
+item: Remark
+  Text=The Wizard Loop contains the dialog screens that the user sees in the installation
+end
+item: Remark
+  Text=If you would like to change the graphic on the dialog boxes, you need to change it by double-clicking on the Wizard Loop line and change the bitmap path.
+end
+remarked item: Include Script
+  Pathname=%_WISE_%\INCLUDE\mdacinit.wse
+end
+item: Wizard Block
+  Direction Variable=DIRECTION
+  Display Variable=DISPLAY
+  Bitmap Pathname=%_WISE_%\DIALOGS\TEMPLATE\WIZARD.BMP
+  X Position=9
+  Y Position=10
+  Filler Color=8421376
+  Dialog=Select Program Manager Group
+  Dialog=Select Backup Directory
+  Dialog=Display Registration Information
+  Dialog=Get Registration Information
+  Variable=GROUP
+  Variable=DOBACKUP
+  Variable=DOBRAND
+  Variable=DOBRAND
+  Value=
+  Value=A
+  Value=1
+  Value=1
+  Compare=0
+  Compare=1
+  Compare=0
+  Compare=1
+  Flags=00000011
+end
+item: Remark
+  Text=If you need to change the size of your Custom Dialogs, you need only change the "Welcome" screen.  
+end
+item: Remark
+  Text=It's size is the template for all following dialogs within the Wizard Loop.
+end
+item: Custom Dialog Set
+  Name=Welcome
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=Welcome
+    Title French=Bienvenue
+    Title German=Willkommen
+    Title Portuguese=Bem-vindo 
+    Title Spanish=Bienvenido
+    Title Italian=Benvenuto
+    Title Danish=Velkommen
+    Title Dutch=Welkom
+    Title Norwegian=Velkommen
+    Title Swedish=Välkommen
+    Width=280
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=172 185 214 199
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suivant>
+      Text German=&Weiter>
+      Text Portuguese=&Próximo>
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+      Text Danish=&Næste>
+      Text Dutch=&Volgende>
+      Text Norwegian=&Neste>
+      Text Swedish=&Nästa >
+    end
+    item: Push Button
+      Rectangle=222 185 264 199
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=Cancel
+      Text French=Annuler
+      Text German=Abbrechen
+      Text Portuguese=Cancelar
+      Text Spanish=Cancelar
+      Text Italian=Annulla
+      Text Danish=Annuller
+      Text Dutch=Annuleren
+      Text Norwegian=Avbryt
+      Text Swedish=Avbryt
+    end
+    item: Static
+      Rectangle=9 177 263 178
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=83 8 121 33
+      Action=2
+      Enabled Color=00000000000000001111111111111111
+      Create Flags=01010000000000000000000000001011
+      Pathname=%_WISE_%\dialogs\template\install.grf
+      Pathname French=%_WISE_%\dialogs\template\install.grf
+      Pathname German=%_WISE_%\dialogs\template\install.grf
+      Pathname Portuguese=%_WISE_%\dialogs\template\install.grf
+      Pathname Spanish=%_WISE_%\dialogs\template\install.grf
+      Pathname Italian=%_WISE_%\dialogs\template\install.grf
+      Pathname Danish=%_WISE_%\dialogs\template\install.grf
+      Pathname Dutch=%_WISE_%\dialogs\template\install.grf
+      Pathname Norwegian=%_WISE_%\dialogs\template\install.grf
+      Pathname Swedish=%_WISE_%\dialogs\template\install.grf
+    end
+    item: Static
+      Rectangle=121 10 258 44
+      Enabled Color=00000000000000001111111111111111
+      Create Flags=01010000000000000000000000000000
+      Text=Welcome to %APPTITLE% Setup program. This program will install %APPTITLE% on your computer.
+      Text French=Bienvenue sur le programme d'installation %APPTITLE%. Ce programme va installer %APPTITLE% sur votre ordinateur.
+      Text German=Willkommen im Installationsprogramm für %APPTITLE%. Dieses Programm installiert  %APPTITLE% auf Ihrem Computer.
+      Text Portuguese=Bem-vindo ao programa de configuração %APPTITLE%. Este programa instalará %APPTITLE% no seu computador
+      Text Spanish=Bienvenido al programa de Configuración %APPTITLE%. Este programa instalará %APPTITLE en su ordenador
+      Text Italian=Benvenuto nel programma di installazione di %APPTITLE%. Con questo programma puoi installare %APPTITLE% sul tuo computer.
+      Text Danish=Velkommen til %APPTITLE% installationsprogrammet. Dette program installerer %APPTITLE% på computeren.
+      Text Dutch=Welkom bij het %APPTITLE% installatieprogramma. Dit programma installeert %APPTITLE% op uw computer.
+      Text Norwegian=Velkommen til %APPTITLE% Oppsett-program. Dette programmet vil installere %APPTITLE% på datamaskinen din.
+      Text Swedish=Välkommen till installationsprogrammet för %APPTITLE%. Detta program installerar %APPTITLE% på din dator.
+    end
+    item: Static
+      Rectangle=90 45 260 175
+      Enabled Color=00000000000000001111111111111111
+      Create Flags=01010000000000000000000000000000
+      Text=It is strongly recommended that you exit all Windows programs before running this Setup Program.
+      Text=
+      Text=Click Cancel to quit Setup and close any programs you have running.  Click Next to continue with the Setup program .
+      Text=
+      Text=WARNING: This program is protected by copyright law and international treaties.
+      Text=
+      Text=Unauthorized reproduction or distribution of this program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under law.
+      Text French=Il vous est fortement recommandé de fermer tous les programmes Windows avant d'exécuter le Programme d'Installation
+      Text French=
+      Text French=Cliquez sur Annuler pour quitter l'Installation et fermez tous les programmes actuellement utilisés. Cliquez sur Suivant pour continuer l'installation
+      Text French=
+      Text French=ATTENTION : Ce programme est protégé par la loi sur les droits d'exploitation et par les traités internationaux
+      Text French=
+      Text French=Toute reproduction ou distribution, même partielle, de ce programme qui n'aura pas reçu d'autorisation préalable fera l'objet de poursuites et sera sévèrement sanctionnée par le droit civil et pénal
+      Text German=Wir empfehlen nachdrücklich, vor Ausführen dieses Installationsprogramms alle Windows-Programme zu beenden. 
+      Text German=
+      Text German=Auf Abbrechen klicken, um die Installation zu beenden und alle laufenden Programme zu schließen. Auf Weiter klicken, um mit dem Installationsprogramm zu beginnen.
+      Text German=
+      Text German=WARNUNG: Dieses Programm ist urheberrechtlich sowie durch internationale Verträge geschützt. 
+      Text German=
+      Text German=Die unzulässige Vervielfältigung oder Verbreitung dieses Programms, ob ganz oder auszugsweise, kann schwere zivil- und strafrechtliche Konsequenzen nach sich ziehen und wird unter voller Ausschöpfung der Rechtsmittel geahndet.
+      Text Portuguese=Recomenda-se insistentemente que saia de todos os programas do Windows antes de executar este Programa de Configuração.
+      Text Portuguese=
+      Text Portuguese=Faça um clique sobre Cancelar para sair da Configuração e feche todos os programas que estiver a executar. Faça um clique sobre Próximo para continuar com o programa de configuração
+      Text Portuguese=
+      Text Portuguese=AVISO: Este programa está protegido pela lei de direitos do autor e tratados internacionais
+      Text Portuguese=
+      Text Portuguese=A reprodução e a distribuição sem autorização deste programa, ou qualquer parte dele, pode dar lugar à aplicação de severas sanções civis e criminais, e serão perseguidas à extensão máxima permitida pela lei.
+      Text Spanish=Se recomienda encarecidamente que salga de todos los programas Windows antes de ejecutar este programa de Configuración.
+      Text Spanish=
+      Text Spanish=Haga un clic en Cancelar para abandonar la Configuración y cerrar cualquier programa que haya estado ejecutando. Haga un clic en Siguiente para continuar con el programa de Configuración.
+      Text Spanish=
+      Text Spanish=AVISO: Este programa está protegido por las leyes de derechos de autor y tratados internacionales.
+      Text Spanish=
+      Text Spanish=La reproducción o distribución no autorizadas de este programa, o cualquier parte de él, podría dar como resultado rigurosas multas civiles y penales, y se entablará la máxima acción judicial que permita la ley.
+      Text Italian=Ti consigliamo di uscire da tutti i programmi Windows prima di eseguire questo programma di installazione.
+      Text Italian=
+      Text Italian=Fai clic su Annulla per uscire dal programma di installazione e chiudi tutti i programmi aperti. Fai clic su Avanti per continuare con il programma di Installazione.
+      Text Italian=
+      Text Italian=AVVERTENZA: Questo programma è protetto ai sensi delle norme di legge e delle convenzioni internazionali in materia di diritti di copyright.
+      Text Italian=
+      Text Italian=La riproduzione o la distribuzione totale o parziale non autorizzata di questo programma potrà essere soggetta a penalità civili e penali, e sarà punita con la massima severità possibile a norma di legge.
+      Text Danish=Det anbefales kraftigt at afslutte alle Windows programmer, inden man kører dette installationsprogram.
+      Text Danish=
+      Text Danish=Klik på Annuller for at forlade installationsprogrammet og lukke alle igangværende programmer. Klik på Næste for at fortsætte med installationsprogrammet.
+      Text Danish=
+      Text Danish=ADVARSEL: Dette program er beskyttet af copyright og internationale traktater. 
+      Text Danish=
+      Text Danish=Uautoriseret gengivelse eller videresalg af dette program eller dele heraf kan føre til streng civil- og/eller kriminel stra. Retsforfølgning heraf vil finde sted i det videste omfang der hjemles muligt.
+      Text Dutch=Het wordt aangeraden om alle Windows programma's af te sluiten voordat u met de installatie van dit programma begint.
+      Text Dutch=
+      Text Dutch=Klik op Annuleren om de installatie te verlaten en eventueel nog lopende programma's af te sluiten. Klik op Volgende om verder te gaan met het Installatieprogramma.
+      Text Dutch=
+      Text Dutch=WAARSCHUWING: dit computerprogramma is auteursrechtelijk beschermd.
+      Text Dutch=
+      Text Dutch=Onrechtmatige verveelvoudiging of distributie van dit programma of een gedeelte ervan is verboden en strafbaar en zal met alle beschikbare juridische middelen worden bestreden.
+      Text Norwegian=Det anbefales på det sterkeste at du avslutter alle Windows-programmer før du kjører dette Oppsett-programmet.
+      Text Norwegian=
+      Text Norwegian=Velg Avbryt for å avbryte Oppsett og lukk alle programmer som er i bruk. Velg Neste for å fortsette med Oppsett-programmet.
+      Text Norwegian=
+      Text Norwegian=ADVARSEL: Dette programmet er beskyttet i henhold til lover om opphavsrett og internasjonale konvensjoner.
+      Text Norwegian=
+      Text Norwegian=Uautorisert kopiering eller distribuering av dette programmet eller deler av det, vil resultere i alvorlig sivil og kriminell straff og vil føre til saksmål i høyest mulig utstrekning i henhold til loven. 
+      Text Swedish=Du tillråds bestämt att gå ur alla Windows-program innan du kör installationsprogrammet.
+      Text Swedish=
+      Text Swedish=Klicka på Avbryt för att gå ur installationsprogrammet och stäng eventuella program som du har laddade. Klicka på Nästa för att fortsätta med installationen.
+      Text Swedish=
+      Text Swedish=VARNING: Detta program är skyddat av upphovsrätten och internationella avtal.
+      Text Swedish=
+      Text Swedish=Om du utan tillstånd kopierar eller distribuerar detta program eller delar av det kan det bli allvarliga civilrättsliga och brottsrättliga straffpåföljder. Vi beivrar sådana överträdelser i den allra högsta utsträckning som lagen tillåter.
+    end
+  end
+end
+item: Custom Dialog Set
+  Name=Select Destination Directory
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=Choose Destination Location
+    Title French=Choisissez la localisation de destination
+    Title German=Zielpfad wählen
+    Title Portuguese=Escolher Local de Destino
+    Title Spanish=Elegir una localización de destino
+    Title Italian=Scegli Posizione di Destinazione
+    Title Danish=Vælg destinationsmappe
+    Title Dutch=Kies doellocatie
+    Title Norwegian=Velg målplassering
+    Title Swedish=Välj ställe för installationen
+    Width=280
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=172 185 214 199
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suivant>
+      Text German=&Weiter>
+      Text Portuguese=&Próximo>
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+      Text Danish=&Næste>
+      Text Dutch=&Volgende>
+      Text Norwegian=&Neste>
+      Text Swedish=&Nästa >
+    end
+    item: Push Button
+      Rectangle=130 185 172 199
+      Variable=DIRECTION
+      Value=B
+      Create Flags=01010000000000010000000000000000
+      Flags=0000000000000001
+      Text=< &Back
+      Text French=<&Retour
+      Text German=<&Zurück
+      Text Portuguese=<&Retornar
+      Text Spanish=<&Retroceder
+      Text Italian=< &Indietro
+      Text Danish=<&Tilbage
+      Text Dutch=<&Terug
+      Text Norwegian=<&Tilbake
+      Text Swedish=< &Tillbaka
+    end
+    item: Push Button
+      Rectangle=222 185 264 199
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=Cancel
+      Text French=Annuler
+      Text German=Abbrechen
+      Text Portuguese=Cancelar
+      Text Spanish=Cancelar
+      Text Italian=Annulla
+      Text Danish=Annuller
+      Text Dutch=Annuleren
+      Text Norwegian=Avbryt
+      Text Swedish=Avbryt
+    end
+    item: Static
+      Rectangle=9 177 263 178
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=90 10 260 122
+      Create Flags=01010000000000000000000000000000
+      Text=Setup will install %APPTITLE% in the following folder.
+      Text=
+      Text=To install into a different folder, click Browse, and select another folder. 
+      Text=
+      Text=You can choose not to install %APPTITLE% by clicking Cancel to exit Setup.
+      Text French=%APPTITLE% va être installé dans le répertoire ci-dessous
+      Text French=
+      Text French=Pour l'installer dans un répertoire différent, cliquez sur Parcourir et sélectionnez un autre répertoire
+      Text French=
+      Text French=Vous pouvez choisir de ne pas installer %APPTITLE% en cliquant sur Annuler pour quitter l'Installation
+      Text German=Installation speichert %APPTITLE% im unten angegebenen Ordner:
+      Text German=
+      Text German=Zur Installation in einem anderen Ordner auf Blättern klicken und einen anderen Ordner wählen.
+      Text German=
+      Text German=Wenn Sie %APPTITLE% nicht installieren möchten, können Sie durch Klicken auf Abbrechen die Installation beenden.
+      Text Portuguese=Configuração instalará %APPTITLE% na seguinte pasta
+      Text Portuguese=
+      Text Portuguese=Para instalar numa pasta diferente, faça um clique sobre Procurar, e seleccione uma outra pasta.
+      Text Portuguese=
+      Text Portuguese=Pode escolher não instalar %APPTITLE% clicando no botão Cancelar para sair da Configuração
+      Text Spanish=El programa de Configuración instalará %APPTITLE% en la siguiente carpeta.
+      Text Spanish=
+      Text Spanish=Para instalar en una carpeta diferente, haga un clic en Visualizar, y seleccione otra carpeta.
+      Text Spanish=
+      Text Spanish=Puede elegir no instalar %APPTITLE% haciendo un clic en Cancelar para salir de Configuración.
+      Text Italian=Il programma di installazione installerà %APPTITLE% nella seguente cartella.
+      Text Italian=
+      Text Italian=Per effettuare l’installazione in una cartella diversa, fai clic su Sfoglia, e scegli un’altra cartella.
+      Text Italian=
+      Text Italian=Puoi scegliere di non installare %APPTITLE% facendo clic su Annulla per uscire dal programma di installazione
+      Text Danish=Installationsprogrammet installerer %APPTITLE% i denne mappe.
+      Text Danish=
+      Text Danish=Man installerer i en anden mappe ved at klikke på Browse og vælge en anden mappe.
+      Text Danish=
+      Text Danish=Man kan vælge ikke at installere %APPTITLE% ved at klikke på Slet og forlade installationsprogrammet.
+      Text Dutch=Het installatieprogramma installeert %APPTITLE% in de volgende directory.
+      Text Dutch=
+      Text Dutch=Als u het in een andere directory wilt installeren, klik dan op Bladeren en kies een andere locatie.
+      Text Dutch=
+      Text Dutch=U kunt ervoor kiezen om %APPTITLE% niet te installeren: klik op Annuleren om het installatieprogramma te verlaten.
+      Text Norwegian=Oppsett vil installere %APPTITLE% i følgende mappe.
+      Text Norwegian=
+      Text Norwegian=For å installere i en annen mappe, klikk Bla igjennom og velg en annen mappe.
+      Text Norwegian=
+      Text Norwegian=Du kan velge å ikke installere %APPTITLE% ved å velge Avbryt for å gå ut av Oppsett.
+      Text Swedish=Installationsprogrammet installerar %APPTITLE% i följande mapp.
+      Text Swedish=
+      Text Swedish=Om du vill att installationen ska göras i en annan mapp, klickar du på Bläddra och väljer en annan mapp.
+      Text Swedish=
+      Text Swedish=Du kan välja att inte installera %APPTITLE% genom att klicka på Avbryt för att lämna installationsprogrammet.
+    end
+    item: Static
+      Rectangle=90 134 260 162
+      Action=1
+      Create Flags=01010000000000000000000000000111
+      Text=Destination Folder
+      Text French=Répertoire de destination
+      Text German=Zielordner
+      Text Portuguese=Pasta de Destino
+      Text Spanish=Carpeta de Destino
+      Text Italian=Cartella di destinazione
+      Text Danish=Destinationsmappe
+      Text Dutch=Doeldirectory
+      Text Norwegian=Målmappe
+      Text Swedish=Destinationsmapp
+    end
+    item: Push Button
+      Rectangle=213 143 255 157
+      Variable=MAINDIR_SAVE
+      Value=%MAINDIR%
+      Destination Dialog=1
+      Action=2
+      Create Flags=01010000000000010000000000000000
+      Text=B&rowse...
+      Text French=P&arcourir
+      Text German=B&lättern...
+      Text Portuguese=P&rocurar
+      Text Spanish=V&isualizar...
+      Text Italian=Sfoglia...
+      Text Danish=&Gennemse...
+      Text Dutch=B&laderen...
+      Text Norwegian=Bla igjennom
+      Text Swedish=&Bläddra
+    end
+    item: Static
+      Rectangle=95 146 211 157
+      Destination Dialog=2
+      Create Flags=01010000000000000000000000000000
+      Text=%MAINDIR%
+      Text French=%MAINDIR%
+      Text German=%MAINDIR%
+      Text Portuguese=%MAINDIR%
+      Text Spanish=%MAINDIR%
+      Text Italian=%MAINDIR%
+      Text Danish=%MAINDIR%
+      Text Dutch=%MAINDIR%
+      Text Norwegian=%MAINDIR%
+      Text Swedish=%MAINDIR%
+    end
+  end
+  item: Dialog
+    Title=Select Destination Directory
+    Title French=Choisissez le répertoire de destination
+    Title German=Zielverzeichnis wählen
+    Title Portuguese=Seleccionar Directório de Destino
+    Title Spanish=Seleccione el Directorio de Destino
+    Title Italian=Seleziona Directory di destinazione
+    Title Danish=Vælg Destinationsbibliotek
+    Title Dutch=Kies doeldirectory
+    Title Norwegian=Velg målkatalog
+    Title Swedish=Välj destinationskalatog
+    Width=221
+    Height=173
+    Font Name=Helv
+    Font Size=8
+    item: Listbox
+      Rectangle=5 2 160 149
+      Variable=MAINDIR
+      Create Flags=01010000100000010000000101000000
+      Flags=0000110000100010
+      Text=%MAINDIR%
+      Text French=%MAINDIR%
+      Text German=%MAINDIR%
+      Text Portuguese=%MAINDIR%
+      Text Spanish=%MAINDIR%
+      Text Italian=%MAINDIR%
+      Text Danish=%MAINDIR%
+      Text Dutch=%MAINDIR%
+      Text Norwegian=%MAINDIR%
+      Text Swedish=%MAINDIR%
+    end
+    item: Push Button
+      Rectangle=167 6 212 21
+      Create Flags=01010000000000010000000000000001
+      Text=OK
+      Text French=OK
+      Text German=OK
+      Text Portuguese=OK
+      Text Spanish=ACEPTAR
+      Text Italian=OK
+      Text Danish=OK
+      Text Dutch=OK
+      Text Norwegian=OK
+      Text Swedish=OK
+    end
+    item: Push Button
+      Rectangle=167 25 212 40
+      Variable=MAINDIR
+      Value=%MAINDIR_SAVE%
+      Create Flags=01010000000000010000000000000000
+      Flags=0000000000000001
+      Text=Cancel
+      Text French=Annuler
+      Text German=Abbrechen 
+      Text Portuguese=Cancelar
+      Text Spanish=Cancelar
+      Text Italian=Annulla
+      Text Danish=Slet
+      Text Dutch=Annuleren
+      Text Norwegian=Avbryt
+      Text Swedish=Avbryt
+    end
+  end
+end
+item: Custom Dialog Set
+  Name=Select Program Manager Group
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=Select Program Manager Group
+    Title French=Sélectionnez le Groupe du Gestionnaire de Programmes
+    Title German=Programm-Managergruppe wählen
+    Title Portuguese=Seleccionar o Grupo Gestor de Programas
+    Title Spanish=Seleccione el Grupo del Administrador del Programa
+    Title Italian=Seleziona il gruppo Program Manager
+    Title Danish=Vælg Programstyringsgruppen
+    Title Dutch=Kies Programmabeheergroep.
+    Title Norwegian=Velg Programbehandlingsgruppen
+    Title Swedish=Välj grupp i Programhanteraren
+    Width=280
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=172 185 214 199
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suivant>
+      Text German=&Weiter>
+      Text Portuguese=&Próximo>
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+      Text Danish=&Næste>
+      Text Dutch=&Volgende>
+      Text Norwegian=&Neste>
+      Text Swedish=&Nästa >
+    end
+    item: Push Button
+      Rectangle=130 185 172 199
+      Variable=DIRECTION
+      Value=B
+      Create Flags=01010000000000010000000000000000
+      Flags=0000000000000001
+      Text=< &Back
+      Text French=<&Retour
+      Text German=<&Zurück
+      Text Portuguese=<&Retornar
+      Text Spanish=<&Retroceder
+      Text Italian=< &Indietro
+      Text Danish=<&Back
+      Text Dutch=<&Terug
+      Text Norwegian=<&Tilbake
+      Text Swedish=< &Tillbaka
+    end
+    item: Push Button
+      Rectangle=222 185 264 199
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=Cancel
+      Text French=Annuler
+      Text German=Abbrechen
+      Text Portuguese=Cancelar
+      Text Spanish=Cancelar
+      Text Italian=Annulla
+      Text Danish=Slet
+      Text Dutch=Annuleren
+      Text Norwegian=Avbryt
+      Text Swedish=Avbryt
+    end
+    item: Static
+      Rectangle=9 177 263 178
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=90 10 260 38
+      Create Flags=01010000000000000000000000000000
+      Text=Enter the name of the Program Manager group to add %APPTITLE% icons to:
+      Text French=Entrez le nom du groupe du Gestionnaire de Programmes où placer les icônes %APPTITLE% à :
+      Text German=Den Namen der Programm-Managergruppe wählen, in der die %APPTITLE%-Symbole gespeichert werden sollen:
+      Text Portuguese=Introduzir o nome do Grupo Gestor de Programa para acrescentar os ícones %APPTITLE% para:
+      Text Spanish=Introduzca el nombre del grupo del Administrador del Programa para añadir los iconos %APPTITLE para:
+      Text Italian=Inserisci il nome del gruppo Program Manager per aggiungere le icone di %APPTITLE% a:
+      Text Danish=Indtast navnet på Programstyringsgruppen der skal tilføjes %APPTITLE% elementer:
+      Text Dutch=Breng de naam van de programmabeheergroep in waaraan u %APPTITLE%-pictogrammen wilt toevoegen.
+      Text Norwegian=Tast inn navnet på programbehandlingsgruppen for å legge %APPTITLE%-ikoner til:
+      Text Swedish=Skriv in namnet på den grupp i Programhanteraren där du vill ha ikonerna för %APPTITLE%:
+    end
+    item: Combobox
+      Rectangle=90 42 260 172
+      Variable=GROUP
+      Create Flags=01010000001000010000001100000001
+      Flags=0000000000000001
+      Text=%GROUP%
+      Text=
+      Text French=%GROUP%
+      Text French=
+      Text German=%GROUP%
+      Text German=
+      Text Portuguese=%GROUP%
+      Text Portuguese=
+      Text Spanish=%GROUP%
+      Text Spanish=
+      Text Italian=%GROUP%
+      Text Italian=
+      Text Danish=%GROUP%
+      Text Danish=
+      Text Dutch=%GROUP%
+      Text Dutch=
+      Text Norwegian=%GROUP%
+      Text Norwegian=
+      Text Swedish=%GROUP%
+      Text Swedish=
+    end
+  end
+end
+item: Custom Dialog Set
+  Name=Start Installation
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=Start Installation
+    Title French=Commencer l'installation
+    Title German=Installation beginnen
+    Title Portuguese=Iniciar Instalação
+    Title Spanish=Comenzar la Instalación
+    Title Italian=Avvia Installazione
+    Title Danish=Start installationen
+    Title Dutch=Start de installatie
+    Title Norwegian=Start installeringen
+    Title Swedish=Starta installationen
+    Width=280
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=172 185 214 199
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Next >
+      Text French=&Suivant>
+      Text German=&Weiter>
+      Text Portuguese=&Próximo>
+      Text Spanish=&Siguiente >
+      Text Italian=&Avanti >
+      Text Danish=&Næste>
+      Text Dutch=&Volgende>
+      Text Norwegian=&Neste>
+      Text Swedish=&Nästa >
+    end
+    item: Push Button
+      Rectangle=130 185 172 199
+      Variable=DIRECTION
+      Value=B
+      Create Flags=01010000000000010000000000000000
+      Text=< &Back
+      Text French=<&Retour
+      Text German=<&Zurück
+      Text Portuguese=<&Retornar
+      Text Spanish=<&Retroceder
+      Text Italian=< &Indietro
+      Text Danish=<&Tilbage
+      Text Dutch=<&Terug
+      Text Norwegian=<&Tilbake
+      Text Swedish=< &Tillbaka
+    end
+    item: Push Button
+      Rectangle=222 185 264 199
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=Cancel
+      Text French=Annuler
+      Text German=Abbrechen
+      Text Portuguese=Cancelar
+      Text Spanish=Cancelar
+      Text Italian=Annulla
+      Text Danish=Annuller
+      Text Dutch=Annuleren
+      Text Norwegian=Avbryt
+      Text Swedish=Avbryt
+    end
+    item: Static
+      Rectangle=9 177 263 178
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=90 10 260 70
+      Create Flags=01010000000000000000000000000000
+      Text=You are now ready to install %APPTITLE%.
+      Text=
+      Text=Press the Next button to begin the installation or the Back button to reenter the installation information.
+      Text French=Vous êtes maintenant prêt à installer %APPTITLE%
+      Text French=
+      Text French=Cliquez sur Suivant pour commencer l'installation ou Retour pour entrer à nouveau les informations d'installation
+      Text German=Sie sind jetzt zur Installation von %APPTITLE% bereit.
+      Text German=
+      Text German=Auf die Schaltfläche Weiter klicken, um mit dem Start der Installation zu beginnen, oder auf die Schaltfläche Zurück, um die Installationsinformationen nochmals aufzurufen.
+      Text Portuguese=Está agora pronto para instalar %APPTITLE%
+      Text Portuguese=
+      Text Portuguese=Pressione o botão Próximo para começar a instalação ou o botão Retornar para introduzir novamente a informação sobre a instalação
+      Text Spanish=Ahora estará listo para instalar %APPTITLE%.
+      Text Spanish=
+      Text Spanish=Pulse el botón de Siguiente para comenzar la instalación o el botón Retroceder para volver a introducir la información sobre la instalación.
+      Text Italian=Sei pronto ad installare %APPTITLE%.
+      Text Italian=
+      Text Italian=Premi il tasto Avanti per iniziare l’installazione o il tasto Indietro per rientrare nuovamente nei dati sull’installazione
+      Text Danish=Du er nu klar til at installere %APPTITLE%.
+      Text Danish=
+      Text Danish=Klik på Næste for at starte installationen eller på Tilbage for at ændre installationsoplysningerne.
+      Text Dutch=U bent nu klaar om %APPTITLE% te installeren.
+      Text Dutch=
+      Text Dutch=Druk op Volgende om met de installatie te beginnen of op Terug om de installatie-informatie opnieuw in te voeren.
+      Text Norwegian=Du er nå klar til å installere %APPTITLE%
+      Text Norwegian=
+      Text Norwegian=Trykk på Neste-tasten for å starte installeringen, eller Tilbake-tasten for å taste inn installasjonsinformasjonen på nytt.
+      Text Swedish=Du är nu redo att installera %APPTITLE%.
+      Text Swedish=
+      Text Swedish=Tryck på Nästa för att starta installationen eller på Tillbaka för att skriva in installationsinformationen på nytt.
+    end
+  end
+end
+item: Remark
+  Text=This reinitialized the BACKUP directory so that it reflects the change the user made to MAINDIR
+end
+item: If/While Statement
+  Variable=DISPLAY
+  Value=Select Destination Directory
+end
+item: Set Variable
+  Variable=BACKUP
+  Value=%MAINDIR%\BACKUP
+end
+item: End Block
+end
+item: End Block
+end
+item: Remark
+  Text=When the BACKUP feature is enabled, the BACKUPDIR is initialized
+end
+item: If/While Statement
+  Variable=DOBACKUP
+  Value=A
+end
+item: Set Variable
+  Variable=BACKUPDIR
+  Value=%BACKUP%
+end
+item: End Block
+end
+item: Remark
+  Text=The BRANDING information is written to the INI file on the installation media.
+end
+item: If/While Statement
+  Variable=BRANDING
+  Value=1
+end
+item: If/While Statement
+  Variable=DOBRAND
+  Value=1
+end
+item: Edit INI File
+  Pathname=%INST%\CUSTDATA.INI
+  Settings=[Registration]
+  Settings=NAME=%NAME%
+  Settings=COMPANY=%COMPANY%
+  Settings=
+end
+item: End Block
+end
+item: End Block
+end
+item: Remark
+  Text=Begin writing to the INSTALL.LOG 
+end
+item: Open/Close INSTALL.LOG
+end
+item: Remark
+  Text=Check free disk space calculates free disk space as well as component sizes.
+end
+item: Remark
+  Text=It should be located before all Install File actions.
+end
+item: Check Disk Space
+  Component=COMPONENTS
+end
+item: Include Script
+  Pathname=%_WISE_%\INCLUDE\vb6.wse
+end
+item: Remark
+  Text=This include script allows uninstall support
+end
+item: Include Script
+  Pathname=%_WISE_%\INCLUDE\uninstal.wse
+end
+item: Install File
+  Source=C:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\ex-d mono.wav
+  Destination=%MAINDIR%\data\ex-d mono.wav
+  Flags=0000000000000010
+  File Size=521260
+  File Date=20010625 165236
+end
+item: Install File
+  Source=c:\Windows\Fonts\ReptonRet.ttf
+  Destination=%FONTS%\ReptonRet.ttf
+  Flags=0000000010000010
+  File Size=36420
+  File Date=20020209 232406
+end
+item: Register Font
+  Filename=ReptonRet.ttf
+  Font name=Repton Returns¨ (TrueType)
+end
+item: Install File
+  Source=c:\Windows\system32\fmod.dll
+  Destination=%SYS32%\fmod.dll
+  Flags=0000000010000011
+  Version String=3.62
+  Version MS=196614
+  Version LS=131072
+  Company=Firelight Firelight Technologies Pty, Ltd
+  Product=FMOD
+  File Size=135680
+  File Date=20030409 125816
+  EXE Type=32
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\wall3.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\wall3.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20030814 013812
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\wall2.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\wall2.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20030812 133939
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\wall1.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\wall1.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20030814 013811
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\help\help.chm
+  Destination=%MAINDIR%\help\help.chm
+  Flags=0000000010000010
+  File Size=32134
+  File Date=20030816 131520
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\help\Ex-D Software Development(TM) Site.url
+  Destination=%MAINDIR%\help\Ex-D Software Development(TM) Site.url
+  Flags=0000000010000010
+  File Size=118
+  File Date=20030613 154815
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\about.dat
+  Destination=%MAINDIR%\data\about.dat
+  Flags=0000000010000010
+  File Size=641
+  File Date=20030817 135721
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\common scenery\arch.x
+  Destination=%MAINDIR%\data\common scenery\arch.x
+  Flags=0000000010000010
+  File Size=18883
+  File Date=20030812 140239
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\common scenery\wall.bmp
+  Destination=%MAINDIR%\data\common scenery\wall.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20000825 141026
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Finale\Appease.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Finale\Appease.rrl
+  Flags=0000000010000010
+  File Size=796
+  File Date=20030706 122242
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Finale\Average.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Finale\Average.rrl
+  Flags=0000000010000010
+  File Size=803
+  File Date=20030706 122242
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Finale\Contest.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Finale\Contest.rrl
+  Flags=0000000010000010
+  File Size=796
+  File Date=20030706 122242
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Finale\Enliven.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Finale\Enliven.rrl
+  Flags=0000000010000010
+  File Size=801
+  File Date=20030706 122242
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Finale\Finale.rre
+  Destination=%MAINDIR%\data\episode\Repton 3\Finale\Finale.rre
+  Flags=0000000010000010
+  File Size=118
+  File Date=20030706 122246
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Finale\Finale.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Finale\Finale.rrl
+  Flags=0000000010000010
+  File Size=776
+  File Date=20030706 122242
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Finale\Illegal.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Finale\Illegal.rrl
+  Flags=0000000010000010
+  File Size=789
+  File Date=20030706 122242
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Finale\Phoenix.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Finale\Phoenix.rrl
+  Flags=0000000010000010
+  File Size=796
+  File Date=20030706 122246
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Finale\Student.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Finale\Student.rrl
+  Flags=0000000010000010
+  File Size=798
+  File Date=20030706 122242
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Prelude\Awkward.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Prelude\Awkward.rrl
+  Flags=0000000010000010
+  File Size=789
+  File Date=20030706 122104
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Prelude\Citadel.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Prelude\Citadel.rrl
+  Flags=0000000010000010
+  File Size=777
+  File Date=20030706 122104
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Prelude\Fritter.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Prelude\Fritter.rrl
+  Flags=0000000010000010
+  File Size=802
+  File Date=20030706 122104
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Prelude\Lawless.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Prelude\Lawless.rrl
+  Flags=0000000010000010
+  File Size=797
+  File Date=20030706 122104
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Prelude\Morning.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Prelude\Morning.rrl
+  Flags=0000000010000010
+  File Size=802
+  File Date=20030706 122104
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Prelude\Prelude.rre
+  Destination=%MAINDIR%\data\episode\Repton 3\Prelude\Prelude.rre
+  Flags=0000000010000010
+  File Size=119
+  File Date=20030706 122223
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Prelude\Prelude.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Prelude\Prelude.rrl
+  Flags=0000000010000010
+  File Size=778
+  File Date=20030711 014531
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Prelude\Ration.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Prelude\Ration.rrl
+  Flags=0000000010000010
+  File Size=776
+  File Date=20030706 122104
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Prelude\Tobacco.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Prelude\Tobacco.rrl
+  Flags=0000000010000010
+  File Size=801
+  File Date=20030706 122110
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Toccata\Chaotic.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Toccata\Chaotic.rrl
+  Flags=0000000010000010
+  File Size=805
+  File Date=20030706 122437
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Toccata\Foresee.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Toccata\Foresee.rrl
+  Flags=0000000010000010
+  File Size=778
+  File Date=20030706 122437
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Toccata\Majesty.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Toccata\Majesty.rrl
+  Flags=0000000010000010
+  File Size=803
+  File Date=20030706 122437
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Toccata\Octagon.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Toccata\Octagon.rrl
+  Flags=0000000010000010
+  File Size=790
+  File Date=20030706 122437
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Toccata\Reserve.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Toccata\Reserve.rrl
+  Flags=0000000010000010
+  File Size=783
+  File Date=20030706 122445
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Toccata\Revenue.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Toccata\Revenue.rrl
+  Flags=0000000010000010
+  File Size=805
+  File Date=20030706 122437
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Toccata\Toccata.rre
+  Destination=%MAINDIR%\data\episode\Repton 3\Toccata\Toccata.rre
+  Flags=0000000010000010
+  File Size=120
+  File Date=20030706 122445
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Toccata\Toccata.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Toccata\Toccata.rrl
+  Flags=0000000010000010
+  File Size=802
+  File Date=20030706 122437
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Repton 3\Toccata\Upstart.rrl
+  Destination=%MAINDIR%\data\episode\Repton 3\Toccata\Upstart.rrl
+  Flags=0000000010000010
+  File Size=798
+  File Date=20030706 122437
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Tutorial\Tutorial.rre
+  Destination=%MAINDIR%\data\episode\Tutorial\Tutorial.rre
+  Flags=0000000010000010
+  File Size=60
+  File Date=20030619 141826
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Tutorial\Tutorial.rrl
+  Destination=%MAINDIR%\data\episode\Tutorial\Tutorial.rrl
+  Flags=0000000010000010
+  File Size=5397
+  File Date=20030814 004711
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\gui\fader.x
+  Destination=%MAINDIR%\data\gui\fader.x
+  Flags=0000000010000010
+  File Size=3170
+  File Date=20030615 174058
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\gui\msg_board.X
+  Destination=%MAINDIR%\data\gui\msg_board.X
+  Flags=0000000010000010
+  File Size=2711
+  File Date=20030530 134751
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\about.x
+  Destination=%MAINDIR%\data\menu\about.x
+  Flags=0000000010000010
+  File Size=304894
+  File Date=20030730 230608
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\ex-d_logo\-D.x
+  Destination=%MAINDIR%\data\menu\ex-d_logo\-D.x
+  Flags=0000000010000010
+  File Size=29503
+  File Date=20020725 165108
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\ex-d_logo\d.bmp
+  Destination=%MAINDIR%\data\menu\ex-d_logo\d.bmp
+  Flags=0000000010000010
+  File Size=105394
+  File Date=20001231 144756
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\ex-d_logo\e.bmp
+  Destination=%MAINDIR%\data\menu\ex-d_logo\e.bmp
+  Flags=0000000010000010
+  File Size=99510
+  File Date=20001231 144444
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\ex-d_logo\E.x
+  Destination=%MAINDIR%\data\menu\ex-d_logo\E.x
+  Flags=0000000010000010
+  File Size=49353
+  File Date=20020725 165138
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\ex-d_logo\text.bmp
+  Destination=%MAINDIR%\data\menu\ex-d_logo\text.bmp
+  Flags=0000000010000010
+  File Size=48634
+  File Date=20010408 191858
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\ex-d_logo\text.x
+  Destination=%MAINDIR%\data\menu\ex-d_logo\text.x
+  Flags=0000000010000010
+  File Size=3473
+  File Date=20020728 155006
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\ex-d_logo\x.bmp
+  Destination=%MAINDIR%\data\menu\ex-d_logo\x.bmp
+  Flags=0000000010000010
+  File Size=54486
+  File Date=20001231 144540
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\ex-d_logo\x.X
+  Destination=%MAINDIR%\data\menu\ex-d_logo\x.X
+  Flags=0000000010000010
+  File Size=40317
+  File Date=20020725 164254
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\exit.x
+  Destination=%MAINDIR%\data\menu\exit.x
+  Flags=0000000010000010
+  File Size=82036
+  File Date=20030615 145805
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\Help.x
+  Destination=%MAINDIR%\data\menu\Help.x
+  Flags=0000000010000010
+  File Size=125804
+  File Date=20030615 145816
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\grass.x
+  Destination=%MAINDIR%\data\menu\intro\grass.x
+  Flags=0000000010000010
+  File Size=4405
+  File Date=20030615 121003
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\ground.bmp
+  Destination=%MAINDIR%\data\menu\intro\ground.bmp
+  Flags=0000000010000010
+  File Size=393270
+  File Date=20030605 171249
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\ground_back.x
+  Destination=%MAINDIR%\data\menu\intro\ground_back.x
+  Flags=0000000010000010
+  File Size=8154
+  File Date=20030609 135343
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\ground_front.x
+  Destination=%MAINDIR%\data\menu\intro\ground_front.x
+  Flags=0000000010000010
+  File Size=8154
+  File Date=20030609 142301
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\RepHolder.bmp
+  Destination=%MAINDIR%\data\menu\intro\RepHolder.bmp
+  Flags=0000000010000010
+  File Size=463926
+  File Date=20030609 205321
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\repholder.x
+  Destination=%MAINDIR%\data\menu\intro\repholder.x
+  Flags=0000000010000010
+  File Size=4412
+  File Date=20030609 215757
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\Repton.bmp
+  Destination=%MAINDIR%\data\menu\intro\Repton.bmp
+  Flags=0000000010000010
+  File Size=870
+  File Date=20030806 184840
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\repton.x
+  Destination=%MAINDIR%\data\menu\intro\repton.x
+  Flags=0000000010000010
+  File Size=82512
+  File Date=20030609 220822
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\returns.x
+  Destination=%MAINDIR%\data\menu\intro\returns.x
+  Flags=0000000010000010
+  File Size=40111
+  File Date=20030609 223212
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\returns_hl.x
+  Destination=%MAINDIR%\data\menu\intro\returns_hl.x
+  Flags=0000000010000010
+  File Size=40233
+  File Date=20030615 161506
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\rock1.x
+  Destination=%MAINDIR%\data\menu\intro\rock1.x
+  Flags=0000000010000010
+  File Size=12599
+  File Date=20030609 170157
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\rock2.x
+  Destination=%MAINDIR%\data\menu\intro\rock2.x
+  Flags=0000000010000010
+  File Size=12623
+  File Date=20030609 170208
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\rock3.x
+  Destination=%MAINDIR%\data\menu\intro\rock3.x
+  Flags=0000000010000010
+  File Size=12625
+  File Date=20030609 170219
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\sky.bmp
+  Destination=%MAINDIR%\data\menu\intro\sky.bmp
+  Flags=0000000010000010
+  File Size=476214
+  File Date=20030605 171833
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\sky.x
+  Destination=%MAINDIR%\data\menu\intro\sky.x
+  Flags=0000000010000010
+  File Size=933
+  File Date=20030609 142421
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\intro\underground.x
+  Destination=%MAINDIR%\data\menu\intro\underground.x
+  Flags=0000000010000010
+  File Size=11649
+  File Date=20030615 161557
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\options.x
+  Destination=%MAINDIR%\data\menu\options.x
+  Flags=0000000010000010
+  File Size=202006
+  File Date=20030615 145828
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\menu\play.x
+  Destination=%MAINDIR%\data\menu\play.x
+  Flags=0000000010000010
+  File Size=76391
+  File Date=20030615 173823
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\music\Meed.mp3
+  Destination=%MAINDIR%\data\music\Meed.mp3
+  Flags=0000000010000010
+  File Size=496852
+  File Date=20030817 125619
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\music\Ode.mp3
+  Destination=%MAINDIR%\data\music\Ode.mp3
+  Flags=0000000010000010
+  File Size=3238768
+  File Date=20030817 125619
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\music\Persistence.mp3
+  Destination=%MAINDIR%\data\music\Persistence.mp3
+  Flags=0000000010000010
+  File Size=3785981
+  File Date=20030817 125619
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\music\The Thunderous Intro for Repton Returns.mp3
+  Destination=%MAINDIR%\data\music\The Thunderous Intro for Repton Returns.mp3
+  Flags=0000000010000010
+  File Size=1638716
+  File Date=20030817 125619
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\help\Check for newer version.url
+  Destination=%MAINDIR%\help\Check for newer version.url
+  Flags=0000000010000010
+  File Size=163
+  File Date=20030816 131702
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\wall9.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\wall9.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20030814 013812
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\wall8.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\wall8.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20000825 144016
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\wall7.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\wall7.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20030814 013812
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\wall6.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\wall6.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20000825 144212
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\wall4.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\wall4.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20000825 144300
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\players\names.dat
+  Destination=%MAINDIR%\data\players\names.dat
+  Flags=0000000010000010
+  File Date=20030817 143006
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\players\new\Home\Home.rre
+  Destination=%MAINDIR%\data\players\new\Home\Home.rre
+  Flags=0000000010000010
+  File Size=53
+  File Date=20030816 225157
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\players\new\Home\Start.rrl
+  Destination=%MAINDIR%\data\players\new\Home\Start.rrl
+  Flags=0000000010000010
+  File Size=3401
+  File Date=20030816 225157
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\players\new\options.dat
+  Destination=%MAINDIR%\data\players\new\options.dat
+  Flags=0000000010000010
+  File Size=10
+  File Date=20030621 005458
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\players\new\stats.dat
+  Destination=%MAINDIR%\data\players\new\stats.dat
+  Flags=0000000010000010
+  File Size=4
+  File Date=20030817 123011
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\barrier.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\barrier.X
+  Flags=0000000010000010
+  File Size=11258
+  File Date=20030619 225536
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\cage.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\cage.X
+  Flags=0000000010000010
+  File Size=9451
+  File Date=20030619 191843
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\crown.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\crown.X
+  Flags=0000000010000010
+  File Size=5244
+  File Date=20030620 001357
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\dimond.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\dimond.x
+  Flags=0000000010000010
+  File Size=4936
+  File Date=20021024 230216
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\0.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\0.x
+  Flags=0000000010000010
+  File Size=8876
+  File Date=20030324 002001
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\1.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\1.x
+  Flags=0000000010000010
+  File Size=7201
+  File Date=20030214 004954
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\2.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\2.x
+  Flags=0000000010000010
+  File Size=7170
+  File Date=20030214 010554
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\3.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\3.x
+  Flags=0000000010000010
+  File Size=7168
+  File Date=20030214 013132
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\4-2-6.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\4-2-6.x
+  Flags=0000000010000010
+  File Size=8917
+  File Date=20030324 002003
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\4.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\4.x
+  Flags=0000000010000010
+  File Size=4185
+  File Date=20030214 001912
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\5.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\5.x
+  Flags=0000000010000010
+  File Size=8822
+  File Date=20030324 002003
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\6.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\6.x
+  Flags=0000000010000010
+  File Size=7144
+  File Date=20030214 174006
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\7.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\7.x
+  Flags=0000000010000010
+  File Size=7172
+  File Date=20030214 165714
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\8.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\8.x
+  Flags=0000000010000010
+  File Size=7153
+  File Date=20030214 171750
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\earth\9.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\earth\9.x
+  Flags=0000000010000010
+  File Size=7139
+  File Date=20030214 172528
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\egg.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\egg.x
+  Flags=0000000010000010
+  File Size=22512
+  File Date=20030322 035122
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\fungus.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\fungus.x
+  Flags=0000000010000010
+  File Size=4594
+  File Date=20030813 232702
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\0.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\0.x
+  Flags=0000000010000010
+  File Size=8824
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\1.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\1.x
+  Flags=0000000010000010
+  File Size=8894
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\10.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\10.x
+  Flags=0000000010000010
+  File Size=8818
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\11.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\11.x
+  Flags=0000000010000010
+  File Size=8812
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\12.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\12.x
+  Flags=0000000010000010
+  File Size=8847
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\13.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\13.x
+  Flags=0000000010000010
+  File Size=8843
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\14.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\14.x
+  Flags=0000000010000010
+  File Size=8800
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\15.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\15.x
+  Flags=0000000010000010
+  File Size=8801
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\2.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\2.x
+  Flags=0000000010000010
+  File Size=8818
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\3.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\3.x
+  Flags=0000000010000010
+  File Size=8810
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\4.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\4.x
+  Flags=0000000010000010
+  File Size=8818
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\5.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\5.x
+  Flags=0000000010000010
+  File Size=8793
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\6.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\6.x
+  Flags=0000000010000010
+  File Size=8788
+  File Date=20030814 012958
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\7.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\7.x
+  Flags=0000000010000010
+  File Size=8804
+  File Date=20030814 012959
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\8.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\8.x
+  Flags=0000000010000010
+  File Size=8782
+  File Date=20030814 012959
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\ground\9.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\ground\9.x
+  Flags=0000000010000010
+  File Size=8757
+  File Date=20030814 012959
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\key.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\key.X
+  Flags=0000000010000010
+  File Size=14726
+  File Date=20030322 031718
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\level-trans.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\level-trans.X
+  Flags=0000000010000010
+  File Size=3287
+  File Date=20030813 224353
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\monster.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\monster.X
+  Flags=0000000010000010
+  File Size=362910
+  File Date=20030716 194425
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\repton.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\repton.X
+  Flags=0000000010000010
+  File Size=347338
+  File Date=20030816 150605
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\rock.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\rock.x
+  Flags=0000000010000010
+  File Size=41811
+  File Date=20030605 011220
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\safe.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\safe.X
+  Flags=0000000010000010
+  File Size=11004
+  File Date=20030619 144349
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\skull.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\skull.x
+  Flags=0000000010000010
+  File Size=53678
+  File Date=20030322 043039
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\spirit.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\spirit.x
+  Flags=0000000010000010
+  File Size=13424
+  File Date=20030606 173240
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\stags\1.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\stags\1.x
+  Flags=0000000010000010
+  File Size=23258
+  File Date=20030602 180406
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\stags\3.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\stags\3.x
+  Flags=0000000010000010
+  File Size=23337
+  File Date=20030602 180313
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\stags\5.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\stags\5.x
+  Flags=0000000010000010
+  File Size=26617
+  File Date=20030602 180346
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\stags\7.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\stags\7.x
+  Flags=0000000010000010
+  File Size=23194
+  File Date=20030602 180331
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\stags\9.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\stags\9.x
+  Flags=0000000010000010
+  File Size=23172
+  File Date=20030602 180356
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\std_wall\w1.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\std_wall\w1.X
+  Flags=0000000010000010
+  File Size=7201
+  File Date=20030214 004954
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\std_wall\w2.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\std_wall\w2.X
+  Flags=0000000010000010
+  File Size=7170
+  File Date=20030214 010554
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\std_wall\w3.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\std_wall\w3.X
+  Flags=0000000010000010
+  File Size=7168
+  File Date=20030214 013132
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\std_wall\w4.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\std_wall\w4.x
+  Flags=0000000010000010
+  File Size=4185
+  File Date=20030214 001912
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\std_wall\w5.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\std_wall\w5.X
+  Flags=0000000010000010
+  File Size=7150
+  File Date=20030214 172750
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\std_wall\w6.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\std_wall\w6.X
+  Flags=0000000010000010
+  File Size=7144
+  File Date=20030214 174006
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\std_wall\w7.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\std_wall\w7.X
+  Flags=0000000010000010
+  File Size=7172
+  File Date=20030214 165714
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\std_wall\w8.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\std_wall\w8.X
+  Flags=0000000010000010
+  File Size=7153
+  File Date=20030214 171750
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\std_wall\w9.X
+  Destination=%MAINDIR%\data\themes\origonal\meshes\std_wall\w9.X
+  Flags=0000000010000010
+  File Size=7139
+  File Date=20030214 172528
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\time-bomb.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\time-bomb.x
+  Flags=0000000010000010
+  File Size=16071
+  File Date=20030814 133335
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\time-capsule.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\time-capsule.x
+  Flags=0000000010000010
+  File Size=8599
+  File Date=20030619 142057
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\transporter.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\transporter.x
+  Flags=0000000010000010
+  File Size=22223
+  File Date=20030619 131415
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\wall_sides\s2.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\wall_sides\s2.x
+  Flags=0000000010000010
+  File Size=6077
+  File Date=20030214 214124
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\wall_sides\s4.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\wall_sides\s4.x
+  Flags=0000000010000010
+  File Size=6131
+  File Date=20030214 224250
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\wall_sides\s6.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\wall_sides\s6.x
+  Flags=0000000010000010
+  File Size=5970
+  File Date=20030214 224252
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\meshes\wall_sides\s8.x
+  Destination=%MAINDIR%\data\themes\origonal\meshes\wall_sides\s8.x
+  Flags=0000000010000010
+  File Size=6042
+  File Date=20030214 224254
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\crown.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\crown.wav
+  Flags=0000000010000010
+  File Size=259202
+  File Date=20030801 172227
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\dig.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\dig.wav
+  Flags=0000000010000010
+  File Size=126636
+  File Date=20030806 123650
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\egg_cracking.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\egg_cracking.wav
+  Flags=0000000010000010
+  File Size=316928
+  File Date=20030801 172201
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\egg_crunch.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\egg_crunch.wav
+  Flags=0000000010000010
+  File Size=24984
+  File Date=20010703 223956
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\fungus.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\fungus.wav
+  Flags=0000000010000010
+  File Size=145226
+  File Date=20030801 165659
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\key.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\key.wav
+  Flags=0000000010000010
+  File Size=173236
+  File Date=20030801 172057
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\level-trans.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\level-trans.wav
+  Flags=0000000010000010
+  File Size=566222
+  File Date=20030801 172135
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\monster_awake.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\monster_awake.wav
+  Flags=0000000010000010
+  File Size=172160
+  File Date=20030806 130532
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\monster_die.sfk
+  Destination=%MAINDIR%\data\themes\origonal\sounds\monster_die.sfk
+  Flags=0000000010000010
+  File Size=232
+  File Date=20030816 220955
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\monster_die.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\monster_die.wav
+  Flags=0000000010000010
+  File Size=85376
+  File Date=20030806 135313
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\m_dimond.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\m_dimond.wav
+  Flags=0000000010000010
+  File Size=58726
+  File Date=20030214 195948
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\rep_die.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\rep_die.wav
+  Flags=0000000010000010
+  File Size=112300
+  File Date=20030806 132402
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\rock_crash.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\rock_crash.wav
+  Flags=0000000010000010
+  File Size=81464
+  File Date=20010703 223954
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\rock_fall.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\rock_fall.wav
+  Flags=0000000010000010
+  File Size=345004
+  File Date=20030801 175403
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\spirit_caught.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\spirit_caught.wav
+  Flags=0000000010000010
+  File Size=93918
+  File Date=20030801 171712
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\time_cap.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\time_cap.wav
+  Flags=0000000010000010
+  File Size=212608
+  File Date=20030801 172237
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\sounds\transporter.wav
+  Destination=%MAINDIR%\data\themes\origonal\sounds\transporter.wav
+  Flags=0000000010000010
+  File Size=351048
+  File Date=20030801 172155
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\earth.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\earth.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20030812 133341
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\egg.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\egg.bmp
+  Flags=0000000010000010
+  File Size=12342
+  File Date=20021026 141602
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\fungus.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\fungus.bmp
+  Flags=0000000010000010
+  File Size=49206
+  File Date=20030620 002735
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\ground.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\ground.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20030814 013810
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\monster.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\monster.bmp
+  Flags=0000000010000010
+  File Size=98358
+  File Date=20030715 203138
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\rock.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\rock.bmp
+  Flags=0000000010000010
+  File Size=12342
+  File Date=20030605 011805
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\spirit.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\spirit.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20000825 175742
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\stags.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\stags.bmp
+  Flags=0000000010000010
+  File Size=49206
+  File Date=20030525 210956
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\stdwall_side.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\stdwall_side.bmp
+  Flags=0000000010000010
+  File Size=49206
+  File Date=20030214 231612
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\time-bomb.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\time-bomb.bmp
+  Flags=0000000010000010
+  File Size=12342
+  File Date=20030619 132524
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\transporter.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\transporter.bmp
+  Flags=0000000010000010
+  File Size=49206
+  File Date=20030619 124950
+end
+item: Install File
+  Source=c:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\themes\origonal\textures\wall.bmp
+  Destination=%MAINDIR%\data\themes\origonal\textures\wall.bmp
+  Flags=0000000010000010
+  File Size=196662
+  File Date=20030812 134324
+end
+item: Install File
+  Source=C:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\ReptonReturns_V1.exe
+  Destination=%MAINDIR%\ReptonReturns_V1.exe
+  Flags=0000000010000011
+  Version String=1.00
+  Version MS=65536
+  Company=Ex-D Software Development(TM)
+  Product=Reption Returns BETA 1
+  File Size=311296
+  File Date=20030817 134851
+  EXE Type=32
+end
+item: Install File
+  Source=C:\Program Files\Common Files\system\ado\msado20.tlb
+  Destination=%MAINDIR%\msado20.tlb
+  Flags=0001000010000011
+  Version String=2.71.9030.0
+  Version MS=131143
+  Version LS=591790080
+  Company=Microsoft Corporation
+  Product=Microsoft Data Access Components
+  File Size=61440
+  File Date=20020711 204758
+  EXE Type=32
+end
+item: Install File
+  Source=C:\WINDOWS\system32\Ex-Perspective.dll
+  Destination=%SYS32%\Ex-Perspective.dll
+  Flags=0001000010000011
+  Version String=2.02.0058
+  Version MS=131074
+  Version LS=58
+  Company=Ex-D Software Development(TM)
+  Product=Ex-Perspective(TM)
+  File Size=225280
+  File Date=20030605 002204
+  EXE Type=32
+end
+item: Set Variable
+  Variable=COMMON
+  Value=%COMMON%
+  Flags=00010100
+end
+item: Set Variable
+  Variable=MAINDIR
+  Value=%MAINDIR%
+  Flags=00010100
+end
+item: Remark
+  Text=This IF/THEN/ELSE reads the correct registry entries for shortcut/icon placement
+end
+item: Check Configuration
+  Flags=10111011
+end
+item: Get Registry Key Value
+  Variable=STARTUPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%WIN%\Start Menu\Programs\StartUp
+  Value Name=StartUp
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=DESKTOPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%WIN%\Desktop
+  Value Name=Desktop
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=STARTMENUDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%WIN%\Start Menu
+  Value Name=Start Menu
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=GROUPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%WIN%\Start Menu\Programs
+  Value Name=Programs
+  Flags=00000010
+end
+item: Get Registry Key Value
+  Variable=CSTARTUPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%STARTUPDIR%
+  Value Name=Common Startup
+  Flags=00000100
+end
+item: Get Registry Key Value
+  Variable=CDESKTOPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%DESKTOPDIR%
+  Value Name=Common Desktop
+  Flags=00000100
+end
+item: Get Registry Key Value
+  Variable=CSTARTMENUDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%STARTMENUDIR%
+  Value Name=Common Start Menu
+  Flags=00000100
+end
+item: Get Registry Key Value
+  Variable=CGROUPDIR
+  Key=Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+  Default=%GROUPDIR%
+  Value Name=Common Programs
+  Flags=00000100
+end
+item: Set Variable
+  Variable=CGROUP_SAVE
+  Value=%GROUP%
+end
+item: Set Variable
+  Variable=GROUP
+  Value=%GROUPDIR%\%GROUP%
+end
+item: Create Shortcut
+  Source=%MAINDIR%\ReptonReturns_V1.exe
+  Destination=%GROUP%\Repton Returns BETA 1\Repton Returns.lnk
+  Icon Number=0
+end
+item: Create Shortcut
+  Source=%MAINDIR%\help\help.chm
+  Destination=%GROUP%\Repton Returns BETA 1\Read Me.lnk
+  Icon Number=0
+end
+item: Create Shortcut
+  Source=%MAINDIR%\help\Check for newer version.url
+  Destination=%GROUP%\Repton Returns BETA 1\Check for newer version.lnk
+  Icon Number=0
+end
+item: Create Shortcut
+  Source=%MAINDIR%\help\Ex-D Software Development(TM) Site.url
+  Destination=%GROUP%\Ex-D Software Development(TM) Site.lnk
+  Icon Number=0
+end
+item: Create Shortcut
+  Source=%MAINDIR%\help\Ex-D Software Development(TM) Site.url
+  Destination=%DESKTOPDIR%\Ex-D Software Development(TM) Site.lnk
+  Icon Number=0
+end
+item: Else Statement
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=Ex-D Software Development(TM) Site
+  Command Line="%MAINDIR%\help\Ex-D Software Development(TM) Site.url"
+  Flags=01000000
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=Repton Returns BETA 1\Read Me
+  Command Line=%MAINDIR%\help\help.chm
+  Flags=01000000
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=Repton Returns BETA 1\Check for newer version
+  Command Line="%MAINDIR%\help\Check for newer version.url"
+  Flags=01000000
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=Ex-D Software Development(TM) Site
+  Command Line="%MAINDIR%\help\Ex-D Software Development(TM) Site.url"
+  Flags=01000000
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=Ex-D Software Development(TM) Site
+  Command Line="%MAINDIR%\help\Ex-D Software Development(TM) Site.url"
+  Flags=01000000
+end
+item: Add ProgMan Icon
+  Group=%GROUP%
+  Icon Name=Repton Returns BETA 1\Repton Returns
+  Command Line=%MAINDIR%\ReptonReturns_V1.exe
+  Flags=01000000
+end
+item: End Block
+end
+item: Remark
+  Text=All OCX/DLL/EXE files that are self-registered
+end
+item: Self-Register OCXs/DLLs
+  Description=Updating System Configuration, Please Wait...
+end
+item: Remark
+  Text=This Wizard Loop finalizes the install 
+end
+item: Add Text to INSTALL.LOG
+  Text=Delete in-use files: On
+end
+item: Wizard Block
+  Direction Variable=DIRECTION
+  Display Variable=DISPLAY
+  Bitmap Pathname=%_WISE_%\DIALOGS\TEMPLATE\WIZARD.BMP
+  X Position=9
+  Y Position=10
+  Filler Color=8421440
+  Flags=00000011
+end
+item: Custom Dialog Set
+  Name=Finished
+  Display Variable=DISPLAY
+  item: Dialog
+    Title=Installation Complete
+    Title French=Installation en cours
+    Title German=Installation abgeschlossen
+    Title Portuguese=Instalação Completa 
+    Title Spanish=Se ha completado la Instalación
+    Title Italian=Installazione completata
+    Title Danish=Installation gennemført
+    Title Dutch=Installatie afgerond
+    Title Norwegian=Installasjonen er fullført
+    Title Swedish=Installationen klar
+    Width=280
+    Height=224
+    Font Name=Helv
+    Font Size=8
+    item: Push Button
+      Rectangle=170 185 212 199
+      Variable=DIRECTION
+      Value=N
+      Create Flags=01010000000000010000000000000001
+      Text=&Finish >
+      Text French=&Terminer>
+      Text German=&Fertigstellen>
+      Text Portuguese=&Terminar >
+      Text Spanish=&Finalizar>
+      Text Italian=&Fine >
+      Text Danish=&Afslut >
+      Text Dutch=&Klaar>
+      Text Norwegian=&Avslutt>
+      Text Swedish=&Sluta>
+    end
+    item: Push Button
+      Control Name=CANCEL
+      Rectangle=222 185 264 199
+      Action=3
+      Create Flags=01010000000000010000000000000000
+      Text=Cancel
+      Text French=Annuler
+      Text German=Abbrechen
+      Text Portuguese=Cancelar
+      Text Spanish=Cancelar
+      Text Italian=Annulla
+      Text Danish=Annuller
+      Text Dutch=Annuleren
+      Text Norwegian=Avbryt
+      Text Swedish=Avbryt
+    end
+    item: Static
+      Rectangle=9 177 263 178
+      Action=3
+      Create Flags=01010000000000000000000000000111
+    end
+    item: Static
+      Rectangle=90 10 260 63
+      Enabled Color=00000000000000001111111111111111
+      Create Flags=01010000000000000000000000000000
+      Text=%APPTITLE% has been successfully installed.
+      Text=
+      Text=
+      Text=Press the Finish button to exit this installation.
+      Text=
+      Text French=L'installation de %APPTITLE% est réussie
+      Text French=
+      Text French=
+      Text French=Cliquez sur Terminer pour quitter cette installation
+      Text French=
+      Text German=%APPTITLE% wurde erfolgreich installiert.
+      Text German=
+      Text German=
+      Text German=Zum Beenden dieser Installation Fertigstellen anklicken.
+      Text German=
+      Text Portuguese=%APPTITLE% foi instalado com êxito
+      Text Portuguese=
+      Text Portuguese=
+      Text Portuguese=Pressionar o botão Terminar para sair desta instalação
+      Text Portuguese=
+      Text Spanish=%APPTITLE% se ha instalado con éxito.
+      Text Spanish=
+      Text Spanish=
+      Text Spanish=Pulse el botón de Finalizar para salir de esta instalación.
+      Text Spanish=
+      Text Italian=%APPTITLE% è stato installato.
+      Text Italian=
+      Text Italian=
+      Text Italian=Premi il pulsante Fine per uscire dal programma di installazione
+      Text Italian=
+      Text Danish=%APPTITLE% er nu installeret korrekt.
+      Text Danish=
+      Text Danish=
+      Text Danish=Klik på Afslut for at afslutte installationen.
+      Text Danish=
+      Text Dutch=%APPTITLE% is met succes geïnstalleerd.
+      Text Dutch=
+      Text Dutch=
+      Text Dutch=Druk op Klaar om deze installatie af te ronden.
+      Text Dutch=
+      Text Norwegian=Installasjonen av %APPTITLE% er vellykket.
+      Text Norwegian=
+      Text Norwegian=
+      Text Norwegian=Trykk på Avslutt-tasten for å avslutte denne installasjonen.
+      Text Norwegian=
+      Text Swedish=Installationen av %APPTITLE% har lyckats.
+      Text Swedish=
+      Text Swedish=
+      Text Swedish=Tryck på Sluta för att gå ur installationsprogrammet.
+      Text Swedish=
+    end
+    item: Push Button
+      Control Name=BACK
+      Rectangle=128 185 170 199
+      Variable=DIRECTION
+      Value=B
+      Create Flags=01010000000000010000000000000000
+      Text=< &Back
+      Text French=<&Retour
+      Text German=<&Zurück
+      Text Portuguese=<&Retornar
+      Text Spanish=<&Retroceder
+      Text Italian=< &Indietro
+      Text Danish=<&Tilbage
+      Text Dutch=<&Terug
+      Text Norwegian=<&Tilbake
+      Text Swedish=< &Tillbaka
+    end
+    item: Set Control Attribute
+      Control Name=BACK
+      Operation=1
+    end
+    item: Set Control Attribute
+      Control Name=CANCEL
+      Operation=1
+    end
+  end
+end
+item: End Block
+end
+item: New Event
+  Name=Cancel
+end
+item: Remark
+  Text=This include script supports a rollback to preinstallation state if the user chooses to cancel before the installation is complete.
+end
+item: Include Script
+  Pathname=%_WISE_%\INCLUDE\rollback.wse
+end
