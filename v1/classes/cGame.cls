@@ -42,6 +42,8 @@ Private Type type_Pause
 End Type
 Dim tPause As type_Pause
 
+Private iRockRumbleSounds As Integer    ' Controls the sound of the rock rumbling for all instences of 'cRockOrEgg'
+
 Private Type type_MusicControl
     exMusicControl   As New exTools_Timer
     strMusicFiles(3) As String
@@ -338,4 +340,20 @@ Function ControlMusic()
     End If
 End Function
 
+Function PlayRockRumbleSound(bStart As Boolean)
+    If bStart Then
+        iRockRumbleSounds = iRockRumbleSounds + 1
+        
+        ' Start the sound?
+        If iRockRumbleSounds = 1 Then ExSnds(4).PlaySound True
+        
+    Else
+        iRockRumbleSounds = iRockRumbleSounds - 1
+        
+        ' End the sound
+        If iRockRumbleSounds <= 0 Then ExSnds(4).StopSound
+    End If
+    
+    
+End Function
 
