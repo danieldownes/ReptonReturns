@@ -8,6 +8,9 @@ All rights reserved.
 To Debug:
 
 Reported    Detail
+28-07-2003: After loading a sub-level, the first rock is not inited correctly (position)
+10-07-2003: Player dosn't init correctly when transporting to new level (reason for 06-07-03 bug)
+06-07-2003: A rock in prelude falls incorrectly
 19-06-2003: Still problems with monster killing
 26-05-2003: Rocks can be pused in free fall when Repton releases a rock and then moves
 		down then push the free falling rock
@@ -33,55 +36,55 @@ To Do (for BETA):
  Programming:
   Debugging
   Visual FX Class
-  level-transporters 
+  lives
+  loading screen
+  game completed screen
+
+  Map View
+
+    
  
 Episode/Level selector 
-    allows delete player from here 
-    progrestion though episodes using level-transporters 
     'user levels' selected via a user defined 3x3 map that is merged with 
-episode selector map (each time user loads episode selector in order to presever 
-the level-transports 
+    episode selector map
 
 
  Art:
-  Monster Art + Animation
   Repton Animation (Upper body walking, digging, being idle, pushing rock, pushing non-movable piece)
-  Repton Texture
+  Repton Texture  
+  level-transporters 
+  Earth
+  toutch up walls 
   Scenery pieces
   fungus
-  toutch up walls 
-  level-transporters 
-
- 
-intro: 
-   master music 
  
  
 music 
   in-game, slow track 
   havily Repton 3 based track 
    
-sound effects 
-   rock falling 
-   rock hitting 
-   crown colected 
+sound effects    
+
    earth dig away 
-   time capsule collected 
-   key col 
-   fungus grow 
+   bomb explosion 
+
+   monster waking 
+   monster moving 
+
    squashed by rock 
    die by monster 
    die by spirt 
    die by fungus 
-   die by skull 
-   egg crunch 
-   egg cracking 
-   monster waking 
-   monster moving 
-   bomb explosion 
-   spirit near/moving 
-   spirit caught 
-   transporter 
+   die by skull         
+   cannt push
+   completed level
+   completed game
+   completed episode
+
+   map colected
+
+
+
 new levels? 
    nature 
    food 
@@ -101,8 +104,8 @@ After BETA: VisualFX class and models
 ----------------------------------------------------------------------------
 Development history overview:
 
-v1.00 Final end:  (??-07-2003)
-v1.00 BETA end:   (??-06-2003)
+v1.00 Final end:  (??-08-2003)
+v1.00 BETA end:   (??-07-2003)
 v1.00 start:      13-10-2001
 Prototype end:    12-10-2000
 Start:            23-08-2000 
@@ -110,6 +113,53 @@ Start:            23-08-2000
 
 ----------------------------------------------------------------------------
 Development history detail:
+03-08-2003:
+	    + Started VisualFX class
+
+01-08-2003:
+	    
+	    * Debuged 30-07-03 error
+
+30-07-2003:
+	    * Tweeked menu navigation
+	    * Tweeked intro logo timings + added Fade in for the stars
+            * More work to 'Home' level
+	    ! Problems with loading and saving levels - Level management
+
+29-07-2003:
+	    + Active player can now delete from the HOME level
+	    + Many sounds implemented
+
+28-07-2003:
+	    + More sounds decided upon
+	    * Level loading management finnished
+
+26-07-2003:
+	    * Level loading management
+
+24-07-2003:
+	    + Level loading management
+
+20-07-2003:
+	    + Mastered intro music 
+
+~15-07-2003:
+	    + Monster art and animation
+
+10-07-2003:	    
+	    * Better monster dieing handlling; may have cured bugs
+    	    + rock hitting sound
+	    + Rock falling sound; needs extra work
+	    ! Player dosn't init correctly when transporting to new level (reason for 06-07-03 bug)
+	    * Small tweeks in RocksOrEggs class
+	    + Visual fader in menu; not fully intergrated
+
+~08-07-2003:
+	    + Level-transporters
+
+06-07-2003:
+	    ! A rock in prelude falls incorrectly
+	    * Game can now be quit to menu and then replayed in correct manner
 
 21-06-2003:
 	    * Finnished menu programming (may still need tweeking)
