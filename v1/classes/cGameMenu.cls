@@ -23,7 +23,6 @@ Option Explicit
 Dim exDummyLookAt    As New exMesh
 
 Dim exStarGlimmer    As New exMesh
-Dim exFader          As New exMesh
 
 Dim exUnderGround    As New exMesh
 
@@ -45,7 +44,7 @@ End Type
 
 Sub Init()
     exUnderGround.InitXFile App.Path & "\data\menu\intro\underground.x", App.Path & "\data\themes\origonal\textures\wall.bmp"
-    exUnderGround.position 26, -30, 0, True
+    exUnderGround.position 26, -5, 0, True
     
     exSky.InitXFile App.Path & "\data\menu\intro\sky.x", App.Path & "\data\menu\intro\sky.bmp"
     exRepHolder.InitXFile App.Path & "\data\menu\intro\repholder.x", App.Path & "\data\menu\intro\repholder.bmp"
@@ -73,6 +72,9 @@ Sub NewPlayer()
     
     blnLoop = True
     
+    ExFader.ResetMatrix
+    ExFader.position 100, 0.01, -200, True
+    
     Do
     
         If ExInp.exInput(ex_Return) Then
@@ -91,8 +93,18 @@ Sub NewPlayer()
             If bExist = False Then
                  ' Create new store for this player
                  CreateFolder App.Path & "\data\players\" & frmMain.txtName.Text
+                 CreateFolder App.Path & "\data\players\" & frmMain.txtName.Text & "\Home"
+                 CreateFolder App.Path & "\data\players\" & frmMain.txtName.Text & "\Home\old"
+                 
                  CopyFile App.Path & "\data\players\new\" & "options.dat", App.Path & "\data\players\" & frmMain.txtName.Text & "\options.dat"
-                ' CopyFile App.Path & "\data\players\new\" & "home.rre", App.Path & "\data\players\" & frmMain.txtName.Text & "\home.rre"
+                 CopyFile App.Path & "\data\players\new\" & "stats.dat", App.Path & "\data\players\" & frmMain.txtName.Text & "\stats.dat"
+                 
+                 CopyFile App.Path & "\data\players\new\Home\" & "Home.rre", App.Path & "\data\players\" & frmMain.txtName.Text & "\Home\Home.rre"
+                 CopyFile App.Path & "\data\players\new\Home\" & "Home.rre", App.Path & "\data\players\" & frmMain.txtName.Text & "\Home\old\Home.rre"
+                 
+                 CopyFile App.Path & "\data\players\new\Home\" & "start.rrl", App.Path & "\data\players\" & frmMain.txtName.Text & "\Home\start.rrl"
+                 CopyFile App.Path & "\data\players\new\Home\" & "start.rrl", App.Path & "\data\players\" & frmMain.txtName.Text & "\Home\old\start.rrl"
+                 
                  'on error reume next
                  Open App.Path & "\data\players\names.dat" For Append As #1
                      Print #1, frmMain.txtName.Text
@@ -124,6 +136,11 @@ Sub NewPlayer()
         exRepton.Render
                                 
         exReturnsHL.Render
+        
+        'RenderFader
+        ExFader.Render
+        ExFader.RotateVecs 0.01, 0, 0
+        
         
         ' The menu
         ExTxtGUI.Colour &HFF00A000
@@ -160,7 +177,13 @@ Function SelectPlayerMenu(Optional iContext As Integer = 0) As Integer
     Dim n As Integer
     Dim iLastMove        As Integer
     
+    
+    Dim b As Integer
+    
     Dim iTopList  As Integer
+
+    ReDim Preserve sPlayers(0)
+    SelectPlayerMenu = 0
     
     ' Read names from file
     If FileExists(App.Path & "\data\players\names.dat") Then
@@ -172,13 +195,13 @@ Function SelectPlayerMenu(Optional iContext As Integer = 0) As Integer
                 Input #1, sPlayers(n)
             Loop
         Close #1
-        SelectPlayerMenu = 1
-    Else
-        ReDim Preserve sPlayers(0)
-        SelectPlayerMenu = 0
+        If n > 0 Then SelectPlayerMenu = 1
     End If
     
-
+    ExFader.ResetMatrix
+    ExFader.Rotate 0, 0, 0, True
+    ExFader.position 0.01, 0.01, -1150, True
+    
     
     iTopList = 1
     
@@ -189,6 +212,8 @@ Function SelectPlayerMenu(Optional iContext As Integer = 0) As Integer
     Do
         DoEvents
     Loop While ExInp.exInput(ex_ESCAPE) Or ExInp.exInput(ex_Return)
+    
+    StartFader 2
 
     Do
     
@@ -255,6 +280,10 @@ Function SelectPlayerMenu(Optional iContext As Integer = 0) As Integer
         exRepton.Render
                                 
         exReturnsHL.Render
+        
+        
+        RenderFader
+        
         
         ' The menu
         ExTxtGUI.Colour &HFF00A000
@@ -351,8 +380,10 @@ Function ReptonReturnsMenu() As Integer
     exDummyLookAt.position 0.001, -200, -999, True
     
     
-    exRepton.position 0.001, -200, -300, True
-    exRepHolder.position 0.001, -200, -300, True
+    exRepton.ResetMatrix
+    exRepHolder.ResetMatrix
+    exRepton.position 0.001, -200, -309, True
+    exRepHolder.position 0.001, -200, -306, True
     exRepton.Rotate -45, 0.1, 0.1, True
     exRepHolder.Rotate -45, 0.1, 0.1, True
     
@@ -422,7 +453,7 @@ Function ReptonReturnsMenu() As Integer
             
         End If
         
-        If ExInp.exInput(ex_Return) Then
+        If ExInp.exInput(ex_Return) And blnLoop Then
             exMenuItems(ReptonReturnsMenu).ResetMatrix
             exMenuItems(ReptonReturnsMenu).AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -150, -1300), ExPrj.exReturn3DVec(0.1, -420, -500), 0.45
             exMenuItems(ReptonReturnsMenu).AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(-80, 100, 0.01), ExPrj.exReturn3DVec(-80, 0.01, 0.01), 0.45
@@ -430,7 +461,7 @@ Function ReptonReturnsMenu() As Integer
             blnLoop = False
         End If
         
-        If ExInp.exInput(ex_ESCAPE) Then
+        If ExInp.exInput(ex_ESCAPE) And blnLoop Then
             exMenuItems(ReptonReturnsMenu).ResetMatrix
             exMenuItems(ReptonReturnsMenu).AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(-200, -1000, 600), ExPrj.exReturn3DVec(0.1, -420, -500), 0.45
             exMenuItems(ReptonReturnsMenu).AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(270, 0.01, 0.01), ExPrj.exReturn3DVec(-80, 0.01, 0.01), 0.45
@@ -531,8 +562,15 @@ Sub ReptonReturnsIntroLoop()
     
     exReturns.position 0, -300, 0, True
     
+    
+    ExFader.ResetMatrix
+    ExFader.Rotate 0, 0, 0, True
+    ExFader.position 0.01, 0.01, 550, True
+    
+    
     timControl.ReSet
-
+    
+    PlayFMOD
     
     
     ' Set Animations
@@ -542,6 +580,7 @@ Sub ReptonReturnsIntroLoop()
     
     intN = 1
     
+    StartFader 2
        
     ' The main loop. Each loop represents one frame.
     Do
@@ -552,31 +591,31 @@ Sub ReptonReturnsIntroLoop()
             Case 1
             
                 If timControl.LocalTime > 5 Then
-                   ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, 500, -200), ExPrj.exReturn3DVec(0.001, 500, 500), 5
+                   ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, 500, -400), ExPrj.exReturn3DVec(0.001, 500, 500), 7
                     
                     intN = 2
                 End If
             
             Case 2
                
-                If timControl.LocalTime > 10 Then
-                    ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, 500, -650), ExPrj.exReturn3DVec(0.001, 500, -200), 5
-                    exDummyLookAt.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.0001, -15000, 20000), ExPrj.exReturn3DVec(0.0001, -15000, 50000), 5
+                If timControl.LocalTime > 12 Then
+                    ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, 500, -650), ExPrj.exReturn3DVec(0.001, 500, -400), 8
+                    exDummyLookAt.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.0001, -15000, 20000), ExPrj.exReturn3DVec(0.0001, -15000, 50000), 8
                 
                     intN = 3
                 End If
                 
-            Case 3
-                If timControl.LocalTime > 15 Then
-                    ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, 480, -680), ExPrj.exReturn3DVec(0.001, 500, -650), 3
+            Case 3          ' "Returns" seeping though ground
+                If timControl.LocalTime > 20 Then
+                    ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, 480, -680), ExPrj.exReturn3DVec(0.001, 500, -650), 4
                     
-                    exReturns.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0, -220, 0), ExPrj.exReturn3DVec(0, -300, 0), 3
+                    exReturns.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0, -220, 0), ExPrj.exReturn3DVec(0, -300, 0), 4
                     
                     intN = 4
                 End If
                 
-            Case 4
-                If timControl.LocalTime > 18 Then
+            Case 4          ' Boulder explostion
+                If timControl.LocalTime > 24 Then
                     ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, 400, -1000), ExPrj.exReturn3DVec(0.001, 480, -680), 1
                     exDummyLookAt.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.0001, -10000, 20000), ExPrj.exReturn3DVec(0.0001, -15000, 20000), 1
                     
@@ -590,12 +629,12 @@ Sub ReptonReturnsIntroLoop()
                     Next n
                     
                     ' Move ground
-                    exGroundFront.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, 0.001, -700), ExPrj.exReturn3DVec(0.001, 0.001, 0.001), 2.5
+                    exGroundFront.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, 0.001, -1500), ExPrj.exReturn3DVec(0.001, 0.001, 0.001), 2.5
                     
                     ' Move grass on moving ground too
                     For n = 0 To 10
                         If exGrass(n).position.z < 0.001 Then
-                            exGrass(n).AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(exGrass(n).position.x, 0.001, exGrass(n).position.z - 700), ExPrj.exReturn3DVec(exGrass(n).position.x, 0.001, exGrass(n).position.z), 2.5
+                            exGrass(n).AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(exGrass(n).position.x, 0.001, exGrass(n).position.z - 1500), ExPrj.exReturn3DVec(exGrass(n).position.x, 0.001, exGrass(n).position.z), 2.5
                         End If
                     Next n
                 
@@ -603,14 +642,35 @@ Sub ReptonReturnsIntroLoop()
                 End If
                 
             Case 5
-                If timControl.LocalTime > 21 Then
-                    ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -150, -1300), ExPrj.exReturn3DVec(0.001, 400, -1000), 1
-                    exDummyLookAt.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -200, -999), ExPrj.exReturn3DVec(0.0001, -10000, 20000), 1
-                                   
+                If timControl.LocalTime > 27 Then
+                    ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -150, -1300), ExPrj.exReturn3DVec(0.001, 400, -1000), 3
+                    exDummyLookAt.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -0.01, -5), ExPrj.exReturn3DVec(0.0001, -10000, 20000), 1.5
+                    
+                    exRepton.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -200, -300), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
+                    exRepton.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(-45, 0.1, 0.1), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
+                    
+                    exRepHolder.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -200, -300), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
+                    exRepHolder.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(-45, 0.1, 0.1), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
+
+                    exReturns.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(10, -250, -120), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
+                    exReturns.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(-45, 0.1, 0.1), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
+                
+                    
+'
+'                    exSky.position 1, -400, 100, True
+                                    
+                                    
                     intN = 6
                 End If
             Case 6
-                If timControl.LocalTime > 22 Then
+                If timControl.LocalTime > 28.5 Then
+                    exDummyLookAt.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -200, -999), ExPrj.exReturn3DVec(0.001, -0.01, -5), 1.5
+                    
+                    intN = 7
+                End If
+                
+            Case 7
+                If timControl.LocalTime > 30 Then
                     blnLoop = False
                 End If
             
@@ -639,7 +699,7 @@ Sub ReptonReturnsIntroLoop()
         Next n
         
         
-        If intN >= 5 And intN < 7 Then
+        If intN >= 5 And intN < 8 Then
             For n = 0 To 10
                 tBoulders(n).exLog.Render
                 exBoulder(tBoulders(n).meshID).ResetMatrix
@@ -649,6 +709,8 @@ Sub ReptonReturnsIntroLoop()
             Next n
         End If
 
+        If intN = 1 Then RenderFader True
+        
         ' Finally flip the buffers, completing the rendering process.
         ExPrj.Sync
 
