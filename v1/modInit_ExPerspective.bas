@@ -13,9 +13,16 @@ Public ExPrj As New exD3Dprj
 Public ExCam As New exCamera
 Public ExInp As New exInput
 
-Public Ex3DP(24) As New exMesh
+Public Ex3DP(26) As New exMesh
 
 Public Ex3DGround(15) As New exMesh      ' Visual Ground
+                                         '  10 = 4-6
+                                         '  11 = 8-2
+                                         '  12 = 4-6-8
+                                         '  13 = 8-2-6
+                                         '  14 = 4-6-2
+                                         '  15 = 8-2-4
+                                         
 
 Public Ex3DWallSides(3) As New exMesh    ' Visual Wall sides (large stones)
 
