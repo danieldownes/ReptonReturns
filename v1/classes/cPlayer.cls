@@ -17,6 +17,8 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
+Public strName As String
+
 Public intDimondsCollected  As Integer
 
 
@@ -74,6 +76,8 @@ Const cintTimeToMove = 0.3           ' Number of seconds it take for player to m
 
 ' Logical functions (these control the 'Visual Controlling' functions)...
 Function UpDate()
+
+    Dim sTemp As String
    
     ' If moving, check if player has arrived at new pos. yet
     If (enmPlayerState = Walk Or enmPlayerState = DigAndWalk) And exTimPlayerCont.LocalTime + 0.01 > cintTimeToMove Then
@@ -89,9 +93,13 @@ Function UpDate()
                 intDimondsCollected = intDimondsCollected + 1
                 
             Case "t"
+                ExSnds(6).PlaySound False
+            
                 rrMap.intTotCrowns = rrMap.intTotCrowns - 1
                                 
             Case "k"                                            ' Key collected; Open all safes
+                ExSnds(14).PlaySound False
+                
                 rrMap.OpenSafes
                 
             Case "b"                                            ' Collected a bomb, thus completing the map
@@ -99,12 +107,42 @@ Function UpDate()
                                                                 '   collected; this is handeled by the 'MovableTo' function.
                                                                 
             Case "u"                                            ' Skull; die
-                Me.Die
+                If rrGame.strEpisodeName = "Home" Then
+                    If MsgBox("Sure to delete " & rrRepton.strName & "'s saved positions and settings?", vbYesNo, "Repton Returns") = vbYes Then
+                    
+                       ' Delete player records
+                       DeleteFolder App.Path & "\data\players\" & rrRepton.strName
+                    
+                       'on error resume next
+                       Open App.Path & "\data\players\names.dat" For Input As #1
+                           Open App.Path & "\data\players\names.tmp" For Output As #2
+                                Do
+                                    Input #1, sTemp
+                                    If sTemp <> rrRepton.strName Then Print #2, sTemp
+                                Loop Until EOF(1)
+                           Close #2
+                       Close #1
+                       MoveFile App.Path & "\data\players\names.tmp", App.Path & "\data\players\names.dat"
+                       
+                       rrGame.iLevelCompeted = -1
+                       
+                       sTemp = ""
+                    Else
+                        intCurX = intOldX
+                        intCurY = intOldY
+                    End If
+                Else
+                
+                    Me.Die
+                    
+                End If
                 
             Case "f"                                            ' Fungus; die
                 Me.Die
                 
             Case "n"                                            ' Transporter; reposition
+            
+                ExSnds(12).PlaySound False
             
                 ' Remove transporter from map
                 rrMap.SetData intCurX, intCurY, Repton
@@ -125,8 +163,18 @@ Function UpDate()
                 ' Start FX
                 
             Case "z"                                            ' Time capsule; reset time bomb timer
+                ExSnds(11).PlaySound False
+            
                 rrMap.TimeBombControl 3
                 
+            Case "y"                                            ' Level Transporter
+                
+                ExSnds(13).PlaySound False
+                                
+                sTemp = tLevelTrans(rrPieces(intCurX, intCurY).intTransporterID).sLocalFile
+                
+                ' Keep track of deleted level-transporter
+                tLevelTrans(rrPieces(intCurX, intCurY).intTransporterID).sLocalFile = "!deleted!"
                 
         End Select
         
@@ -144,6 +192,23 @@ Function UpDate()
         
         
         GameEvents
+        
+        If sTemp <> "" Then           ' Level-transporter?
+            If rrGame.strEpisodeName = "Home" Then
+                ' Save level
+                rrMap.SaveFileLevel App.Path & "\data\players\" & sPrimPlayerName & "\home\start.rrl"          '& rrGame.strEpisodeName  & rrGame.LevelOrder(rrGame.iCurGameLevel)
+            End If
+            
+            ' Start Game
+            rrGame.DeInit
+            rrGame.sEpisodeDir = App.Path & "\data\episode\" & sTemp
+            rrGame.Init True
+            
+            intOldX = intCurX
+            intOldY = intCurY
+        End If
+        
+
         UserInteraction   ' Still moving?
         
     End If
@@ -255,7 +320,7 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
             If rrRepton.intDimondsCollected <> rrMap.intTotDimonds _
                Or rrMap.intTotCrowns <> 0 Or rrMap.intTotEggs <> 0 Or rrMap.intTotMonstersAlive <> 0 Then
                
-                MoveableTo = False
+                'MoveableTo = False
             End If
             
         
@@ -290,12 +355,7 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
                 End If
                 
                 If rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Monster) Then
-                    If rrMonster(rrPieces(intX - 1, intY).intMonsterID).Killable = True Then
-                        rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Left
-                    
-                    Else
-                        MoveableTo = False
-                    End If
+                    rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Left
                 End If
             Else
                 If rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Space) Then
@@ -305,11 +365,11 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
                 End If
                 
                 If rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Monster) Then
-                    If rrMonster(rrPieces(intX + 1, intY).intMonsterID).Killable = True Then
+                    'If rrMonster(rrPieces(intX + 1, intY).intMonsterID).Killable = True Then
                         rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
-                    Else
-                        MoveableTo = False
-                    End If
+                    'Else
+                    '    MoveableTo = False
+                    'End If
                 End If
             End If
         End If
@@ -327,6 +387,7 @@ Sub Init()
     ' Init public varables
     intDimondsCollected = 0
     intLives = 3
+    strName = sPrimPlayerName
     
     intAniN = 0
     intAniMin = 56      '56
