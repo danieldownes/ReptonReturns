@@ -30,40 +30,68 @@ Possibly fixed:
 
 
 ----------------------------------------------------------------------------
-To Do (for BETA):
+To Test:
 
- Programming:
-  Debugging
-  Visual FX Class
-  lives
-  loading screen
-  game completed screen
+09-02-2005: After playing a game with 4 (or possibly more) sprits, then 
+		playing a game with only 3 spirits, a visual spirit was seen
+29-05-2003: Monsters now die via funguses
 
-  Map View
+
+----------------------------------------------------------------------------
+
+## To Do (for BETA 2): ##
+
+ Programming:      
+  level and game completed screen
+  Fountain Partile Engine -- need better particle control; emitting speed, emitter offsetting, particle life control +radius, (clumping?)
+	- Repton die
+	- monster die
+	- egg crack
+	- bomb explode
+	- spirit capture
+	- transporting
+	- glittering dimonds
+	- Earth digging
+	- Dust behind rocks
+	- Dust behind monsters, spirts ?
+	- Diamond (item) collection?
+	- Screen flashing (for egg crack, spirt catch, bomb explode)?
+	- other FXs? (warning of overuse)?
+
+  remove directory data from packed files
+  (Map View)?
+  Dubug file output?
+  Editor integration
+
+ review sounds	
+ nicer icon
+ testing; 	
+	Game is Completable?
+	Game works for limited user?
+	Windows 2000 admin/limited user?	
+	Windows 98/ME?
+	Timing problems?
+		
+
+
+
+## Other Ideas ##
+  
+  Convert to .NET ?
+  Secure Files -- Player files to do!
 
     
  
-Episode/Level selector 
+Episode/Level selector:
     'user levels' selected via a user defined 3x3 map that is merged with 
     episode selector map
 
 
- Art:
-  Repton Animation (Upper body walking, digging, being idle, pushing rock, pushing non-movable piece)
-  level-transporters 
-  Earth
-  toutch up walls 
-  Scenery pieces
-  fungus
+Art:
+  Repton Animation (pushing rock, pushing non-movable piece)
+  More scenery pieces
  
- 
-music 
-  in-game, slow track 
-  havily Repton 3 based track 
-   
-sound effects    
-
-   bomb explosion 
+sound effects:
 
    monster moving 
 
@@ -74,8 +102,8 @@ sound effects
    die by skull         
    cannt push
 
-   completed level
-   completed game
+   completed level		*	- Maybe in B2 ??
+   completed game		*
    completed episode
 
    map colected
@@ -89,20 +117,17 @@ In-game save points
    player can exit level at any time and return to exactly same setup 
 
 
-Help file
 
-
-promote, show the world RR!! 
+show the world RR!! 
  
-After BETA: VisualFX class and models
 
-  
 
 ----------------------------------------------------------------------------
 Development history overview:
 
-v1.00 Final end:  (??-09-2003)
-v1.00 BETA 1 end:   (17-08-2003)
+v1.00 Final end:  Ever?
+v1.00 BETA 2 end: (??-03-2005) ??
+v1.00 BETA 1 end: 17-08-2003
 v1.00 start:      13-10-2001
 Prototype end:    12-10-2000
 Start:            23-08-2000 
@@ -111,8 +136,73 @@ Start:            23-08-2000
 ----------------------------------------------------------------------------
 Development history detail:
 
+10-02-2005:
+	    + 'Dust behind repton' effect (coding only) using emitter generator
+	    + Emitter generator
+	    * Debugging particle emmitter class
+
+09-02-2005:
+	    ! After playing a game with 4 (or possibly more) sprits, then 
+		playing a game with only 3 spirits, a visual spirit was seen
+	    + Level loading screen 
+	    * Nicer animation on Ex-D logo
+	    * Nicer usage of grammer fader
+
+08-02-2005:
+	    * Cleaned-up sides of wall rendering; now has better efficentcy
+		and visually appeal
+
+07-02-2005:
+	    + Shuddering egg visual animation effect
+	    * Single particle fountain up and flowing
+
+06-02-2005:
+	    * Working on particle fountain engine
+
+05-02-2005:
+	    + Implementing simple particle fountain engine (for use with 
+		Repton die, monster die, egg crack, bomb explode, spirit 
+		capture, transporting, etc)
+
+02-02-2005: (35 mins)
+	    * Fixed memory leak error which caused application to not fully 
+		unload (introduced in BETA 2 dev.)
+
+01-02-2005: (3 hours)
+	    ! Loading a level from 2nd scenero cause IO error
+	    + Res Selector integration
+
+31-01-2005: (~3 hours)
+	    * Finalised Res Selector
+
+15-11-2003:
+	    * Finnished making all main level files secure and working (not 
+		inc. player 'Home' level)
+
+08-10-2003:
+	    * Continued work to make media files secure
+
+17-09-2003:
+	    * Monster can now move though earth. Also the earth is drawn 
+		while monster is moving though it.
+		...and is replaced when moving from out of it. Also 
+			rock/eggs detect if monster is in earth,
+		...and while is so, does not move and kill the monster.
+
+15-09-2003:
+	    + Started to implement 'loading screen'
+
+11-09-2003:
+	    + Started to implement 'secure files' feature; media files are 
+		located in several 'data' file
+	    
+
+-- v1 BETA 2 Development --
+
+
 17-08-2003:
-	    * Fixed error; After Repton dies, the location were he died was not reset to a 'Space'
+	    * Fixed error; After Repton dies, the location were he died was 
+		not reset to a 'Space'
 	    * Other last minuete tweeks b4 BETA release
 	    + Player lives managment
 
@@ -120,8 +210,10 @@ Development history detail:
 	    * Corrected colour for Repton's legs
 
 15-08-2003:
-	    + Put messages into 'home' level, acting as completed level screen (for beta at least)
-	    * Should now not be posible to illegally move falling rock (see 26-05-03 bug)
+	    + Put messages into 'home' level, acting as completed level 
+		screen (for beta at least)
+	    * Should now not be posible to illegally move falling 
+		rock (see 26-05-03 bug)
 	    * Redid Repton animation in max and implemented
 
 13-08-2003:
@@ -174,7 +266,8 @@ Development history detail:
 	    * Better monster dieing handlling; may have cured bugs
     	    + rock hitting sound
 	    + Rock falling sound; needs extra work
-	    ! Player dosn't init correctly when transporting to new level (reason for 06-07-03 bug)
+	    ! Player dosn't init correctly when transporting to new 
+		level (reason for 06-07-03 bug)
 	    * Small tweeks in RocksOrEggs class
 	    + Visual fader in menu; not fully intergrated
 
@@ -228,7 +321,8 @@ Development history detail:
 	    + Now using FMOD sound system to play MP3's
 
 04-06-2003:
-	    * Finnished making rocks rotate (more or less) accuretly - had to update Ex-Perspective in order to make this work
+	    * Finnished making rocks rotate (more or less) accuretly - had to 
+		update Ex-Perspective in order to make this work
 
 03-06-2003:
 	    * Started to make rocks rotate accuretly
@@ -243,9 +337,9 @@ Development history detail:
 	    * Messages now only appear once
 
 30-05-2003: (~7:00)
-	    + Messages appear at desinated triggers; still need to delete messages, and other tweeks
+	    + Messages appear at desinated triggers; still need to delete messages, and other tweaks
 	    * Fixed 'Monsters hold rocks until they move down, then get squished' bug (today)
-	    ! Skull disappear when walking into them
+	    ! Skulls disappear when walking into them
 	    * Fixed 'Transporters do not get overwritten' bug (today)
 	    * Fixed 'Rocks still not falling correctly' bug (today)
 	    * Fixed 'Problems with ground textures' bug (today)
@@ -425,7 +519,8 @@ Development history detail:
 
 14-12-2001:
 	    * Working on rendering (using 'postion and render' method)
-	    - 'intihideandshow' and 'hideandshow' function - not needed because of changed rendering method	
+	    - 'intihideandshow' and 'hideandshow' function - not needed because of changed rendering method
+
 12-12-2001:
 	    * Reattempted Repton 3 intro sound in Logic pro audio
 
