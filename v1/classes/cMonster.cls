@@ -59,7 +59,7 @@ Dim intPieceType As enmPieceType
 
 Public ExLog3D As New exMesh               ' Logical 3D (so that transformations are preserved; no mesh data).
 
-Const cintTimeToMove As Single = 0.45      ' Number of seconds it take for move from one
+Private cintTimeToMove As Single           ' Number of seconds it take for move from one
                                            '  map piece to another.
 
 
@@ -86,6 +86,11 @@ Function Init(intX As Integer, intY As Integer)
 
     
     enmMonsterState = StillInEgg
+    
+    
+    ' Playing Speed
+    cintTimeToMove = 0.45 / rrGame.sngGameSpeed
+    
    
 End Function
 
@@ -171,17 +176,17 @@ Function Move3D()
         
             Case Up
                 If int3DLastDirection = Left Then ExLog3D.Rotate 0, 0, 90, True
-                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 180), ExLog3D.Rotate, 0.2
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 180), ExLog3D.Rotate, cintTimeToMove * 1.7
                 
             Case Down
-                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 360), ExLog3D.Rotate, 0.2
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 360), ExLog3D.Rotate, cintTimeToMove * 1.7
                 
             Case Left
                 If int3DLastDirection = Up Then ExLog3D.Rotate 0, 0, 540, True
-                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 450), ExLog3D.Rotate, 0.2
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 450), ExLog3D.Rotate, cintTimeToMove * 1.7
                                 
             Case Right
-                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 270), ExLog3D.Rotate, 0.2
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 270), ExLog3D.Rotate, cintTimeToMove * 1.7
                 
         End Select
                 
@@ -200,7 +205,7 @@ Function CheckIfMove()
     ' Control spawn timing sequences ...
     
     If enmMonsterState = EggIsCracking Then
-        If timMonsterSpawnCont.LocalTime > 3 Then
+        If timMonsterSpawnCont.LocalTime > 3 / rrGame.sngGameSpeed Then
             ' Egg has fully cracked
             intPieceType = Monster
             rrPieces(intCurX, intCurY).intMonsterID = intMyID
@@ -214,7 +219,7 @@ Function CheckIfMove()
         End If
         
     ElseIf enmMonsterState = MonsterWaking Then
-        If timMonsterSpawnCont.LocalTime > 3 Then
+        If timMonsterSpawnCont.LocalTime > 3 / rrGame.sngGameSpeed Then
             ' Monster has fully awakened
             
             enmMonsterState = SeekingRepton
