@@ -75,5 +75,73 @@ Repton 3\Finale\Student.rrl
 0,0
 Repton 3\Finale\Average.rrl
 0
+10
+1
+5,14
+
+Walking into the skull on the 'Home' level will delete the currently active Repton Returns account; including saved game positions and settings for this account.
+</game-message>
+1
+14,12
+
+Work your way though the level-transporters (above) to complete the standard levels of Repton Returns. When in a level press the Escape key at any time to return to this 'Home' level.
+Once you complete a level
+that level's transporter will disappear from your home level.
+
+Remember
+this is a BETA version of Repton Returns
+meaning that bugs may still exist. If you come across an error
+please report it;
+see www.Ex-D.net/games/ReptonReturns/ for details. Thank you.
+</game-message>
+1
+14,11
+
+This is the first level from the original Repton 3 'Prelude' episode. Good luck.
+</game-message>
+5
+18,12
+17,13
+18,13
+17,14
+18,14
+
+You are now entering into the 'Toccata' set of levels from the original Repton 3.
+</game-message>
+1
+20,11
+
+You'll need to complete the 'Prelude' levels before the 'Finale' levels are unlocked.
+</game-message>
+1
+28,15
+
+Welcome to the 'Finale' levels.
+</game-message>
+2
+33,9
+34,8
+
+Careful!!!
+</game-message>
+1
+23,21
+
+Almost there. Only the worst level of the lot stands in the way!
+</game-message>
+1
+11,21
+
+Well done! You have completed Repton Returns.
+
+Want more
+harder levels? Checkout: http://www.Ex-D.net
+For updates and the chance to help build levels and graphics for future versions/expansions of Repton Returns.
+
+Hope you enjoyed.
+</game-message>
 0
+
+
+</game-message>
 False
