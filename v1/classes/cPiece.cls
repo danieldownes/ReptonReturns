@@ -42,7 +42,7 @@ Function Render()
         
         ' Lets render the ground now
         intPieceType = GetWallAroundInfo(intCurX, intCurY)
-        Ex3DGround(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+        Ex3DGround(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
         Ex3DGround(intPieceType).Render
         
     End If
@@ -54,49 +54,49 @@ Function Render()
     Select Case intPieceType
     
         Case Wall
-            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
             
-            Ex3DWallSides(0).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(0).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DWallSides(0).Render
             
-            Ex3DWallSides(1).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(1).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DWallSides(1).Render
 
-            Ex3DWallSides(2).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(2).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DWallSides(2).Render
 
-            Ex3DWallSides(3).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(3).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DWallSides(3).Render
         
         Case Wall2
-            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
 
             
-            Ex3DWallSides(3).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(3).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DWallSides(3).Render
 
         Case Wall4
-            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
 
-            Ex3DWallSides(2).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(2).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DWallSides(2).Render
 
 
         Case Wall6
-            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
             
-            Ex3DWallSides(1).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(1).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DWallSides(1).Render
         
         Case Wall8
-            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
 '
-            Ex3DWallSides(0).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(0).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DWallSides(0).Render
             
         Case Rock
@@ -109,23 +109,35 @@ Function Render()
         Case skull
             SpinObject intPieceType, 2
             
-            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
             
         Case Dimond
             SpinObject intPieceType, 1
             
-            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
             
+        Case TimeCapsule
+            SpinObject intPieceType, 1
+            
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).Render
+        
         Case Key
             SpinObject intPieceType, 1
             
-            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).Render
+            
+        Case Cage
+            SpinObject intPieceType, 0.7
+            
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
         
         Case Else
-            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
         
     End Select
@@ -153,7 +165,7 @@ End Function
 
 
 Private Function SpinObject(intPieceType As Integer, iSpeed As Single)
-    If Ex3DP(intPieceType).AnimatedTransform.Active(Rotation3D) = False Then
+    If Ex3DP(intPieceType).AnimatedTransform.active(Rotation3D) = False Then
         'Ex3DP(intPieceType).ResetMatrix
         Ex3DP(intPieceType).AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 360), ExPrj.exReturn3DVec(0, 0, 0), iSpeed
     End If
