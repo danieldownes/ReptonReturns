@@ -29,11 +29,6 @@ Private int3DDirection As enmDirection          ' The direction that the visual 
 Private int3DLastDirection As enmDirection      '
 
 
-Private intAniN   As Integer
-Private intAniMin As Integer
-Private intAniMax As Integer
-Private intAniSpeed As Integer
-
 Private Enum StateEN
     StillInEgg = 0
     EggIsCracking   ' 1
@@ -53,6 +48,11 @@ Dim intOldX As Integer
 Dim intOldY As Integer
 
 
+Dim intAniN     As Integer
+Dim intAniMin   As Integer
+Dim intAniMax   As Integer
+Dim intAniSpeed As Integer
+
 
 Dim intPieceType As enmPieceType
 
@@ -69,12 +69,16 @@ Function Init(intX As Integer, intY As Integer)
     intCurY = intY
     intOldX = intX
     intOldY = intY
-    
-    intPieceType = Monster
+        
+    ' Internal ani settings
+    intAniN = 0
+    intAniMin = 1      '56
+    intAniMax = 94
+    intAniSpeed = 4
     
     intMyID = rrMap.intTotMonsters
     
-    ExLog3D.Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+    ExLog3D.position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
     ' Random post rotation?
     'ExLog3D.InitXFile ""
     ExLog3D.Rotate Rnd(360), Rnd(360), Rnd(360), True
@@ -95,13 +99,21 @@ Function Render()
     ' Only render if Monster is active
     If enmMonsterState = EggIsCracking Or enmMonsterState = MonsterWaking Or enmMonsterState = SeekingRepton Then
         
-        'Ex3DP(intPieceType).Rotate ExLog3D.Rotate.X, ExLog3D.Rotate.Y, ExLog3D.Rotate.Z, True
-        Ex3DP(intPieceType).Position ExLog3D.Position.x, ExLog3D.Position.y, ExLog3D.Position.Z, True
+        Ex3DP(intPieceType).ResetMatrix
+        Ex3DP(intPieceType).Rotate ExLog3D.Rotate.x, ExLog3D.Rotate.y, ExLog3D.Rotate.z, True
+        Ex3DP(intPieceType).position ExLog3D.position.x, ExLog3D.position.y, ExLog3D.position.z, True
         
         
         Ex3DP(intPieceType).Render
         
+        ' Update internal animation
+        intAniN = intAniN + 1
+        If intAniN > intAniMax Then intAniN = intAniMin
+        Ex3DP(intPieceType).Animate intAniN * 160, 6000 * intAniSpeed
+        
     End If
+    
+    
     
 End Function
 
@@ -142,7 +154,7 @@ Public Function Move(intDir As enmDirection)
     rrMap.SetData intOldX, intOldY, Space
     rrMap.SetData intCurX, intCurY, intPieceType
         
-    rrPieces(intOldX, intOldY).intMonsterID = -2
+    rrPieces(intOldX, intOldY).intMonsterID = -1  '-2
     rrPieces(intCurX, intCurY).intMonsterID = intMyID
         
     Move3D          ' Direction and/or position may have changed
@@ -151,8 +163,31 @@ End Function
 
 Function Move3D()
     
-    ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), -240), ExLog3D.Position, cintTimeToMove
+    ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), -240), ExLog3D.position, cintTimeToMove
     'ExLog3D.Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+    
+    
+    ' Direction/Rotation
+    If int3DDirection <> int3DLastDirection Then
+        Select Case int3DDirection
+        
+            Case Up
+                If int3DLastDirection = Left Then ExLog3D.Rotate 0, 0, 90, True
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 180), ExLog3D.Rotate, 0.2
+                
+            Case Down
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 360), ExLog3D.Rotate, 0.2
+                
+            Case Left
+                If int3DLastDirection = Up Then ExLog3D.Rotate 0, 0, 540, True
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 450), ExLog3D.Rotate, 0.2
+                                
+            Case Right
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 270), ExLog3D.Rotate, 0.2
+                
+        End Select
+                
+    End If
     
 End Function
 
@@ -169,7 +204,10 @@ Function CheckIfMove()
     If enmMonsterState = EggIsCracking Then
         If timMonsterSpawnCont.LocalTime > 3 Then
             ' Egg has fully cracked
+            intPieceType = Monster
+            rrPieces(intCurX, intCurY).intMonsterID = intMyID
             
+            rrMap.SetData intCurX, intCurY, Monster
             enmMonsterState = MonsterWaking
             timMonsterSpawnCont.ReSet
             
@@ -186,7 +224,7 @@ Function CheckIfMove()
     ElseIf enmMonsterState = SeekingRepton Then
         
         ' Have we stoped moving?
-        If ExLog3D.AnimatedTransform.Active(Translation3D) = False Then
+        If ExLog3D.AnimatedTransform.active(Translation3D) = False Then
             
             intOldDir = int3DDirection
             
@@ -268,6 +306,8 @@ Function Spawn(intX As Integer, intY As Integer)
     
     Me.Move3D               ' Update visual moster with these new coords.
     
+    intPieceType = Egg
+    
     rrMap.SetData intX, intY, intPieceType
     rrPieces(intX, intY).intMonsterID = intMyID
     
@@ -311,14 +351,6 @@ Private Function CanMoveTo(intX As Integer, intY As Integer) As Boolean
         CanMoveTo = True
     Else
         CanMoveTo = False
-    End If
-End Function
-
-Function Killable() As Boolean
-    If enmMonsterState = EggIsCracking Or enmMonsterState = StillInEgg Then
-        Killable = False
-    Else
-        Killable = True
     End If
 End Function
 
