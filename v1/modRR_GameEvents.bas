@@ -40,7 +40,13 @@ Function GameEvents()
         
         ' Check time remaining
         rrMap.TimeBombControl 2
-        'If rrMap.sngTimeLeft <= 0 And sngTimeBombOut <> -1 Then rrRepton.Die
+        If rrMap.sngTimeBombOut <> -1 Then
+            If rrMap.sngTimeLeft <= 0 Then
+                ' Time has ran out
+               ' ExSnds(20).PlaySound False
+               ' rrRepton.Die False
+            End If
+        End If
         
         ' Music Control
         rrGame.ControlMusic
@@ -198,23 +204,23 @@ FungusFound:
 End Function
 
 Function TryRockFalls()
-    Dim x As Integer
-    Dim y As Integer
+    Dim X As Integer
+    Dim Y As Integer
     
     
     On Error Resume Next
     
-    For y = rrMap.intMapSizeY To 1 Step -1
+    For Y = rrMap.intMapSizeY To 1 Step -1
         ExTxtMsg.Text ""
-        For x = rrMap.intMapSizeX To 1 Step -1
-            If rrPieces(x, y).intRockOrEggID <> -1 Then
-                rrRocksOrEggs(rrPieces(x, y).intRockOrEggID).CheckIfFall
+        For X = rrMap.intMapSizeX To 1 Step -1
+            If rrPieces(X, Y).intRockOrEggID <> -1 Then
+                rrRocksOrEggs(rrPieces(X, Y).intRockOrEggID).CheckIfFall
                 
             End If
             
-        Next x
-        ExTxtMsg.position 200, 40 + (20 * y)
-    Next y
+        Next X
+        ExTxtMsg.position 200, 40 + (20 * Y)
+    Next Y
     
     
     Resume
