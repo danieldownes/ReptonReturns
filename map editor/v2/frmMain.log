@@ -1,0 +1,6 @@
+Line 308: Class ToggleButton.conGenPicToggle of control usrNum was not a loaded control class.
+Line 11: Property Icon in frmMain had an invalid file reference.
+Line 289: Property Picture in picUnSelNum had an invalid file reference.
+Line 300: Property Picture in picSelectedNum had an invalid file reference.
+Line 315: The property name _ExtentX in usrNum is invalid.
+Line 316: The property name _ExtentY in usrNum is invalid.
