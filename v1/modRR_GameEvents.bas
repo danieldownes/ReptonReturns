@@ -156,12 +156,15 @@ FungusFound:
                     
             End Select
             
+            ' Play sound
+            If rrRepton.GetXPos > (intX - 7) And rrRepton.GetXPos < (intX + 7) And rrRepton.GetYPos > (intY - 7) And rrRepton.GetYPos < (intY + 7) Then
+                ' Repton is near, play fungus sound
+                ExSnds(15).PlaySound False
+            End If
+            
             ' Check if Repton should die
             If rrMap.GetData(intX, intY) = "i" Then
                 rrRepton.Die
-            ElseIf rrRepton.GetXPos > (intX - 7) And rrRepton.GetXPos < (intX + 7) And rrRepton.GetYPos > (intY - 7) And rrRepton.GetYPos < (intY + 7) Then
-                ' Repton is near, play fungus sound
-                ExSnds(15).PlaySound False
             End If
             
             ' Check if monster should die
