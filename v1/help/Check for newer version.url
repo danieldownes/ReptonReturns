@@ -1,0 +1,5 @@
+[DEFAULT]
+BASEURL=http://localhost/ex-d/
+[InternetShortcut]
+URL=http://www.ex-d.net/products/check_version.asp?ID=6&Ver=1.00BETA1
+Modified=20F4A34CF063C3011A
