@@ -32,6 +32,7 @@ Dim int3DDirection As enmDirection              ' Current direction that we are 
 
 Public blnFalling   As Boolean
 Public blnFreeFall  As Boolean
+Public bPlayingSnd  As Boolean
 
 Public bEggCracking As Boolean
 
@@ -75,8 +76,12 @@ Function Init(intType As enmPieceType, intX As Integer, intY As Integer)
     
     cintTimeToMove = 0.22 / rrGame.sngGameSpeed
 
+
 End Function
 
+Function DeInit()
+    If bPlayingSnd Then rrGame.PlayRockRumbleSound False
+End Function
 
 Function Render()
 
@@ -84,8 +89,9 @@ Function Render()
     
     If ExLog3D.AnimatedTransform.active(Translation3D) = False Then
         If int3DDirection = Left Or int3DDirection = Right Then
-             ExSnds(4).StopSound
-             bRockSndPlaying = False
+             'ExSnds(4).StopSound
+             If bPlayingSnd Then rrGame.PlayRockRumbleSound False
+             bPlayingSnd = False
         End If
     End If
     
@@ -167,7 +173,9 @@ Public Function Move(intDir As enmDirection)
             
             int3DDirection = Down
             
-            PlayFallingSnd
+            'PlayFallingSnd
+            If Not bPlayingSnd Then rrGame.PlayRockRumbleSound True
+            bPlayingSnd = True
             
         Case Right
             intCurX = intCurX + 1
@@ -177,7 +185,9 @@ Public Function Move(intDir As enmDirection)
             
             ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, 90, 0), cintTimeToMove * 1.25
             
-            PlayFallingSnd
+            'PlayFallingSnd
+            If Not bPlayingSnd Then rrGame.PlayRockRumbleSound True
+            bPlayingSnd = True
                         
         Case Left
             intCurX = intCurX - 1
@@ -188,7 +198,9 @@ Public Function Move(intDir As enmDirection)
 
             ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, -90, 0), cintTimeToMove * 1.25
             
-            PlayFallingSnd
+            'PlayFallingSnd
+            If Not bPlayingSnd Then rrGame.PlayRockRumbleSound True
+            bPlayingSnd = True
                
     End Select
     
@@ -202,7 +214,8 @@ Public Function Move(intDir As enmDirection)
     If rrMap.GetData(intCurX, intCurY) = "m" Then
         ' Find ID of this monster and kill it - should also work if more than one monster is in same place
         For n = 1 To rrMap.intTotMonstersAlive
-            If rrMonster(n).GetXPos = intCurX And rrMonster(n).GetYPos = intCurY Then
+            If (rrMonster(n).GetXPos = intCurX And rrMonster(n).GetYPos = intCurY) Or _
+               (rrMonster(n).GetXPos = intOldX And rrMonster(n).GetYPos = intOldY) Then
                 rrMonster(n).Die
             End If
         Next n
@@ -241,6 +254,9 @@ Function CheckIfFall()
     Dim iTemp As Integer
     Dim n As Integer
     
+    
+    ' If egg is cracking then exit now as eggs don't fall and while cracking (but allow animation to process before doing so)
+    If bEggCracking Then Render: Exit Function
 
 
     ' If we stopped falling on last check (and we are still not falling) then reset 'bWasFalling'
@@ -253,10 +269,11 @@ Function CheckIfFall()
         blnFalling = False
         bWasFalling = True
 
-        ExSnds(4).StopSound
-        bRockSndPlaying = False
+'        If bPlayingSnd Then rrGame.PlayRockRumbleSound False
+'        bPlayingSnd = False
+        
 
-        If intPieceType = Rock Then ExSnds(5).PlaySound (False) Else ExSnds(8).PlaySound (False)
+'        If intPieceType = Rock Then ExSnds(5).PlaySound (False) Else ExSnds(8).PlaySound (False)
     End If
        
     
@@ -270,7 +287,7 @@ Function CheckIfFall()
             End If
         End If
         
-        ' Fall stight down?
+        ' Fall stright down?
         sTemp = rrMap.GetData(intCurX, intCurY + 1)
         If sTemp = "0" Then
         
@@ -410,5 +427,12 @@ CrackEgg:
         blnFreeFall = False
     End If
 
+    ' Should falling sound stop?
+    If blnFalling = False And bWasFalling = True Then
+        If bPlayingSnd Then rrGame.PlayRockRumbleSound False
+        bPlayingSnd = False
+        
+        If intPieceType = Rock Then ExSnds(5).PlaySound (False) Else ExSnds(8).PlaySound (False)
+    End If
     
 End Function
