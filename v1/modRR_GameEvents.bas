@@ -40,7 +40,10 @@ Function GameEvents()
         
         ' Check time remaining
         rrMap.TimeBombControl 2
-        'If rrMap.sngTimeLeft <= 0 Then rrRepton.Die
+        'If rrMap.sngTimeLeft <= 0 And sngTimeBombOut <> -1 Then rrRepton.Die
+        
+        ' Music Control
+        rrGame.ControlMusic
         
     End If
         
