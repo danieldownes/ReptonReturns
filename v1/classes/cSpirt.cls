@@ -24,6 +24,10 @@ Dim intCurY As Integer
 Dim intOldX As Integer
 Dim intOldY As Integer
 
+Public intOrgX As Integer
+Public intOrgY As Integer
+
+
 
 Dim int3DDirection As enmDirection              ' Current direction that we are moving
 
@@ -52,6 +56,8 @@ Function Init(intX As Integer, intY As Integer)
     intCurY = intY
     intOldX = intX
     intOldY = intY
+    intOrgX = intX
+    intOrgY = intY
     
     intPieceType = Spirit
     
@@ -273,6 +279,9 @@ ReTryCornerSelect:
                        
             ' If we went into a cage, we should turn into a dimond (deactivate and change map)
             If sTemp = "c" Then
+            
+                ExSnds(9).PlaySound False
+                
                 bActive = False
                 
                 rrMap.SetData intCurX, intCurY, Dimond
