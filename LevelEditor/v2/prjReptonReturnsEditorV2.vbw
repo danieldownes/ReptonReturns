@@ -1,0 +1,5 @@
+frmMain = 62, 58, 1098, 1061, Z, 65, 58, 915, 804, C
+frmLoading = 0, 0, 0, 0, C, 22, 28, 790, 571, C
+modSimpleFileOps = 88, 112, 856, 655, C
+frmAbout = 154, 196, 902, 832, , 132, 168, 880, 804, C
+modFormTopMost = 0, 0, 0, 0, C
