@@ -9,22 +9,27 @@ To Debug:
 
 Reported    Detail
 
+15-02-2005:
+	    ! From testing Repton 3; rock ontop of cracking egg should not fall, including slighted fall
+
+12-02-2005: 
+	    ! It is possible to collect a piece before diying by falling rock;
+		e.g. holding a rock that is slighted from the right or left (pos directly above too)
+			then let that rock fall onto you (as to die) but then quickly collect a piece in 
+			the next place to the side of the falling rock, as if you progressed without diying!
+
+
 
 
 Possibly fixed:
-
-28-07-2003: After loading a sub-level, the first rock is not inited correctly (position)
-10-07-2003: Player dosn't init correctly when transporting to new level (reason for 06-07-03 bug)
-06-07-2003: A rock in prelude falls incorrectly
+15-02-2005: Rock rumbleing (blipping) sound problem possibly fixed (finally!)
+14-02-2005: Egg fell and made cracking sound more than once
+12-02-2005: Particles only work on the first instence of of a ccGame init
+12-02-2005: Rock was pushed to the left into monster, but Repton did not walk
+12-02-2005: Monsters will not process while hatching off screen
 19-06-2003: Still problems with monster killing
 26-05-2003: Rocks can be pused in free fall when Repton releases a rock and then moves
 		down then push the free falling rock
-06-05-2003: Dimond sound dosn't play multiple instences; known for a while
-11-05-2003: Can not kill monster via pushing rock from side
-11-05-2003: Error when two Monsters are active (1st to release was top, 2nd was bottom of map; order of which monster is released first may be dependable on different errors. 
-30-04-2003: Rocks fall incorrectly, in wrong order
-22-03-2003: Monster dosn't die when rock (free) falls on top - rock terminates and monster continues
-14-02-2003: Enviroment lighting will need to be looked at
 13-02-2003: Bomb incorrectly detects that all diamonds have been collected; ~70 were still rememining, and
                  bomb was able to defuse
 
@@ -32,8 +37,6 @@ Possibly fixed:
 ----------------------------------------------------------------------------
 To Test:
 
-09-02-2005: After playing a game with 4 (or possibly more) sprits, then 
-		playing a game with only 3 spirits, a visual spirit was seen
 29-05-2003: Monsters now die via funguses
 
 
@@ -43,17 +46,19 @@ To Test:
 
  Programming:      
   level and game completed screen
-  Fountain Partile Engine -- need better particle control; emitting speed, emitter offsetting, particle life control +radius, (clumping?)
+  Fountain Partile Engine -- need better particle control; emitting speed, particle life control +radius, (clumping?)
+	- Earth digging
 	- Repton die
 	- monster die
 	- egg crack
-	- bomb explode
 	- spirit capture
 	- transporting
+	- level trasporting / player spawning
+	- bomb explode
 	- glittering dimonds
-	- Earth digging
 	- Dust behind rocks
-	- Dust behind monsters, spirts ?
+	- Dust behind monsters?
+	- Sparkles behind spirits
 	- Diamond (item) collection?
 	- Screen flashing (for egg crack, spirt catch, bomb explode)?
 	- other FXs? (warning of overuse)?
@@ -63,6 +68,9 @@ To Test:
   Dubug file output?
   Editor integration
 
+
+ update 'About' to include BETA testers
+          - slow down the music?
  review sounds	
  nicer icon
  testing; 	
@@ -71,6 +79,8 @@ To Test:
 	Windows 2000 admin/limited user?	
 	Windows 98/ME?
 	Timing problems?
+
+	- Testing documentation? e.g. game specs
 		
 
 
@@ -135,6 +145,33 @@ Start:            23-08-2000
 
 ----------------------------------------------------------------------------
 Development history detail:
+
+16-02-2005:
+	    * Particle generator can now set particles in rotation 
+	    * Modified Mead.mp3 to sound better (less harsh and slightly slower)
+	    * Fixed 12-02-05 3rd discovered bug (Rock was pushed to the left 
+		into monster, but Repton did not walk)
+
+15-02-2005:
+	    * Rock rumbleing (blipping) sound problem possibly fixed (finally!)
+	    ! You can push rocks though spirits!
+	    ! Rock didn't kill monster when falling down sloping pieces
+	    * Fixed time bomb problem
+
+14-02-2005:
+	    ! Time bomb didn't kill repton when the time expired
+	    ! Egg fell and cracked twice on a 7 slighted (possibly wall type 2) piece
+	    * Worked on rock falling sonund; slightly better, but still needs more thought
+
+12-02-2005: 
+	    ! It is possible to collect a piece before diying by falling rock;
+		e.g. holding a rock that is slighted from the right or left (pos directly above too)
+			then let that rock fall onto you (as to die) but then quickly collect a piece in 
+			the next place, as if you progessed without dieing!
+	    ! Rock was pushed to the left into monster, but Repton did not walk
+	    ! Monsters will not process while hatching off screen
+	    * Working on particles implementation and engine, plus fixing of below bug
+	    ! Particles only work on the first instence of of a ccGame init
 
 10-02-2005:
 	    + 'Dust behind repton' effect (coding only) using emitter generator
@@ -593,6 +630,7 @@ Development history detail:
                                                       |  + = added
                                                       |  - = removed
                                                       |  * = changed/updated
+						      |  " = communication
                                                       \---------------------
 
 
