@@ -24,8 +24,8 @@ Public intPieceType As enmPieceType      ' Should only be Rock OR Egg
 
 
 
-Dim intCurX As Integer
-Dim intCurY As Integer
+Public intCurX As Integer
+Public intCurY As Integer
 
 Dim int3DDirection As enmDirection              ' Current direction that we are rolling (if rolling at all)
 Dim int3DLastDir   As enmDirection              ' Last direction we rolled
@@ -65,8 +65,8 @@ Function Render()
 
     ExLog3D.Render '' Simply to update animation
     
-    Ex3DP(intPieceType).Rotate ExLog3D.Rotate.X, ExLog3D.Rotate.Y, ExLog3D.Rotate.Z, True
-    Ex3DP(intPieceType).Position ExLog3D.Position.X, ExLog3D.Position.Y, ExLog3D.Position.Z, True
+    Ex3DP(intPieceType).Rotate ExLog3D.Rotate.x, ExLog3D.Rotate.y, ExLog3D.Rotate.Z, True
+    Ex3DP(intPieceType).Position ExLog3D.Position.x, ExLog3D.Position.y, ExLog3D.Position.Z, True
     
     
     Ex3DP(intPieceType).Render
@@ -111,7 +111,7 @@ Public Function Move(intDir As enmDirection)
     ' Is monster under rock?
     If rrMap.GetData(intCurX, intCurY) = "m" Then
         ' Find ID of this monster and kill it - should also work if more than one monster is in same place
-        For n = 0 To rrMap.intTotMonsters
+        For n = 1 To rrMap.intTotMonstersAlive
             If rrMonster(n).GetXPos = intCurX And rrMonster(n).GetYPos = intCurY Then
                 rrMonster(n).Die
             End If
@@ -145,6 +145,9 @@ Function CheckIfFall()
     
     bWasFalling = False
     
+    
+    
+    
     ' Have we stoped falling?
     If blnFalling = True And ExLog3D.AnimatedTransform.Active(Translation3D) = False Then
         blnFalling = False
@@ -153,7 +156,13 @@ Function CheckIfFall()
     
     ' Can only fall if not already falling
     If blnFalling = False Then
-        
+    
+        ' Is below rock still falling? If so, don't do anything until that rock is out of the way
+        If rrPieces(intCurX, intCurY + 1).intRockOrEggID <> -1 Then
+            If rrRocksOrEggs(rrPieces(intCurX, intCurY + 1).intRockOrEggID).blnFalling = True Then
+                Exit Function
+            End If
+        End If
         
         ' Fall stight down?
         sTemp = rrMap.GetData(intCurX, intCurY + 1)
@@ -168,10 +177,12 @@ Function CheckIfFall()
             End If
             
 '            ' Is a monster (moveing) under rock?
-'            iTemp = rrPieces(intCurX, intCurY + 1).intMonsterID
-'            If iTemp <> -1 Then
-'                rrMonster(iTemp).Die
-'            End If
+        ElseIf sTemp = "m" Then
+            iTemp = rrPieces(intCurX, intCurY + 1).intMonsterID
+            If iTemp <> -1 Then
+                blnFalling = rrMonster(iTemp).Die
+                If blnFalling Then Me.Move Down
+            End If
         
         ' Is player already under moving rock?
         ElseIf sTemp = "i" Then
@@ -183,13 +194,19 @@ Function CheckIfFall()
             
             ' Eggs should crack at this point
             If intPieceType = Egg And bWasFalling = True Then
-                rrMap.intTotMonsters = rrMap.intTotMonsters + 1
-                rrMonster(rrMap.intTotMonsters).Spawn intCurX, intCurY
+                rrMonster(rrMap.intTotMonstersAlive + 1).Spawn intCurX, intCurY
                 
                 ' Remove reference that this is an egg
 '               rrMap.SetData intCurX, intCurY, Monster
 '               rrPieces(intCurX, intCurY).TypeID = "m"
                 rrMap.intTotEggs = rrMap.intTotEggs - 1
+                intMyRockOrEggID = -1
+               
+                ' Start GfxFX - hatching egg
+                
+                ' Prevent egg from further prosessing
+                rrPieces(intCurX, intCurY).intRockOrEggID = -1
+                Exit Function
             End If
         
         End If
@@ -200,6 +217,14 @@ Function CheckIfFall()
         
         
         ' Fall to the left?
+        
+        ' Is left-below rock still falling? If so, don't do anything until that rock is out of the way
+        If rrPieces(intCurX - 1, intCurY + 1).intRockOrEggID <> -1 Then
+            If rrRocksOrEggs(rrPieces(intCurX - 1, intCurY + 1).intRockOrEggID).blnFalling = True Then
+                Exit Function
+            End If
+        End If
+        
         
         ' Is the support currently under rock slanted to the left?
         sTemp = rrMap.GetData(intCurX, intCurY + 1)
@@ -215,6 +240,11 @@ Function CheckIfFall()
                 sTemp = rrMap.GetData(intCurX - 1, intCurY + 1)   ' Check if room exists to 1 left, 1 down (And Repton isn't there)
                 If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX - 1 And rrRepton.GetYPos = intCurY + 1) Then
                     
+                    iTemp = rrPieces(intCurX - 1, intCurY + 1).intMonsterID
+                    If iTemp <> -1 Then
+                        rrMonster(iTemp).Die
+                    End If
+                    
                     ' This rock should fall to the left
                     blnFalling = True
                     Me.Move Left
@@ -228,6 +258,16 @@ Function CheckIfFall()
     If blnFalling = False Then      ' Still not falling
         
         ' Fall to the right?
+        
+        ' Is rock-below rock still falling? If so, don't do anything until that rock is out of the way
+        If rrPieces(intCurX + 1, intCurY + 1).intRockOrEggID <> -1 Then
+            If rrRocksOrEggs(rrPieces(intCurX + 1, intCurY + 1).intRockOrEggID).blnFalling = True Then
+                Exit Function
+            End If
+        End If
+
+        
+        
         ' Is the support currently under rock slanted to the right? (Note: this should only be checked if there is no
         '  fall to the left, as in this function)
         sTemp = rrMap.GetData(intCurX, intCurY + 1)
@@ -242,6 +282,11 @@ Function CheckIfFall()
                 
                 sTemp = rrMap.GetData(intCurX + 1, intCurY + 1)   ' Check if room exists to 1 left, 1 down (And Repton isn't there)
                 If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX - 1 And rrRepton.GetYPos = intCurY + 1) Then
+                
+                    iTemp = rrPieces(intCurX - 1, intCurY + 1).intMonsterID
+                    If iTemp <> -1 Then
+                        rrMonster(iTemp).Die
+                    End If
                     
                     ' This rock should fall to the left
                     blnFalling = True
