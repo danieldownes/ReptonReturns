@@ -48,10 +48,13 @@ Function Init(intType As enmPieceType, intX As Integer, intY As Integer)
     intCurY = intY
     
     ExLog3D.Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-    ' Random post rotation?
-    'ExLog3D.InitXFile ""
-    ExLog3D.Rotate 0, Rnd() * 360, 0, True
-    'ExLog3D.ResetMatrix
+    
+    If intType = Rock Then
+        ' Random post rotation?
+        'ExLog3D.InitXFile ""
+        ExLog3D.Rotate 0, Rnd() * 360, 0, True
+        'ExLog3D.ResetMatrix
+    End If
     
     blnFalling = False
 
