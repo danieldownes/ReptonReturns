@@ -8,6 +8,7 @@ All rights reserved.
 To Debug:
 
 Reported    Detail
+19-06-2003: Still problems with monster killing
 26-05-2003: Rocks can be pused in free fall when Repton releases a rock and then moves
 		down then push the free falling rock
 
@@ -30,23 +31,71 @@ Possibly fixed:
 To Do (for BETA):
 
  Programming:
-  Load episode and new level file layouts
   Debugging
-  Menu System 
-  Play MP3
   Visual FX Class
+  level-transporters 
+ 
+Episode/Level selector 
+    allows delete player from here 
+    progrestion though episodes using level-transporters 
+    'user levels' selected via a user defined 3x3 map that is merged with 
+episode selector map (each time user loads episode selector in order to presever 
+the level-transports 
+
 
  Art:
   Monster Art + Animation
   Repton Animation (Upper body walking, digging, being idle, pushing rock, pushing non-movable piece)
   Repton Texture
-  Intro Scene
-  Spirits
-  Bomb
+  Scenery pieces
+  fungus
+  toutch up walls 
+  level-transporters 
 
- Sounds:
-  Another dimond sound(s); so to recectify 06-05-2003 bug
-  Many others  
+ 
+intro: 
+   master music 
+ 
+ 
+music 
+  in-game, slow track 
+  havily Repton 3 based track 
+   
+sound effects 
+   rock falling 
+   rock hitting 
+   crown colected 
+   earth dig away 
+   time capsule collected 
+   key col 
+   fungus grow 
+   squashed by rock 
+   die by monster 
+   die by spirt 
+   die by fungus 
+   die by skull 
+   egg crunch 
+   egg cracking 
+   monster waking 
+   monster moving 
+   bomb explosion 
+   spirit near/moving 
+   spirit caught 
+   transporter 
+new levels? 
+   nature 
+   food 
+In-game save points 
+   player can exit level at any time and return to exactly same setup 
+
+
+Help file
+
+
+promote, show the world RR!! 
+ 
+After BETA: VisualFX class and models
+
   
 
 ----------------------------------------------------------------------------
@@ -61,6 +110,63 @@ Start:            23-08-2000
 
 ----------------------------------------------------------------------------
 Development history detail:
+
+21-06-2003:
+	    * Finnished menu programming (may still need tweeking)
+
+20-06-2003: (~2:30 hours)
+	    + Started options menu
+	    + About titles programming
+
+19-06-2003: (~3:30 hours)
+	    + Fungus texture only
+	    * Finnished crown mesh 
+	    ! Still problems with monsters killing
+	    + Barrier mesh
+	    + Cage mesh
+	    + Safe mesh
+	    + Time-bomb mesh + tex
+	    + Time Capsule mesh
+	    + Transporter mesh + tex
+
+18-06-2003: (~2 hours)
+	    * Continued work on menu system; player select, new player
+
+16-06-2003:
+	    + Started work on the menu functionality
+
+15-06-2003:
+	    + Implemented main menu system graphics
+
+09-06-2003:
+	    + Started intro sequence
+
+08-06-2003: (~0:10)
+	    * Finnished spirit art
+
+06-06-2003: (~00:20)
+	    * Tutorial level - Result from testing with Hermione
+	    + Started spirit art
+
+05-06-2003:
+	    + Inserted Ex-D logo
+	    * Fixed top-Wall bug
+	    + Now using FMOD sound system to play MP3's
+
+04-06-2003:
+	    * Finnished making rocks rotate (more or less) accuretly - had to update Ex-Perspective in order to make this work
+
+03-06-2003:
+	    * Started to make rocks rotate accuretly
+
+02-06-2003:
+	    * Implemented 'stags' visual pieices
+	    * Viewing and player position now correctly set on game init
+	    + Scenery pieces are now loaded and rendered - still need 'MoveableTo' check, and
+		selective rendering (i.e, do not render if outside of viewing)
+31-05-2003: 
+	    * Message is now split up into pages, and includes next-page/resume navigation
+	    * Messages now only appear once
 
 30-05-2003: (~7:00)
 	    + Messages appear at desinated triggers; still need to delete messages, and other tweeks
