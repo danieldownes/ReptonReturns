@@ -13,7 +13,7 @@ Public ExPrj As New exD3Dprj
 Public ExCam As New exCamera
 Public ExInp As New exInput
 
-Public Ex3DP(26) As New exMesh
+Public Ex3DP(32) As New exMesh
 
 Public Ex3DGround(15) As New exMesh      ' Visual Ground
                                          '  10 = 4-6
@@ -29,9 +29,12 @@ Public Ex3DWallSides(3) As New exMesh    ' Visual Wall sides (large stones)
 Public ExSnds(5) As New exSound
 
 
+Public ExMsgBoard As New exMesh
+
+
 ' GUI stuff - make into class object?
-Public txt2D As New ex2DText
-Public txtScore2D As New ex2DText
+Public ExTxtGUI As New ex2DText
+Public ExTxtMsg As New ex2DText
 
 ''Public ExSnd As exSound
 
