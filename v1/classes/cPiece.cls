@@ -106,14 +106,23 @@ Function Render()
             If intRockOrEggID <> -1 Then rrRocksOrEggs(intRockOrEggID).Render
             ''' DEBUG:: this check is needed because of some unknown bug
             
-        Case skull
+        Case Skull
             SpinObject intPieceType, 2
             
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
-            
+        
         Case Dimond
             SpinObject intPieceType, 1
+            
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).Render
+            
+        Case Safe
+            SpinObject Dimond, 1
+            
+            Ex3DP(Dimond).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(Dimond).Render
             
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
@@ -136,7 +145,17 @@ Function Render()
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
             
-        Case monster
+        Case LevelTransport
+            SpinObject intPieceType, 4
+            
+            Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).Render
+            
+            Ex3DP(Transporter).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(Transporter).Render
+            
+            
+        Case Monster
             ' Do nothing
         
         Case Else
