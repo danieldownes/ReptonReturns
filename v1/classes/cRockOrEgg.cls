@@ -76,6 +76,10 @@ Function Render()
 
     ExLog3D.Render
     
+    If ExLog3D.AnimatedTransform.active(Translation3D) = False Then
+       'ExSnds(4).StopSound
+    End If
+    
 End Function
 
 
@@ -105,22 +109,15 @@ Public Function Move(intDir As enmDirection)
         Case Down
             intCurY = intCurY + 1
                         
-
                 
             If ExLog3D.AnimatedTransform.active(Rotation3D) <> True Then
-'                If int3DDirection = Right Then
-'                    ExLog3D.RotateVecs 90, -90, 0
-'                    ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0.00001, 0.00001, 0), ExPrj.exReturn3DVec(-90, 90, 0), cintTimeToMove
-'                Else
-'                    ExLog3D.RotateVecs 90, 90, 0
-'                    ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0.00001, 0.00001, 0), ExPrj.exReturn3DVec(-90, -90, 0), cintTimeToMove
-'                End If
-'            Else
                 ExLog3D.RotateVecs 90, 0, 0
                 ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0.00001, 0, 0), ExPrj.exReturn3DVec(-90, 0, 0), cintTimeToMove
             End If
             
             int3DDirection = Down
+            
+            PlayFallingSnd True
             
         Case Right
             intCurX = intCurX + 1
@@ -129,6 +126,8 @@ Public Function Move(intDir As enmDirection)
             ExLog3D.RotateVecs 0, -90, 0
             
             ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, 90, 0), cintTimeToMove
+            
+            PlayFallingSnd True
                         
         Case Left
             intCurX = intCurX - 1
@@ -138,6 +137,8 @@ Public Function Move(intDir As enmDirection)
             
 
             ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, -90, 0), cintTimeToMove
+            
+            PlayFallingSnd True
                
     End Select
     
@@ -169,8 +170,11 @@ End Function
 
 Function Move3D()
     
+    If ExLog3D.AnimatedTransform.active(Translation3D) = False Then
+       ' ExSnds(4).PlaySound True
+    End If
+    
     ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove
-    'ExLog3D.Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
     
 End Function
 
@@ -186,9 +190,13 @@ Function CheckIfFall()
     
     
     ' Have we stoped falling?
+    ExLog3D.Render
     If blnFalling = True And ExLog3D.AnimatedTransform.active(Translation3D) = False Then
         blnFalling = False
         bWasFalling = True
+        
+        ExSnds(4).StopSound
+        ExSnds(5).PlaySound False
     End If
     
     ' Can only fall if not already falling
@@ -267,12 +275,9 @@ Function CheckIfFall()
         sTemp = rrMap.GetData(intCurX, intCurY + 1)
         If sTemp = "d" Or sTemp = "7" Or sTemp = "r" Or sTemp = "k" Or sTemp = "g" Or sTemp = "t" Or sTemp = "b" Then
         
-            ' if rock or egg support, this needs specal attention
-            
-                      
             
             sTemp = rrMap.GetData(intCurX - 1, intCurY)     ' Check if room exists to the left (And Repton isn't there)
-            If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX And rrRepton.GetYPos = intCurY + 1) Then
+            If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX - 1 And rrRepton.GetYPos = intCurY) Then
                 
                 sTemp = rrMap.GetData(intCurX - 1, intCurY + 1)   ' Check if room exists to 1 left, 1 down (And Repton isn't there)
                 If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX - 1 And rrRepton.GetYPos = intCurY + 1) Then
@@ -309,18 +314,14 @@ Function CheckIfFall()
         '  fall to the left, as in this function)
         sTemp = rrMap.GetData(intCurX, intCurY + 1)
         If sTemp = "d" Or sTemp = "9" Or sTemp = "r" Or sTemp = "k" Or sTemp = "g" Or sTemp = "t" Or sTemp = "b" Then
-        
-            ' if rock or egg support, this needs specal attention
-            
-                      
             
             sTemp = rrMap.GetData(intCurX + 1, intCurY)     ' Check if room exists to the left (And Repton isn't there)
-            If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX And rrRepton.GetYPos = intCurY + 1) Then
+            If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX + 1 And rrRepton.GetYPos = intCurY) Then
                 
                 sTemp = rrMap.GetData(intCurX + 1, intCurY + 1)   ' Check if room exists to 1 left, 1 down (And Repton isn't there)
-                If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX - 1 And rrRepton.GetYPos = intCurY + 1) Then
+                If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX + 1 And rrRepton.GetYPos = intCurY + 1) Then
                 
-                    iTemp = rrPieces(intCurX - 1, intCurY + 1).intMonsterID
+                    iTemp = rrPieces(intCurX + 1, intCurY + 1).intMonsterID
                     If iTemp <> -1 Then
                         rrMonster(iTemp).Die
                     End If
@@ -329,8 +330,6 @@ Function CheckIfFall()
                     blnFalling = True
                     Me.Move Right
                     Me.Move Down
-                    
-                    
                 End If
             End If
         End If
@@ -346,3 +345,9 @@ Function CheckIfFall()
         blnFreeFall = False
     End If
 End Function
+
+Private Sub PlayFallingSnd(bNewFall As Boolean)
+    If bNewFall Then
+        ExSnds(4).PlaySound True
+    End If
+End Sub
