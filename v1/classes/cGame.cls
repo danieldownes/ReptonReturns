@@ -39,7 +39,6 @@ Function Init()
     ' Init Pause functionality
     Pause -1
     
-    
     sEpisodeDir = "C:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Tutorial\"
     strEpisodeName = "Tutorial"
     
@@ -47,7 +46,8 @@ Function Init()
     
     iCurGameLevel = 1
     rrMap.LoadFileLevel
-    
+        
+    ExPrj.BackColour &H0
     
     SetupLevel
 
