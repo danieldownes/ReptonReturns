@@ -72,6 +72,8 @@ Function Init(intX As Integer, intY As Integer)
     
     intPieceType = Monster
     
+    intMyID = rrMap.intTotMonsters
+    
     ExLog3D.Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
     ' Random post rotation?
     'ExLog3D.InitXFile ""
@@ -81,8 +83,7 @@ Function Init(intX As Integer, intY As Integer)
     
     enmMonsterState = StillInEgg
     
-    ' Show on map that we are still an egg, until the egg has fully hatched
-    rrMap.SetData intCurX, intCurY, Egg
+    'rrMap.SetData intCurX, intCurY, Egg
    
 End Function
 
@@ -95,7 +96,7 @@ Function Render()
     If enmMonsterState = EggIsCracking Or enmMonsterState = MonsterWaking Or enmMonsterState = SeekingRepton Then
         
         'Ex3DP(intPieceType).Rotate ExLog3D.Rotate.X, ExLog3D.Rotate.Y, ExLog3D.Rotate.Z, True
-        Ex3DP(intPieceType).Position ExLog3D.Position.X, ExLog3D.Position.Y, ExLog3D.Position.Z, True
+        Ex3DP(intPieceType).Position ExLog3D.Position.x, ExLog3D.Position.y, ExLog3D.Position.Z, True
         
         
         Ex3DP(intPieceType).Render
@@ -138,8 +139,11 @@ Public Function Move(intDir As enmDirection)
         rrRepton.Die
     End If
     
-    rrMap.SetData intCurX, intCurY, intPieceType
     rrMap.SetData intOldX, intOldY, Space
+    rrMap.SetData intCurX, intCurY, intPieceType
+        
+    rrPieces(intOldX, intOldY).intMonsterID = -2
+    rrPieces(intCurX, intCurY).intMonsterID = intMyID
         
     Move3D          ' Direction and/or position may have changed
     
@@ -168,8 +172,7 @@ Function CheckIfMove()
             
             enmMonsterState = MonsterWaking
             timMonsterSpawnCont.ReSet
-            ' Show on map that we are now a monster
-            rrMap.SetData intCurX, intCurY, intPieceType
+            
         End If
         
     ElseIf enmMonsterState = MonsterWaking Then
@@ -265,15 +268,29 @@ Function Spawn(intX As Integer, intY As Integer)
     
     Me.Move3D               ' Update visual moster with these new coords.
     
+    rrMap.SetData intX, intY, intPieceType
+    rrPieces(intX, intY).intMonsterID = intMyID
+    
+    rrMap.intTotMonstersAlive = rrMap.intTotMonstersAlive + 1
+    
     enmMonsterState = EggIsCracking
     
     timMonsterSpawnCont.ReSet
     
 End Function
 
-Function Die()
+Function Die() As Boolean
+    If enmMonsterState = SeekingRepton Or enmMonsterState = MonsterWaking Then
+        DieForced
+        Die = True
+    Else
+        Die = False
+    End If
+End Function
+
+Function DieForced()
     enmMonsterState = Dead
-    rrMap.intTotMonsters = rrMap.intTotMonsters - 1
+    rrMap.intTotMonstersAlive = rrMap.intTotMonstersAlive - 1
 End Function
 
 Function GetXPos() As Integer
@@ -294,6 +311,14 @@ Private Function CanMoveTo(intX As Integer, intY As Integer) As Boolean
         CanMoveTo = True
     Else
         CanMoveTo = False
+    End If
+End Function
+
+Function Killable() As Boolean
+    If enmMonsterState = EggIsCracking Or enmMonsterState = StillInEgg Then
+        Killable = False
+    Else
+        Killable = True
     End If
 End Function
 
