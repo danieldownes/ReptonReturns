@@ -13,47 +13,42 @@ Function GameEvents()
     
     Dim n As Integer
     
-    ' Move any spirts
-    For n = 0 To rrMap.intTotSpirits
+    ' If game is not paused then do game events
+    If rrGame.Pause(-2) = False Then
     
-        rrSpirit(n).CheckIfMove
+        ' Move any spirts
+        For n = 0 To rrMap.intTotSpirits
         
+            rrSpirit(n).CheckIfMove
+                
+           
+            'Does this spirit walk into a cage
             
-       
-        'Does this spirit walk into a cage
-        
-    Next n
-    
-    'Move any falling rocks
-    For n = 0 To rrMap.intTotRocksOrEggs
-    
-        rrRocksOrEggs(n).CheckIfFall
-    
-        'Check for a kill
-            
-            'Does this rock kill repton
-            
-            'Does this rock kill an alien
-            
-    Next n
-    
-    ' Move any monsters
-    If rrMap.intTotMonsters <> 0 Then
-        For n = 1 To rrMap.intTotMonsters
-            rrMonster(n).CheckIfMove
         Next n
+        
+        'Move any falling rocks
+        TryRockFalls
+        
+                
+        ' Move any monsters
+        If rrMap.intTotMonstersAlive <> 0 Then
+            For n = 1 To rrMap.intTotMonsters
+                rrMonster(n).CheckIfMove
+            Next n
+        End If
+        
+    
+        
+        ' Do any fungas'es grow?
+        GrowFunguses
+        
+        
+        ' Check time remaining
+        rrMap.TimeBombControl 2
+        'If rrMap.sngTimeLeft <= 0 Then rrRepton.Die
+        
     End If
-    
-
-    
-    ' Do any fungas'es grow?
-    GrowFunguses
-       
-
-
-    
-    'Check time remaining
-    
+        
 End Function
 
 
@@ -82,13 +77,13 @@ Function GrowFunguses()
         '   this method could be quite slow though.
         
         
-        ' Randomaly choose a fungus to possible grow
+        ' Randomaly choose a fungus to possibly grow
         intFungusToGrow = Int(Rnd() * (rrMap.intTotFunguses - 1)) + 1
         
         ' Find this fungus'es map coords.
         n = 0
-        For intY = 1 To 27
-            For intX = 1 To 30
+        For intY = 1 To rrMap.intMapSizeY
+            For intX = 1 To rrMap.intMapSizeY
             
                 If rrMap.GetData(intX, intY) = "f" Then n = n + 1
                 
@@ -105,28 +100,28 @@ FungusFound:
         
         ' Left?
         sTemp = rrMap.GetData(intX - 1, intY)
-        If sTemp = "i" Or sTemp = "0" Then
+        If sTemp = "i" Or sTemp = "m" Or sTemp = "0" Then
             bCanGrow(1) = True
             n = n + 1
         End If
         
         ' Right?
         sTemp = rrMap.GetData(intX + 1, intY)
-        If sTemp = "i" Or sTemp = "0" Then
+        If sTemp = "i" Or sTemp = "m" Or sTemp = "0" Then
             bCanGrow(2) = True
             n = n + 1
         End If
         
         ' Up?
         sTemp = rrMap.GetData(intX, intY - 1)
-        If sTemp = "i" Or sTemp = "0" Then
+        If sTemp = "i" Or sTemp = "m" Or sTemp = "0" Then
             bCanGrow(3) = True
             n = n + 1
         End If
         
         ' Down?
         sTemp = rrMap.GetData(intX, intY + 1)
-        If sTemp = "i" Or sTemp = "0" Then
+        If sTemp = "i" Or sTemp = "m" Or sTemp = "0" Then
             bCanGrow(4) = True
             n = n + 1
         End If
@@ -168,6 +163,16 @@ FungusFound:
                 rrRepton.Die
             End If
             
+            ' Check if monster should die
+            If rrMap.GetData(intX, intY) = "m" Then
+                ' Find ID of this monster and kill it - should also work if more than one monster is in same place
+                For n2 = 1 To rrMap.intTotMonstersAlive
+                    If rrMonster(n2).GetXPos = intX And rrMonster(n2).GetYPos = intY Then
+                        rrMonster(n2).DieForced
+                    End If
+                Next n2
+            End If
+            
             ' Write new fungus to map
             rrMap.SetData intX, intY, Fungus
             rrPieces(intX, intY).TypeID = "f"
@@ -182,11 +187,27 @@ FungusFound:
             
         End If
     End If
+
+    ' If no funguses can grow then reset timer so that once fungus can grow, it dosn't grow instently
+    If timFungus.LocalTime >= sngNextFungusTime Then timFungus.ReSet
     
 End Function
 
+Function TryRockFalls()
+    Dim x As Integer
+    Dim y As Integer
+    
+    For y = rrMap.intMapSizeY To 1 Step -1
+        For x = rrMap.intMapSizeX To 1 Step -1
+            If rrPieces(x, y).intRockOrEggID <> -1 Then
+                rrRocksOrEggs(rrPieces(x, y).intRockOrEggID).CheckIfFall
+            End If
+        Next x
+    Next y
+End Function
+
 Function FungusNewTime()
-    sngNextFungusTime = Rnd() * 5 + 3
+    sngNextFungusTime = Rnd() * 10 + 5
     
     ' Reset timer
     
