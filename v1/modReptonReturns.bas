@@ -7,18 +7,28 @@ Option Explicit
 
 
 Public rrGame            As New cGame       ' Main game flow control (loading/exiting levels, etc)
+
+' ToDo: Put all following in 'cGame'::
+
+Public Type type_Transporter
+    iToX As Integer
+    iToY As Integer
+End Type
+
 Public rrMap             As New cMap        ' The loaded level
 Public rrRepton          As New cPlayer     ' A human player (Repton)
 Public rrPieces(30, 27)  As New cPiece      ' A piece on the level
 Public rrRocksOrEggs(50) As New cRockOrEgg  ' A rock or egg; moveable piece
 Public rrMonster(4)      As New cMonster
-Public rrSpirit(4)       As New cSpirt
+Public rrSpirit(8)       As New cSpirt
+
+Public tTransporters(8)  As type_Transporter
 
 
 Dim intWallAround_LOOKUP(1, 1, 1, 1) As Integer       ' (2,4,6,8) - wall is there(1) or not(0) for each
                                                       '  Down [2], Left [4], Right [6], Up [8]  (KeyPad)
                                                       '  Used in 'GetWallAroundInfo'
-                                           
+
 
 Public Enum enmPieceType
     Space = 0
@@ -43,9 +53,11 @@ Public Enum enmPieceType
     Spirit
     Bomb
     Fungus
-    Skull
+    skull
     Barrier
     Monster
+    Transporter
+    TimeCapsule
 End Enum
 
 
@@ -171,20 +183,23 @@ Function SetupLevel() As Integer
     Ex3DP(enmPieceType.Wall3).InitXFile strThemeDir & "\meshes\std_wall\w1.x", strThemeDir & "\wall1.bmp"
     Ex3DP(enmPieceType.Wall1).InitXFile strThemeDir & "\meshes\std_wall\w3.x", strThemeDir & "\wall3.bmp"
 
-    Ex3DP(11).InitXFile strThemeDir & "\meshes\egg.x", strThemeDir & "\earth.bmp"
+    Ex3DP(11).InitXFile strThemeDir & "\meshes\earth\0.x", strThemeDir & "\earth.bmp"
+    Ex3DP(11).Rotate 90, 0, 0, True
+    
     Ex3DP(12).InitXFile strThemeDir & "\meshes\rock.x", strThemeDir & "\textures\ROCK.BMP"
     Ex3DP(13).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\safe.bmp"
-    Ex3DP(14).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\key.bmp"
+    Ex3DP(14).InitXFile strThemeDir & "\meshes\key.x"   ', strThemeDir & "\key.bmp"
     Ex3DP(15).InitXFile strThemeDir & "\meshes\egg.x", strThemeDir & "\textures\egg.bmp"
     Ex3DP(16).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\repton.bmp"
-    Ex3DP(17).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\crown.bmp"
+    Ex3DP(17).InitXFile strThemeDir & "\meshes\crown.x"      'strThemeDir & "\crown.bmp"
     Ex3DP(18).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\cage.bmp"
     Ex3DP(19).InitXFile strThemeDir & "\meshes\rock.x", strThemeDir & "\spirit.bmp"
     Ex3DP(20).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\bomb.bmp"
     Ex3DP(21).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\fungus.bmp"
-    Ex3DP(22).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\skull.bmp"
+    Ex3DP(22).InitXFile strThemeDir & "\meshes\skull.x"   ', strThemeDir & "\skull.bmp"
     Ex3DP(23).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\barrier.bmp"
     Ex3DP(24).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\repton.bmp"
+    Ex3DP(25).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\textures\egg.bmp"
     
     
     ' Ground meshes
@@ -220,6 +235,7 @@ Function SetupLevel() As Integer
     rrMap.intTotSpirits = 0
     rrMap.intTotDimonds = 0
     rrMap.intTotFunguses = 0
+    rrMap.intTotTransporters = 0
     
     
    For intY = 1 To 27
@@ -283,6 +299,7 @@ Function SetupLevel() As Integer
 
                 
             Case "t"   'Crown
+                rrMap.intTotCrowns = rrMap.intTotCrowns + 1
 
             Case "c"   'Cage
                 rrMap.intTotDimonds = rrMap.intTotDimonds + 1
@@ -306,6 +323,10 @@ Function SetupLevel() As Integer
                 rrMap.intTotFunguses = rrMap.intTotFunguses + 1
             
             Case "u"    ' Skull
+            
+            Case "n"    ' Transport
+                rrMap.intTotTransporters = rrMap.intTotTransporters + 1
+                rrPieces(intX, intY).intTransporterID = rrMap.intTotTransporters
             
             Case Else 'Error!
                 
@@ -333,7 +354,7 @@ Function GetPlayerOffsetPiece(intX As Integer, intY As Integer) As Integer
     ' Check if this is a piece off the edge of the map...
     '  Left, Top, Right, Bottom
  
-    If iX <= 0 Or iY <= 0 Or iX > 30 Or iY > 26 Then
+    If iX < 1 Or iY < 1 Or iX > 30 Or iY > 26 Then
        
             ' Flat wall
             GetPlayerOffsetPiece = -1  'enmPieceType.Wall
@@ -350,7 +371,7 @@ Function GetPlayerOffsetPiece(intX As Integer, intY As Integer) As Integer
 End Function
 
 Sub SetupWallAroundInfo_LookUpTable()
-    
+                                             
     '                    2  4  6  8    TypeOfFloor
     intWallAround_LOOKUP(0, 0, 0, 0) = 5
     intWallAround_LOOKUP(0, 0, 0, 1) = 8
@@ -397,6 +418,9 @@ End Function
 
 Function DataInt2Str(intIn As enmPieceType) As String
 
+' Used charicters:   abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ%*)^$(&£!|\`¬¦@;:,.<>#~=+-_
+'  (underlined)      ------- - - -- - ----    -----------
+
    If intIn = 0 Then DataInt2Str = "0"    'Space...
    If intIn = 1 Then DataInt2Str = "5"
    If intIn = 2 Then DataInt2Str = "d"    'Dimond
@@ -422,6 +446,8 @@ Function DataInt2Str(intIn As enmPieceType) As String
    If intIn = 22 Then DataInt2Str = "u"   'Skull
    If intIn = 23 Then DataInt2Str = "a"   'Barrier (looks like batteries)
    If intIn = 24 Then DataInt2Str = "m"   'Monster
+   If intIn = 25 Then DataInt2Str = "n"   'Transporter
+   If intIn = 26 Then DataInt2Str = "z"   'TimeCapsule
    
 End Function
 
@@ -453,6 +479,8 @@ Function DataStr2Int(strIn As String) As Integer
    If strIn = "u" Then DataStr2Int = 22    'Skull
    If strIn = "a" Then DataStr2Int = 23    'Barrier (looks like batteries)
    If strIn = "m" Then DataStr2Int = 24
+   If strIn = "n" Then DataStr2Int = 25
+   If strIn = "z" Then DataStr2Int = 26
    
 '   if strIn = "%" then DataStr2Int =
 '   if strIn = "*" then DataStr2Int =
