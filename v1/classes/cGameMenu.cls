@@ -20,6 +20,7 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
+
 Dim exDummyLookAt    As New exMesh
 
 Dim exStarGlimmer    As New exMesh
@@ -33,8 +34,6 @@ Dim exReturns        As New exMesh
 Dim exReturnsHL      As New exMesh
 
 
-
-
 Private Type Boulder_T
     exLog As New exMesh
     
@@ -43,15 +42,19 @@ End Type
 
 
 Sub Init()
-    exUnderGround.InitXFile App.Path & "\data\menu\intro\underground.x", App.Path & "\data\themes\origonal\textures\wall.bmp"
+
+    
+    ' RR intro media
+
+    exUnderGround.InitXFile pckGenFiles.GetPackedFile("underground.x"), pckOrigThemeFiles.GetPackedFile("wall.bmp")
     exUnderGround.position 26, -5, 0, True
     
-    exSky.InitXFile App.Path & "\data\menu\intro\sky.x", App.Path & "\data\menu\intro\sky.bmp"
-    exRepHolder.InitXFile App.Path & "\data\menu\intro\repholder.x", App.Path & "\data\menu\intro\repholder.bmp"
-    exRepton.InitXFile App.Path & "\data\menu\intro\repton.x", App.Path & "\data\menu\intro\repton.bmp"
+    exSky.InitXFile pckGenFiles.GetPackedFile("sky.x"), pckGenFiles.GetPackedFile("sky.bmp")
+    exRepHolder.InitXFile pckGenFiles.GetPackedFile("repholder.x"), pckGenFiles.GetPackedFile("repholder.bmp")
+    exRepton.InitXFile pckGenFiles.GetPackedFile("repton.x"), pckGenFiles.GetPackedFile("Repton.bmp")  'App.Path & "\data\menu\intro\repton.bmp"
     
-    exReturns.InitXFile App.Path & "\data\menu\intro\returns.x"
-    exReturnsHL.InitXFile App.Path & "\data\menu\intro\returns_hl.x"
+    exReturns.InitXFile pckGenFiles.GetPackedFile("returns.x")
+    exReturnsHL.InitXFile pckGenFiles.GetPackedFile("returns_hl.x")
 
 End Sub
 
@@ -374,11 +377,11 @@ Function ReptonReturnsMenu() As Integer
     
     Dim bStarted As Boolean
     
-    exMenuItems(1).InitXFile App.Path & "\data\menu\play.x", App.Path & "\data\themes\origonal\textures\rock.bmp"
-    exMenuItems(2).InitXFile App.Path & "\data\menu\options.x", App.Path & "\data\themes\origonal\textures\rock.bmp"
-    exMenuItems(3).InitXFile App.Path & "\data\menu\help.x", App.Path & "\data\themes\origonal\textures\rock.bmp"
-    exMenuItems(4).InitXFile App.Path & "\data\menu\about.x", App.Path & "\data\themes\origonal\textures\rock.bmp"
-    exMenuItems(0).InitXFile App.Path & "\data\menu\exit.x", App.Path & "\data\themes\origonal\textures\rock.bmp"
+    exMenuItems(1).InitXFile pckGenFiles.GetPackedFile("play.x"), pckOrigThemeFiles.GetPackedFile("rock.bmp")
+    exMenuItems(2).InitXFile pckGenFiles.GetPackedFile("options.x"), pckOrigThemeFiles.GetPackedFile("rock.bmp")
+    exMenuItems(3).InitXFile pckGenFiles.GetPackedFile("help.x"), pckOrigThemeFiles.GetPackedFile("rock.bmp")
+    exMenuItems(4).InitXFile pckGenFiles.GetPackedFile("about.x"), pckOrigThemeFiles.GetPackedFile("rock.bmp")
+    exMenuItems(0).InitXFile pckGenFiles.GetPackedFile("exit.x"), pckOrigThemeFiles.GetPackedFile("rock.bmp")
     
     
     ExCam.position 0.001, -150, -1300, True
@@ -397,11 +400,11 @@ Function ReptonReturnsMenu() As Integer
     
     exSky.position 1, -400, 100, True
     
-    ExCam.LookAt exDummyLookAt.position.x, exDummyLookAt.position.y, exDummyLookAt.position.z
+    ExCam.LookAt exDummyLookAt.position.X, exDummyLookAt.position.Y, exDummyLookAt.position.z
     
-    ExTxtMsg.Colour &HFF888888
-    ExTxtMsg.position 100, frmMain.iYsize - 50
-    ExTxtMsg.Text "Repton Returns v1.00 BETA 1     ©2003 Ex-D Software Development™."
+    ExTxtMsg.Colour &HFFBBBBFF
+    ExTxtMsg.position 90, frmMain.iYsize - 50
+    ExTxtMsg.Text "Repton Returns 1 BETA 2       ©2005 Ex-D Software Development™."
     
     ReptonReturnsMenu = 0
     iLastMove = 0
@@ -548,14 +551,14 @@ Sub ReptonReturnsIntroLoop()
 
     ' Load the 3D discriptions...
     
-    exGroundBack.InitXFile App.Path & "\data\menu\intro\ground_back.x", App.Path & "\data\menu\intro\ground.bmp"
-    exGroundFront.InitXFile App.Path & "\data\menu\intro\ground_front.x", App.Path & "\data\menu\intro\ground.bmp"
+    exGroundBack.InitXFile pckGenFiles.GetPackedFile("ground_back.x"), pckGenFiles.GetPackedFile("ground.bmp")
+    exGroundFront.InitXFile pckGenFiles.GetPackedFile("ground_front.x"), pckGenFiles.GetPackedFile("ground.bmp")
     
-    exBoulder(0).InitXFile App.Path & "\data\menu\intro\rock1.x", App.Path & "\data\themes\origonal\textures\rock.bmp"
-    exBoulder(1).InitXFile App.Path & "\data\menu\intro\rock2.x", App.Path & "\data\themes\origonal\textures\rock.bmp"
-    exBoulder(2).InitXFile App.Path & "\data\menu\intro\rock3.x", App.Path & "\data\themes\origonal\textures\rock.bmp"
+    exBoulder(0).InitXFile pckGenFiles.GetPackedFile("rock1.x"), pckOrigThemeFiles.GetPackedFile("rock.bmp")
+    exBoulder(1).InitXFile pckGenFiles.GetPackedFile("rock2.x"), pckOrigThemeFiles.GetPackedFile("rock.bmp")
+    exBoulder(2).InitXFile pckGenFiles.GetPackedFile("rock3.x"), pckOrigThemeFiles.GetPackedFile("rock.bmp")
     For n = 0 To 10
-        exGrass(n).InitXFile App.Path & "\data\menu\intro\grass.x"  '', App.Path & "\data\themes\origonal\textures\rock.bmp"
+        exGrass(n).InitXFile pckGenFiles.GetPackedFile("grass.x")
         exGrass(n).position Rnd() * 1000 - 500, 0.01, Rnd * 1000 - 500, True
     Next n
     
@@ -642,7 +645,7 @@ Sub ReptonReturnsIntroLoop()
                     ' Move grass on moving ground too
                     For n = 0 To 10
                         If exGrass(n).position.z < 0.001 Then
-                            exGrass(n).AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(exGrass(n).position.x, 0.001, exGrass(n).position.z - 1500), ExPrj.exReturn3DVec(exGrass(n).position.x, 0.001, exGrass(n).position.z), 2.5
+                            exGrass(n).AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(exGrass(n).position.X, 0.001, exGrass(n).position.z - 1500), ExPrj.exReturn3DVec(exGrass(n).position.X, 0.001, exGrass(n).position.z), 2.5
                         End If
                     Next n
                 
@@ -686,9 +689,9 @@ Sub ReptonReturnsIntroLoop()
         
         ExCam.UpDate
         exDummyLookAt.Render
-        ExCam.LookAt exDummyLookAt.position.x, exDummyLookAt.position.y, exDummyLookAt.position.z
+        ExCam.LookAt exDummyLookAt.position.X, exDummyLookAt.position.Y, exDummyLookAt.position.z
         
-        exSky.position 1, -(ExCam.position.y * 0.2 - 100), ExCam.position.z + 400, True
+        exSky.position 1, -(ExCam.position.Y * 0.2 - 100), ExCam.position.z + 400, True
         
         
         ' Start of Rendering process...
@@ -711,8 +714,8 @@ Sub ReptonReturnsIntroLoop()
             For n = 0 To 10
                 tBoulders(n).exLog.Render
                 exBoulder(tBoulders(n).meshID).ResetMatrix
-                exBoulder(tBoulders(n).meshID).position tBoulders(n).exLog.position.x, tBoulders(n).exLog.position.y, tBoulders(n).exLog.position.z, True
-                exBoulder(tBoulders(n).meshID).Rotate tBoulders(n).exLog.Rotate.x, tBoulders(n).exLog.Rotate.y, tBoulders(n).exLog.Rotate.z, True
+                exBoulder(tBoulders(n).meshID).position tBoulders(n).exLog.position.X, tBoulders(n).exLog.position.Y, tBoulders(n).exLog.position.z, True
+                exBoulder(tBoulders(n).meshID).Rotate tBoulders(n).exLog.Rotate.X, tBoulders(n).exLog.Rotate.Y, tBoulders(n).exLog.Rotate.z, True
                 exBoulder(tBoulders(n).meshID).Render
             Next n
         End If
@@ -765,18 +768,17 @@ Sub ExDlogoLoop()
     
     Dim blnLoop               As Boolean
           
-    'Load sounds
-    sndExDlogo.InitSound App.Path & "\data\ex-d mono.wav"
-
-
-    ' Load the 3D discriptions...
+          
+    ' Ex-D logo media...
     
-    ExDlogo_E.InitXFile App.Path & "\data\menu\ex-d_logo\E.x", App.Path & "\data\menu\ex-d_logo\e.bmp"
-    ExDlogo_x.InitXFile App.Path & "\data\menu\ex-d_logo\x.x", App.Path & "\data\menu\ex-d_logo\x.bmp"
-    ExDlogo_D.InitXFile App.Path & "\data\menu\ex-d_logo\-d.x", App.Path & "\data\menu\ex-d_logo\d.bmp"
-    ExDlogo_text.InitXFile App.Path & "\data\menu\ex-d_logo\text.x", App.Path & "\data\menu\ex-d_logo\text.bmp"
+    sndExDlogo.InitSound App.Path & "\..\ex-d mono.wav"
 
-   
+    ExDlogo_E.InitXFile pckGenFiles.GetPackedFile("E.x"), pckGenFiles.GetPackedFile("e.bmp")
+    ExDlogo_x.InitXFile pckGenFiles.GetPackedFile("x.x"), pckGenFiles.GetPackedFile("x.bmp")
+    ExDlogo_D.InitXFile pckGenFiles.GetPackedFile("-d.x"), pckGenFiles.GetPackedFile("d.bmp")
+    ExDlogo_text.InitXFile pckGenFiles.GetPackedFile("text.x"), pckGenFiles.GetPackedFile("text.bmp")
+          
+       
     intTxtCon = 0
     
     ExTxtGUI.position (frmMain.ScaleWidth / 2) - (frmMain.ScaleWidth / 10), frmMain.ScaleHeight / 2
@@ -788,26 +790,31 @@ Sub ExDlogoLoop()
     
     ExCam.position 1, 1, 450, True
     
+    ExFader.ResetMatrix
+    ExFader.Rotate 0, 180, 0, True
+    ExFader.position 0.01, 0.01, 20, True
     
     
     timControl.ReSet
 
     ' Set Animations
-    ExDlogo_E.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(90, 180, 1), ExPrj.exReturn3DVec(90, 180, 90), 3
-    ExDlogo_E.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(1, 1, 1), ExPrj.exReturn3DVec(600, 1, 1), 3
+    ExDlogo_E.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(90, 180, 1), ExPrj.exReturn3DVec(90, 180, 150), 3
+    ExDlogo_E.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.00001, 0.00001, 0.00001), ExPrj.exReturn3DVec(600, 1, 1), 3
     
     ExDlogo_x.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(90, 180, 1), ExPrj.exReturn3DVec(-270, 180, 1), 2
-    ExDlogo_x.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(1, 1, 1), ExPrj.exReturn3DVec(1, 1, -5500), 2
+    ExDlogo_x.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.00001, 0.00001, 0.00001), ExPrj.exReturn3DVec(1, 1, -5500), 2
     
-    ExDlogo_D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(90, 180, 1), ExPrj.exReturn3DVec(90, 180, -90), 3
-    ExDlogo_D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(1, 1, 1), ExPrj.exReturn3DVec(-600, 1, 1), 3
+    ExDlogo_D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(90, 180, 1), ExPrj.exReturn3DVec(90, 180, -150), 3
+    ExDlogo_D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.00001, 0.00001, 0.00001), ExPrj.exReturn3DVec(-600, 1, 1), 3
     
     ExDlogo_text.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(90, 180, 1), ExPrj.exReturn3DVec(270, 180, 1), 3
-    ExDlogo_text.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(1, 1, 1), ExPrj.exReturn3DVec(1, 1, -700), 3
+    ExDlogo_text.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.00001, 0.00001, 0.00001), ExPrj.exReturn3DVec(1, 1, -700), 3
 
     ExDlogo_E.position 1, 1, 1, True
     
     sndExDlogo.PlaySound False
+    
+    StartFader 2
     
     intN = 0
     
@@ -825,19 +832,21 @@ Sub ExDlogoLoop()
                     ExDlogo_D.ResetMatrix
                     ExDlogo_text.ResetMatrix
                     
-                    ExDlogo_E.Rotate 90, 180, 0, True
-                    ExDlogo_x.Rotate 90, 180, 0, True
-                    ExDlogo_D.Rotate 90, 180, 0, True
-                    ExDlogo_text.Rotate 90, 180, 0, True
+                    ExDlogo_E.Rotate 90, 180, 1, True
+                    ExDlogo_x.Rotate 90, 180, 1, True
+                    ExDlogo_D.Rotate 90, 180, 1, True
+                    ExDlogo_text.Rotate 90, 180, 1, True
                     intN = 1
                 End If
                 
             Case 1
             
-                If timControl.LocalTime > 5 Then
+                If timControl.LocalTime > 6.5 Then
                    
-                    ExDlogo_x.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(290, 250, 150), ExPrj.exReturn3DVec(90, 180, 1), 3
+                    ExDlogo_x.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(380, 250, 150), ExPrj.exReturn3DVec(90, 180, 1), 3
                     ExDlogo_x.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(1, 1, -7000), ExPrj.exReturn3DVec(1, 1, 1), 3
+                    
+                    StartFader 2
                     
                     intN = 2
                 End If
@@ -845,17 +854,17 @@ Sub ExDlogoLoop()
             Case 2
                 ExDlogo_x.Render
                 
-                ExDlogo_E.position ExDlogo_x.position().x, ExDlogo_x.position().y, ExDlogo_x.position().z, True
-                ExDlogo_D.position ExDlogo_x.position().x, ExDlogo_x.position().y, ExDlogo_x.position().z, True
-                ExDlogo_text.position ExDlogo_x.position().x, ExDlogo_x.position().y, ExDlogo_x.position().z, True
+                ExDlogo_E.position ExDlogo_x.position().X, ExDlogo_x.position().Y, ExDlogo_x.position().z, True
+                ExDlogo_D.position ExDlogo_x.position().X, ExDlogo_x.position().Y, ExDlogo_x.position().z, True
+                ExDlogo_text.position ExDlogo_x.position().X, ExDlogo_x.position().Y, ExDlogo_x.position().z, True
                 
-                ExDlogo_E.Rotate ExDlogo_x.Rotate().x, ExDlogo_x.Rotate().y, ExDlogo_x.Rotate().z, True
-                ExDlogo_D.Rotate ExDlogo_x.Rotate().x, ExDlogo_x.Rotate().y, ExDlogo_x.Rotate().z, True
-                ExDlogo_text.Rotate ExDlogo_x.Rotate().x, ExDlogo_x.Rotate().y, ExDlogo_x.Rotate().z, True
+                ExDlogo_E.Rotate ExDlogo_x.Rotate().X, ExDlogo_x.Rotate().Y, ExDlogo_x.Rotate().z, True
+                ExDlogo_D.Rotate ExDlogo_x.Rotate().X, ExDlogo_x.Rotate().Y, ExDlogo_x.Rotate().z, True
+                ExDlogo_text.Rotate ExDlogo_x.Rotate().X, ExDlogo_x.Rotate().Y, ExDlogo_x.Rotate().z, True
                 
             
             
-                If timControl.LocalTime > 7 Then
+                If timControl.LocalTime > 9.5 Then
                     'intN = 3
                     'ExPrj.BackColour &HFFFFFF
                     blnLoop = False
@@ -879,7 +888,7 @@ Sub ExDlogoLoop()
         End Select
         
         ' Start of Rendering process...
-        ExPrj.Render
+           ExPrj.Render
 
         
         ' Render the discriptions...
@@ -893,6 +902,7 @@ Sub ExDlogoLoop()
             ExTxtGUI.Render
         End If
         
+        RenderFader (intN <> 2)
 
         ' Finally flip the buffers, completing the rendering process.
         ExPrj.Sync
@@ -1056,7 +1066,7 @@ Function OptionMenu() As Integer
                     
                 End Select
             End If
-            
+           
         End If
         
         If ExInp.exInput(ex_Return) Then                        ' Exit with save
@@ -1139,7 +1149,7 @@ Function AboutTitles() As Integer
         
     sTimeToTake = 100
         
-    OpenFMOD App.Path & "\data\music\Meed.mp3"
+    OpenFMOD pckGenFiles("Meed.mp3")
     VolumeFMOD 80
     
     ' Read lines from file
