@@ -42,7 +42,7 @@ Public ExLog3D As New exMesh               ' Logical 3D (so that transformations
                                            '  are used). The last spirits logical timer is used to chech if each spirit
                                            '  can move.
 
-Const cintTimeToMove As Single = 0.15      ' Number of seconds it take for move from one
+Const cintTimeToMove As Single = 0.35      ' Number of seconds it take for move from one
                                            '  map piece to another.
 
 
@@ -99,8 +99,8 @@ Function Render()
     ' Only render if Spirit is active
     If bActive = True Then
         
-        Ex3DP(intPieceType).Rotate ExLog3D.Rotate.X, ExLog3D.Rotate.Y, ExLog3D.Rotate.Z, True
-        Ex3DP(intPieceType).Position ExLog3D.Position.X, ExLog3D.Position.Y, ExLog3D.Position.Z, True
+        Ex3DP(intPieceType).Rotate ExLog3D.Rotate.x, ExLog3D.Rotate.y, ExLog3D.Rotate.Z, True
+        Ex3DP(intPieceType).Position ExLog3D.Position.x, ExLog3D.Position.y, ExLog3D.Position.Z, True
         
         
         Ex3DP(intPieceType).Render
