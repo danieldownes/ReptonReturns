@@ -181,8 +181,8 @@ Function LoadFileLevel() As Boolean
         
         ' Sceinary filenames (in order as IDed)
         Input #1, sTemp                              ' How many
-        If Int(Val(sTemp)) > 0 Then
-            ReDim SceneryPieces(Int(sTemp))
+        ReDim SceneryPieces(Int(sTemp))
+        If UBound(SceneryPieces) > 0 Then
             If UBound(SceneryPieces) > 0 Then
                 For n = 1 To UBound(SceneryPieces)
                     Input #1, sTemp
@@ -226,10 +226,10 @@ Function LoadFileLevel() As Boolean
                 
                 Input #1, sTemp
                 Do While sTemp <> "</game-message>"
+                    sTemp = Replace(sTemp, "<comma>", ",")
                     tInGameMessages(n).strMessage = tInGameMessages(n).strMessage + vbCrLf + sTemp
                     Input #1, sTemp
                 Loop
-                Replace tInGameMessages(n).strMessage, "<comma>", ","
             
             Next n
         End If
@@ -463,7 +463,7 @@ Function TimeBombControl(intCont As Integer)
             End If
             
         Case 2
-            If rrGame.Pause(-2) = False Then sngTimeLeft = sngTimeBombOut - timTimeBomb.LocalTime
+            If rrGame.Pause(-2) = False Then sngTimeLeft = (sngTimeBombOut - timTimeBomb.LocalTime) * rrGame.sngGameSpeed
             
         Case 3
             timTimeBomb.ReSet
