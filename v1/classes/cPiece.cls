@@ -41,9 +41,9 @@ Function Render()
     If rrMap.GetGeneralPieceType(intCurX, intCurY) <> Wall Then
         
         ' Lets render the ground now
-        intPieceType = GetWallAroundInfo(intCurX, intCurY)
-        Ex3DGround(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-        Ex3DGround(intPieceType).Render
+        'intPieceType = GetWallAroundInfo(intCurX, intCurY)
+        Ex3DGround(0).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+        Ex3DGround(0).Render
         
     End If
     
@@ -57,47 +57,33 @@ Function Render()
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
             
-            Ex3DWallSides(0).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-            Ex3DWallSides(0).Render
-            
-            Ex3DWallSides(1).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-            Ex3DWallSides(1).Render
-
-            Ex3DWallSides(2).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-            Ex3DWallSides(2).Render
-
-            Ex3DWallSides(3).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-            Ex3DWallSides(3).Render
+            DrawSides 1, 1, 1, 1
         
         Case Wall2
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
 
-            
-            Ex3DWallSides(3).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-            Ex3DWallSides(3).Render
+            DrawSides 1, 0, 1, 1
 
         Case Wall4
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
 
-            Ex3DWallSides(2).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-            Ex3DWallSides(2).Render
-
+            DrawSides 1, 1, 0, 1
 
         Case Wall6
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
             
-            Ex3DWallSides(1).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-            Ex3DWallSides(1).Render
-        
+            DrawSides 1, 1, 1, 0
+            
         Case Wall8
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
-'
-            Ex3DWallSides(0).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
-            Ex3DWallSides(0).Render
+
+            DrawSides 0, 1, 1, 1
+            
+        ' curved walls?
             
         Case Rock
             rrRocksOrEggs(intRockOrEggID).Render
@@ -156,8 +142,11 @@ Function Render()
             
             
         Case Monster
-            ' Do nothing
-        
+            If rrMonster(rrPieces(intCurX, intCurY).intMonsterID).blnEarth Then
+                Ex3DP(Earth).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+                Ex3DP(Earth).Render
+            End If
+            
         Case Else
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
@@ -165,6 +154,7 @@ Function Render()
     End Select
     
 End Function
+
 
 Public Property Get TypeID() As String
     TypeID = strCType
@@ -193,3 +183,52 @@ Private Function SpinObject(intPieceType As Integer, iSpeed As Single)
     End If
 End Function
 
+Private Sub DrawSides(bTop As Boolean, bBottom As Boolean, bLeft As Boolean, bRight As Boolean)
+    Dim char As String
+    
+' Debug; from set perspecive holes on the top side of walls can not be see, so why fill then;
+'           ...may cause probs when dynamically moving the cam, but there are visual defects
+'               on the current perspective while drawing 'top sides'
+'    If bTop Then
+'        char = rrMap.GetData(intCurX, intCurY - 1)
+'        If char <> "1" And char <> "2" And char <> "3" And char <> "4" And char <> "5" And char <> "6" Then
+'
+'            Ex3DWallSides(3).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+'            Ex3DWallSides(3).Render
+'
+'        End If
+'    End If
+    
+    If bBottom Then
+        char = rrMap.GetData(intCurX, intCurY + 1)
+        'If Not (char = "4" Or char = "5" Or char = "6" Or char = "7" Or char = "8" Or char = "9") Then
+        If char <> "1" And char <> "2" And char <> "3" And char <> "4" And char <> "5" And char <> "6" Then
+
+            Ex3DWallSides(0).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(0).Render
+
+        End If
+    End If
+
+    If bLeft Then
+        char = rrMap.GetData(intCurX - 1, intCurY)
+         If Not (char = "1" Or char = "2" Or char = "4" Or char = "5" Or char = "7" Or char = "8") Then
+
+            Ex3DWallSides(1).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(1).Render
+
+        End If
+    End If
+
+    If bRight Then
+        char = rrMap.GetData(intCurX + 1, intCurY)
+        If Not (char = "2" Or char = "3" Or char = "5" Or char = "6" Or char = "8" Or char = "9") Then
+
+
+            Ex3DWallSides(2).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DWallSides(2).Render
+
+        End If
+    End If
+
+End Sub
