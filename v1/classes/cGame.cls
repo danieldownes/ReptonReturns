@@ -41,6 +41,14 @@ Private Type type_Pause
 End Type
 Dim tPause As type_Pause
 
+Private Type type_MusicControl
+    exMusicControl   As New exTools_Timer
+    strMusicFiles(3) As String
+    sngMusicLen(3)   As Single
+    intCurMusicTrack As Integer
+End Type
+Private tMusicControl As type_MusicControl
+
 Function Init(Optional bTransporting As Boolean = False)
 
     ' Init Pause functionality
@@ -72,6 +80,16 @@ Function Init(Optional bTransporting As Boolean = False)
     ExPrj.BackColour &H0
     
     SetupLevel bTransporting
+    
+    ' Music
+    tMusicControl.strMusicFiles(1) = ""
+    tMusicControl.sngMusicLen(1) = 0
+    tMusicControl.strMusicFiles(2) = "Persistence.mp3"
+    tMusicControl.sngMusicLen(2) = 159
+    tMusicControl.strMusicFiles(3) = ""
+    tMusicControl.sngMusicLen(3) = 0
+    
+    tMusicControl.intCurMusicTrack = 1
 
 End Function
 
@@ -269,3 +287,12 @@ Function Pause(sngTimed As Single) As Boolean
 
 End Function
 
+Function ControlMusic()
+    If tMusicControl.exMusicControl.LocalTime > tMusicControl.sngMusicLen(tMusicControl.intCurMusicTrack) Then
+        tMusicControl.intCurMusicTrack = tMusicControl.intCurMusicTrack + 1
+        If tMusicControl.intCurMusicTrack > UBound(tMusicControl.strMusicFiles) Then tMusicControl.intCurMusicTrack = 1
+        OpenFMOD App.Path & "\data\music\" & tMusicControl.strMusicFiles(tMusicControl.intCurMusicTrack)
+        PlayFMOD
+        tMusicControl.exMusicControl.ReSet
+    End If
+End Function
