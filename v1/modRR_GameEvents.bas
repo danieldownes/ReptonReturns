@@ -20,13 +20,11 @@ Function GameEvents()
         For n = 0 To rrMap.intTotSpirits
         
             rrSpirit(n).CheckIfMove
-                
             
         Next n
-        
-        'Move any falling rocks
+                
+        ' Move any falling rocks
         TryRockFalls
-        
                 
         ' Move any monsters
         If rrMap.intTotMonstersAlive <> 0 Then
@@ -35,7 +33,6 @@ Function GameEvents()
             Next n
         End If
         
-    
         
         ' Do any fungas'es grow?
         GrowFunguses
@@ -159,6 +156,9 @@ FungusFound:
             ' Check if Repton should die
             If rrMap.GetData(intX, intY) = "i" Then
                 rrRepton.Die
+            ElseIf rrRepton.GetXPos > (intX - 7) And rrRepton.GetXPos < (intX + 7) And rrRepton.GetYPos > (intY - 7) And rrRepton.GetYPos < (intY + 7) Then
+                ' Repton is near, play fungus sound
+                ExSnds(15).PlaySound False
             End If
             
             ' Check if monster should die
@@ -195,13 +195,24 @@ Function TryRockFalls()
     Dim x As Integer
     Dim y As Integer
     
+    
+    On Error Resume Next
+    
     For y = rrMap.intMapSizeY To 1 Step -1
+        ExTxtMsg.Text ""
         For x = rrMap.intMapSizeX To 1 Step -1
             If rrPieces(x, y).intRockOrEggID <> -1 Then
                 rrRocksOrEggs(rrPieces(x, y).intRockOrEggID).CheckIfFall
+                
             End If
+            
         Next x
+        ExTxtMsg.position 200, 40 + (20 * y)
     Next y
+    
+    
+    Resume
+    
 End Function
 
 Function FungusNewTime()
