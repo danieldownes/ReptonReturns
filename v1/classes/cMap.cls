@@ -481,18 +481,20 @@ Function TimeBombControl(intCont As Integer)
 
     Select Case intCont
         Case 0
-            sngTimeLeft = sngTimeBombOut - timTimeBomb.LocalTime
+            'sngTimeLeft = (sngTimeBombOut - timTimeBomb.LocalTime) * rrGame.sngGameSpeed
+            timTimeBomb.Stop_
             
         Case 1
             If sngTimeBombOut <> -1 Then
-                sngTimeBombOut = sngTimeLeft + timTimeBomb.LocalTime
+            '    sngTimeBombOut = (sngTimeLeft + timTimeBomb.LocalTime) * rrGame.sngGameSpeed
+                timTimeBomb.Start
             End If
             
         Case 2
             If rrGame.Pause(-2) = False Then
                 sngTimeLeft = (sngTimeBombOut - timTimeBomb.LocalTime) * rrGame.sngGameSpeed
             Else
-                sngTimeLeft = 1
+                'sngTimeLeft = 1
             End If
             
         Case 3
