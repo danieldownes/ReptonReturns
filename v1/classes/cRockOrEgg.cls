@@ -33,6 +33,8 @@ Dim int3DDirection As enmDirection              ' Current direction that we are 
 Public blnFalling   As Boolean
 Public blnFreeFall  As Boolean
 
+Public bEggCracking As Boolean
+
 Private ExLog3D As New exMesh
 
 
@@ -55,20 +57,21 @@ Function Init(intType As enmPieceType, intX As Integer, intY As Integer)
     
     If intType = Rock Then
         
-        ExLog3D.InitXFile strThemeDir & "\meshes\rock.x", strThemeDir & "\textures\ROCK.BMP"
+        ExLog3D.InitXFile pckOrigThemeFiles.GetPackedFile("rock.x"), pckOrigThemeFiles.GetPackedFile("ROCK.BMP")
         
         ' Random post rotation?
         ExLog3D.RotateVecs Rnd() * 360, Rnd() * 360, 0
         
     Else
         ' Egg
-        ExLog3D.InitXFile strThemeDir & "\meshes\egg.x", strThemeDir & "\textures\egg.bmp"
+        ExLog3D.InitXFile pckOrigThemeFiles.GetPackedFile("egg.x"), pckOrigThemeFiles.GetPackedFile("egg.bmp")
     End If
 
     ExLog3D.ResetMatrix
     ExLog3D.position Ret3DPos(intCurX), Ret3DPos(intCurY), -200, True
     
     blnFalling = False
+    bEggCracking = False
     
     cintTimeToMove = 0.22 / rrGame.sngGameSpeed
 
@@ -80,7 +83,51 @@ Function Render()
     ExLog3D.Render
     
     If ExLog3D.AnimatedTransform.active(Translation3D) = False Then
-       If int3DDirection = Left Or int3DDirection = Right Then ExSnds(4).StopSound
+        If int3DDirection = Left Or int3DDirection = Right Then
+             ExSnds(4).StopSound
+             bRockSndPlaying = False
+        End If
+    End If
+    
+    ' Egg cracking animation
+    If bEggCracking And Not ExLog3D.AnimatedTransform.active(Rotation3D) Then
+        Select Case cintTimeToMove
+            Case 0
+                cintTimeToMove = 1  ' Now acts as a counter to control cracking/twitching animation
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 6, -7), ExPrj.exReturn3DVec(12, -7, -5), (1 / rrGame.sngGameSpeed)
+                'ExLog3D.RotateVecs 3, 389, 0
+
+            Case 1
+                cintTimeToMove = 2
+                
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, -4, 4), ExPrj.exReturn3DVec(0, -8, 6), (0.5 / rrGame.sngGameSpeed)
+                'ExLog3D.RotateVecs 388, 3, 0
+
+            Case 2
+                cintTimeToMove = 3
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 2, -2), ExPrj.exReturn3DVec(0, 5, -8), (0.5 / rrGame.sngGameSpeed)
+                'ExLog3D.RotateVecs 3, 2, 0
+
+            Case 3
+                ' Remove reference that this is an egg
+                rrMap.intTotEggs = rrMap.intTotEggs - 1
+                intMyRockOrEggID = -1
+                
+                ' Prevent egg from further prosessing
+                rrPieces(intCurX, intCurY).intRockOrEggID = -1
+                
+                
+                ' Flash vis effect/emitter?
+                '
+                
+                ' Start particle emitter?
+                '
+                
+                
+                ' Spawn monster
+                rrMonster(rrMap.intTotMonstersAlive + 1).Spawn intCurX, intCurY
+                                
+        End Select
     End If
     
 End Function
@@ -120,7 +167,7 @@ Public Function Move(intDir As enmDirection)
             
             int3DDirection = Down
             
-            PlayFallingSnd True
+            PlayFallingSnd
             
         Case Right
             intCurX = intCurX + 1
@@ -130,7 +177,7 @@ Public Function Move(intDir As enmDirection)
             
             ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, 90, 0), cintTimeToMove * 1.25
             
-            PlayFallingSnd True
+            PlayFallingSnd
                         
         Case Left
             intCurX = intCurX - 1
@@ -141,7 +188,7 @@ Public Function Move(intDir As enmDirection)
 
             ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, -90, 0), cintTimeToMove * 1.25
             
-            PlayFallingSnd True
+            PlayFallingSnd
                
     End Select
     
@@ -183,7 +230,7 @@ Function Move3D()
     Else
         ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove * 1.25
     End If
-    
+     
 End Function
 
 
@@ -194,18 +241,24 @@ Function CheckIfFall()
     Dim iTemp As Integer
     Dim n As Integer
     
+
+
+    ' If we stopped falling on last check (and we are still not falling) then reset 'bWasFalling'
+    'If blnFalling = False And bWasFalling = True Then
     bWasFalling = False
-    
     
     ' Have we stoped falling?
     ExLog3D.Render
     If blnFalling = True And ExLog3D.AnimatedTransform.active(Translation3D) = False Then
         blnFalling = False
         bWasFalling = True
-        
+
         ExSnds(4).StopSound
+        bRockSndPlaying = False
+
         If intPieceType = Rock Then ExSnds(5).PlaySound (False) Else ExSnds(8).PlaySound (False)
     End If
+       
     
     ' Can only fall if not already falling
     If blnFalling = False Then
@@ -213,7 +266,7 @@ Function CheckIfFall()
         ' Is below rock still falling? If so, don't do anything until that rock is out of the way
         If rrPieces(intCurX, intCurY + 1).intRockOrEggID <> -1 Then
             If rrRocksOrEggs(rrPieces(intCurX, intCurY + 1).intRockOrEggID).blnFalling = True Then
-                Exit Function
+                'Exit Function
             End If
         End If
         
@@ -241,25 +294,27 @@ Function CheckIfFall()
         ElseIf sTemp = "i" Then
             If bWasFalling = True Then
                 rrRepton.Die
+                GoTo CrackEgg
             End If
             
         Else
-            
+CrackEgg:
             ' Eggs should crack at this point
             If intPieceType = Egg And bWasFalling = True Then
-                rrMonster(rrMap.intTotMonstersAlive + 1).Spawn intCurX, intCurY
+                               
                 
-                ' Remove reference that this is an egg
-'               rrMap.SetData intCurX, intCurY, Monster
-'               rrPieces(intCurX, intCurY).TypeID = "m"
-                rrMap.intTotEggs = rrMap.intTotEggs - 1
-                intMyRockOrEggID = -1
-               
-                ' Start GfxFX - hatching egg
+                bEggCracking = True     ' Flag for egg cracking animation sequence
+                bWasFalling = False
                 
-                ' Prevent egg from further prosessing
-                rrPieces(intCurX, intCurY).intRockOrEggID = -1
+                cintTimeToMove = 0  ' Now acts as a counter to control cracking/twitching animation
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(1, 2, 0), ExPrj.exReturn3DVec(0, 0, 0), (1 / rrGame.sngGameSpeed)
+
+                ExSnds(7).PlaySound False
+                
+                
                 Exit Function
+                
+                
             End If
         
         End If
@@ -281,7 +336,7 @@ Function CheckIfFall()
         
         ' Is the support currently under rock slanted to the left?
         sTemp = rrMap.GetData(intCurX, intCurY + 1)
-        If sTemp = "d" Or sTemp = "7" Or sTemp = "r" Or sTemp = "k" Or sTemp = "g" Or sTemp = "t" Or sTemp = "b" Then
+        If sTemp = "d" Or sTemp = "7" Or sTemp = "r" Or sTemp = "k" Or sTemp = "g" Or sTemp = "t" Or sTemp = "b" Or sTemp = "&" Then
         
             
             sTemp = rrMap.GetData(intCurX - 1, intCurY)     ' Check if room exists to the left (And Repton isn't there)
@@ -292,7 +347,7 @@ Function CheckIfFall()
                     
                     iTemp = rrPieces(intCurX - 1, intCurY + 1).intMonsterID
                     If iTemp <> -1 Then
-                        rrMonster(iTemp).Die
+                        If rrMonster(iTemp).Die = False Then Exit Function
                     End If
                     
                     ' This rock should fall to the left
@@ -321,7 +376,7 @@ Function CheckIfFall()
         ' Is the support currently under rock slanted to the right? (Note: this should only be checked if there is no
         '  fall to the left, as in this function)
         sTemp = rrMap.GetData(intCurX, intCurY + 1)
-        If sTemp = "d" Or sTemp = "9" Or sTemp = "r" Or sTemp = "k" Or sTemp = "g" Or sTemp = "t" Or sTemp = "b" Then
+        If sTemp = "d" Or sTemp = "9" Or sTemp = "r" Or sTemp = "k" Or sTemp = "g" Or sTemp = "t" Or sTemp = "b" Or sTemp = "(" Then
             
             sTemp = rrMap.GetData(intCurX + 1, intCurY)     ' Check if room exists to the left (And Repton isn't there)
             If (sTemp = "0" Or sTemp = "m") And Not (rrRepton.GetXPos = intCurX + 1 And rrRepton.GetYPos = intCurY) Then
@@ -331,7 +386,7 @@ Function CheckIfFall()
                 
                     iTemp = rrPieces(intCurX + 1, intCurY + 1).intMonsterID
                     If iTemp <> -1 Then
-                        rrMonster(iTemp).Die
+                        If rrMonster(iTemp).Die = False Then Exit Function
                     End If
                     
                     ' This rock should fall to the left
@@ -344,6 +399,8 @@ Function CheckIfFall()
         
     End If
     
+  
+    
     ' If rock is in free falling (ie, it has been falling before it was detected that it should fall
     '  again (directly afterward), then add count (so that it can be detected if it hit repton, or if this is
     '  an egg, if it should crack).
@@ -352,10 +409,6 @@ Function CheckIfFall()
     Else
         blnFreeFall = False
     End If
-End Function
 
-Private Sub PlayFallingSnd(bNewFall As Boolean)
-    If bNewFall Then
-        ExSnds(4).PlaySound True
-    End If
-End Sub
+    
+End Function
