@@ -55,7 +55,7 @@ Function Init(intX As Integer, intY As Integer)
     
     intPieceType = Spirit
     
-    ExLog3D.Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+    ExLog3D.position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
     ' Random post rotation?
     'ExLog3D.InitXFile ""
     ExLog3D.Rotate Rnd(360), Rnd(360), Rnd(360), True
@@ -99,9 +99,11 @@ Function Render()
     ' Only render if Spirit is active
     If bActive = True Then
         
-        Ex3DP(intPieceType).Rotate ExLog3D.Rotate.x, ExLog3D.Rotate.y, ExLog3D.Rotate.Z, True
-        Ex3DP(intPieceType).Position ExLog3D.Position.x, ExLog3D.Position.y, ExLog3D.Position.Z, True
+        Ex3DP(intPieceType).position ExLog3D.position.x, ExLog3D.position.y, ExLog3D.position.z, True
         
+        If Ex3DP(intPieceType).AnimatedTransform.active(Rotation3D) = False Then
+            Ex3DP(intPieceType).AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(360, 0, 360), ExPrj.exReturn3DVec(0, 0, 0), 0.1
+        End If
         
         Ex3DP(intPieceType).Render
         
@@ -158,7 +160,7 @@ End Function
 
 Function Move3D()
     
-    ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), -240), ExLog3D.Position, cintTimeToMove
+    ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), -240), ExLog3D.position, cintTimeToMove
     'ExLog3D.Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
     
 End Function
@@ -171,6 +173,9 @@ Function CheckIfMove()
     Dim intOldDir As enmDirection
     
     
+    ' No spirts, then exit now
+    If rrMap.intTotSpirits = 0 Then Exit Function
+    
                     
     'ExLog3D.Render      ' We'll need to update transformations in the background
 
@@ -178,15 +183,15 @@ Function CheckIfMove()
     If bActive = False Then
         
         ' Keep moving (all other spirits depend upon the last spirit in array to be still logically active)
-        If rrSpirit(rrMap.intTotSpirits - 1).ExLog3D.AnimatedTransform.Active(Translation3D) = False Then
-            ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), -240), ExLog3D.Position, cintTimeToMove
+        If rrSpirit(rrMap.intTotSpirits - 1).ExLog3D.AnimatedTransform.active(Translation3D) = False Then
+            ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), -240), ExLog3D.position, cintTimeToMove
         End If
         
         Exit Function
     End If
     
     ' Have we stoped moving?
-    If rrSpirit(rrMap.intTotSpirits - 1).ExLog3D.AnimatedTransform.Active(Translation3D) = False Then
+    If rrSpirit(rrMap.intTotSpirits - 1).ExLog3D.AnimatedTransform.active(Translation3D) = False Then
     
 ReTryCornerSelect:
         
