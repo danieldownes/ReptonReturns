@@ -3,19 +3,9 @@ Attribute VB_Name = "modSimpleFileOps"
 '- Name:    Karl E. Peterson
 '- Email:
 '- Web: www.mvps.org/vb
-'- Company:
-'----------------------------------------
-'- Notes:   Copy or paste files to the clipboard as '       Explorer does
-'----------------------------------------
-
-
 
 
 Option Explicit
-
-
-Public Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long
-Public Const SW_NORMAL = 1
 
 
 Public Type SHFILEOPSTRUCT
@@ -40,8 +30,6 @@ Public Const FOF_SIMPLEPROGRESS = &H100
 
 Public Sub DeleteFile(gFile As String, gAllowUndo As Boolean)
     Dim op As SHFILEOPSTRUCT
-
-Debug.Print gFile
 
     With op
         .wFunc = FO_DELETE
