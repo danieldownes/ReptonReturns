@@ -11,6 +11,26 @@ Begin VB.Form frmMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   919
    StartUpPosition =   3  'Windows Default
+   Begin VB.TextBox txtName 
+      BackColor       =   &H00000000&
+      BorderStyle     =   0  'None
+      BeginProperty Font 
+         Name            =   "Arial Black"
+         Size            =   18
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H0080FF80&
+      Height          =   615
+      Left            =   3720
+      TabIndex        =   2
+      Top             =   3960
+      Visible         =   0   'False
+      Width           =   5415
+   End
    Begin VB.Label lblMsgRef 
       BackStyle       =   0  'Transparent
       BeginProperty Font 
@@ -59,23 +79,34 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
+Public iXsize As Integer
+Public iYsize As Integer
 
 
 Private Sub Form_Load()
 
-   ' Dim ExTool As New ExTools
+    Dim rrGameMenu As New cGameMenu
     
-    ' Initalize Ex-Perspective™...
-    ExPrj.Init Me.hWnd       ' Main
-    ExPrj.BackColour &H0
+    Dim iSel As Integer
+    
+    
+    iXsize = Me.ScaleWidth
+    iYsize = Me.ScaleHeight
 
-    ExInp.InitKeyboardInput  ' Input
-
+    
+    ' Initalize Ex-Perspective™
+    InitExperspectiveObjects
+    
+    
+    InitFMOD
+    OpenFMOD "C:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\_no use\Music\thunderus intro - v good\older\Repton Returns - Thunderus Intro (pre-release).mp3"
+    
+    
+    
+    ' Game one time inits...
+    
     ' Data Structure Initalization (LookUp tables, etc)
     SetupWallAroundInfo_LookUpTable
-    
-    ' Start Game
-    rrGame.Init
     
     ' GUI inits
     ExTxtGUI.InitText "", lblGUIRef.Font
@@ -83,27 +114,89 @@ Private Sub Form_Load()
     ExTxtGUI.Colour &HFF00A000
 
     ExTxtMsg.InitText "", lblMsgRef.Font
-    ExTxtMsg.Colour &HFFFFFF00
     
     Me.Show
-
     
-    ' The main loop. Each cycle repersents one frame.
+    
+    rrGameMenu.Init
+    
+    rrGameMenu.ExDlogoLoop
+    PlayFMOD
+    rrGameMenu.ReptonReturnsIntroLoop
+    
     Do
+    
+        iSel = rrGameMenu.ReptonReturnsMenu
         
-        UserInteraction                                ' {  Input
+        Select Case iSel
         
-        
-        ' Allow events in this game to accour          ' /
-        GameEvents                                     ' |
-                                                       '-   Process
-        ' Allow other events to process.               ' |
-        DoEvents                                       ' \
-        
-        
-        DrawFrame                                      ' {  Output
+            Case 1              ' Player selection menu.
+            
+                Do
                 
-    Loop
+                    iSel = rrGameMenu.SelectPlayerMenu
+                    
+                    Select Case iSel
+                    
+                        Case 0              ' Create new player
+                            rrGameMenu.NewPlayer
+                        
+                        Case -1             ' Back to the Main Menu (do nothing)
+                        
+                        Case Else           ' Start game with selected player
+                        
+                            'rrGameMenu.Deinit
+                            
+                            ' Show loading screen
+                            
+                        
+                            ' Start Game
+                            rrGame.Init
+                            
+                        
+                            
+                            ' The main loop. Each cycle represents one frame.
+                            Do While Not (UserInteraction)                     ' {  Input
+                                
+                                ' Allow events in this game to accour          ' /
+                                GameEvents                                     ' |
+                                                                               '-   Process
+                                ' Allow other events to process.               ' |
+                                DoEvents                                       ' \
+                                
+                                
+                                DrawFrame                                      ' {  Output
+                                        
+                            Loop
+                        
+                            iSel = -1           ' After playing, go beck to main menu
+                    
+                    End Select
+                
+                Loop Until iSel = -1
+                
+                iSel = 1
+            
+            Case 2              ' Options menu
+                rrGameMenu.OptionMenu
+            
+            Case 3              ' Help
+                ShellExecute Me.hwnd, "open", App.Path & "\help.chm", vbNullString, vbNullString, 3 'SW_NORMAL
+                
+            Case 4              ' About
+                rrGameMenu.AboutTitles
+                
+            Case 0              ' Exit
+        
+        End Select
+        
+    Loop Until iSel = 0
+    
+    rrGameMenu.DeInit
+    
+    DeInitFMOD
+    
+    End
     
 End Sub
 
@@ -117,6 +210,8 @@ Sub Form_Unload(Cancel As Integer)
     Set rrRepton = Nothing
     Set rrMap = Nothing
     Set rrGame = Nothing
+    
+    DeInitFMOD
     
     Unload frmMain
     
