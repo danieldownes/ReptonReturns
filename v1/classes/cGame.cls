@@ -17,15 +17,22 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
+Public bGameCompleted As Boolean
 
 Public sEpisodeDir As String
 Public iCurGameLevel As Integer
+Public iTotGameLevels As Integer
+Public bEpisodeCompeted As Boolean
+Public iLevelCompeted As Integer
 
 Public strEpisodeName As String
 Public intGamePlayType               As Integer
 Dim strLevelOrder()               As String
 Public strVisualTheme As String
 
+Public sngGameSpeed As Single
+Public sngSfxVol As Single
+Public sngMusicVol As Single
 
 Private Type type_Pause
     timPauseContol As New exTools_Timer     ' See 'Pause' function for detail
@@ -34,23 +41,93 @@ Private Type type_Pause
 End Type
 Dim tPause As type_Pause
 
-Function Init()
+Function Init(Optional bTransporting As Boolean = False)
 
     ' Init Pause functionality
     Pause -1
     
-    sEpisodeDir = "C:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Tutorial\"
-    strEpisodeName = "Tutorial"
+    rrGame.iCurGameLevel = 1
+    ReDim strLevelOrder(1)
+    
+    If Mid(sEpisodeDir, Len(sEpisodeDir) - 3, 4) = ".rrl" Then
+        ' Extract level name
+        strEpisodeName = Mid(sEpisodeDir, 1, Len(sEpisodeDir) - 4)
+        strLevelOrder(1) = Trim(Mid(strEpisodeName, InStrRev(strEpisodeName, "\") + 1, Len(strEpisodeName) - InStrRev(strEpisodeName, "\") + 1))
+        ' Remove level name from dir string
+        strEpisodeName = Trim(strEpisodeName)
+        strLevelOrder(1) = Trim(strLevelOrder(1))
+        sEpisodeDir = Mid(strEpisodeName, 1, Len(strEpisodeName) - Len(strLevelOrder(1)))
+    End If
+    strEpisodeName = Mid(sEpisodeDir, 1, Len(sEpisodeDir) - 1)
+    strEpisodeName = Mid(strEpisodeName, InStrRev(strEpisodeName, "\") + 1, Len(strEpisodeName) - InStrRev(strEpisodeName, "\") + 1)
     
     OpenFileEpisode sEpisodeDir
     
-    iCurGameLevel = 1
     rrMap.LoadFileLevel
+    
+    bGameCompleted = False
+    bEpisodeCompeted = False
+    iLevelCompeted = 0
         
     ExPrj.BackColour &H0
     
-    SetupLevel
+    SetupLevel bTransporting
 
+End Function
+
+Function MainLoop() As Boolean
+' Returns:
+'  1 if MainLoop should be recalled
+'  0 if not
+
+    ' The main loop. Each cycle represents one frame.
+    Do While Not (UserInteraction) And iLevelCompeted = 0           ' {  Input
+        
+        ' Allow events in this game to accour                       ' /
+        GameEvents                                                  ' |
+                                                                    '-   Process
+        ' Allow other events to process.                            ' |
+        DoEvents                                                    ' \
+        
+        DrawFrame                                                   ' {  Output
+                
+    Loop
+    
+    If iLevelCompeted = 1 Then
+    
+        If rrGame.strEpisodeName = "Home" Then
+            ' Whole game has been completed
+            bGameCompleted = True
+        Else
+            ' This level has been completed, copy 'Home' into 'Home\old\'
+            DeleteFile App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl", False
+            CopyFile App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl", App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl"
+        End If
+        
+    ElseIf iLevelCompeted = 0 Then
+        ' This level was uncompleted, copy 'old/Home' into 'Home'
+        DeleteFile App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl", False
+        CopyFile App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl", App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl"
+    End If
+    
+    
+    If rrGame.strEpisodeName = "Home" Then
+        ' Exit to menu
+        MainLoop = False
+    Else
+        ' Load 'Home' level
+        
+        rrGame.DeInit
+        rrGame.sEpisodeDir = App.Path & "\data\players\" & sPrimPlayerName & "\Home\"
+        rrGame.Init
+        
+        MainLoop = True
+    End If
+    
+End Function
+
+Function DeInit()
+    DeinitLevel
 End Function
 
 Function OpenFileEpisode(strFile As String) As Boolean
@@ -95,14 +172,19 @@ Function OpenFileEpisode(strFile As String) As Boolean
         Input #1, strVisualTheme
         
         ' Level order (using levelID)
+        sTemp = strLevelOrder(1)
         n = 1
         Do
             ReDim Preserve strLevelOrder(n)
             Input #1, strLevelOrder(n)
             
+            If sTemp <> "" Then     ' If level filename was given then this will determine the level number within this episode
+                If strLevelOrder(n) = sTemp Then rrGame.iCurGameLevel = n
+            End If
+            
             n = n + 1
         Loop Until EOF(1)
-        
+        iTotGameLevels = n - 1
         
         
         OpenFileEpisode = True
@@ -135,7 +217,13 @@ End Function
 
 
 Function LevelCompleted()
-    MsgBox "You have cleared all dimonds from level " & Str(rrGame.iCurGameLevel) & "!!!"
+        
+    ' Flag that level has been completed
+    iLevelCompeted = 1
+    
+    ' Check if episode is completed
+    If rrGame.iCurGameLevel = rrGame.iTotGameLevels Then rrGame.bEpisodeCompeted = True
+    
 End Function
 
 Function Pause(sngTimed As Single) As Boolean
