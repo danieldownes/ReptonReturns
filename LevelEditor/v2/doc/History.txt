@@ -1,0 +1,115 @@
+Repton Returns Editor version 2
+Ex-D Software Development(TM)
+All rights reserved.
+
+
+
+----------------------------------------------------------------------------
+To Debug:
+
+Reported    Detail
+
+
+
+----------------------------------------------------------------------------
+To Do:
+
+  Test Level button
+
+----------------------------------------------------------------------------
+Things to improve (not nessesarily in release 1):
+
+  File load/save/import dialog remember last directory
+  Form footer information bar
+  Visual theme for episode data area
+  Use Win BlitBit instead of COM controls
+  More import formats
+  Loadable visual piece type (sutable for select in-game visual theme)
+
+----------------------------------------------------------------------------
+Development history overview:
+
+End v2:		     25-05-2003
+Start v2:            06-05-2003
+Stopped v1:	     06-09-2000
+Start v1:	     30-08-2000
+
+
+----------------------------------------------------------------------------
+Development history detail:
+
+25-05-2003: (~0:20)
+              (Help files finnished - not timed)
+	    + Control map piece as depending what game play style is selected
+	    * Fix map piece
+
+24-05-2003: (~~3:30)
+	    * Fixed false error message when saving/loading
+	    + About dialoge
+	    + Loading picture
+	    + Scrolling of panels
+	    + Scrolling of map
+	    + Tested functionallity via making a tutorial level, fixed small errors
+
+23-05-2003: (~5:00)
+	    + Started on Scrolling of map
+	    * Better file management; no confirmation on overwrite when saving
+                                       and deletes file in temp DIR on exit
+	    * Fixed ReptonFX import; transporter were not loading correctly
+	    + See 'Go To' position for transporters
+	    * Controls update/restrict depending on which 'game type' is selected
+	    + Support for 'Navigational Map' from start feature
+	    * Fixed scenery & message loading error
+	    + Scenery piece mesh and texture file selection
+            + Loads RR episodes
+	    * ReptonFX import should now correctly import transporters
+
+21-05-2003: (~2:00)
+	    * ReptonFX import feature now loads all levels in the DIR
+	    * Finnished import feature for ReptonFX level 	    
+
+20-05-2003: (~4:00)
+	    + Started on level convertion from ReptonFX
+	    + Level swapping in level list
+	    + Level loading
+	    + New Episode (and level set)
+	    + Level and Episode saving
+
+19-05-2003: (~3:30)
+	    + Other minor code related to file control
+	    + File saving code (not tested)
+	    * File archecture
+	    * Menu structure
+
+18-05-2003: (~2:00)
+	    + Scenery management functionallity
+	    + Deletation of message triggers
+
+17-05-2003: (~7 hours)
+	    + In-game messages (triggers cann't be deleted yet)
+	    + Transporters (untested)
+	    + Map resizing 
+	    + Level playing order control (& Episode panel functionallity)
+	    + Form resizing issues
+
+13-05-2003: (~3 hours)
+	    + Debugging panel (inc checking pieces)
+	    + Allows to enter piece on to map with chosen piece	    
+	    + Piece type pictures (coped from v1)
+
+06-05-2003: (1:15 hours)
+	    + This 'History' file (based on RRv1 history file)
+	    + Design of 'In-Game Messages' panel
+	    + Piece type show and selection functionality
+	    + Panels and functionality
+	    + frmMain started
+            + Project started
+	  
+
+----------------------------------------------------------------------------
+                                                      |
+                                                      | Key:
+                                                      |  + = added
+                                                      |  - = removed
+                                                      |  * = changed/updated
+                                                      \---------------------
