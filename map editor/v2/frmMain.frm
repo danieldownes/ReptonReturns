@@ -1,6 +1,6 @@
 VERSION 5.00
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
-Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "comdlg32.ocx"
+Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"
 Begin VB.Form frmMain 
    BackColor       =   &H00FFFFFF&
    Caption         =   "Repton Returns Editor v2 : Ex-D Software Development(TM)"
@@ -794,8 +794,8 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private Type Corrds2D_T
-    x As Integer
-    y As Integer
+    X As Integer
+    Y As Integer
 End Type
 
 Private Type GameMessages_T
@@ -1052,8 +1052,8 @@ Function UpdateVisualControls(Optional iMiss As Integer = 0)
     ' Level controls
     txtLevelName.Text = lstLevels.List(intCurSelLevel - 1)
     txtLevelTime.Text = sngMapTime
-    txtMapSizeX.Text = tMapSize.x
-    txtMapSizeY.Text = tMapSize.y
+    txtMapSizeX.Text = tMapSize.X
+    txtMapSizeY.Text = tMapSize.Y
 
     ' InGameMessages:
     If UBound(tInGameMessages) < 1 Then
@@ -1128,10 +1128,10 @@ Function UpdateVisualControls(Optional iMiss As Integer = 0)
        
         ' Show on map
         shpScenery.Visible = True
-        shpScenery.Top = ((picPiece(1).Height + 15) * (SceneryPieces(intSelSceneryNo).tSizeTopLeft.y - 1)) + picPiece(1).Top
-        shpScenery.Left = ((picPiece(1).Width + 15) * (SceneryPieces(intSelSceneryNo).tSizeTopLeft.x - 1)) + picPiece(1).Left
-        shpScenery.Height = ((picPiece(1).Height + 15) * (SceneryPieces(intSelSceneryNo).tSizeBotRight.y - SceneryPieces(intSelSceneryNo).tSizeTopLeft.y + 1))
-        shpScenery.Width = ((picPiece(1).Width + 15) * (SceneryPieces(intSelSceneryNo).tSizeBotRight.x - SceneryPieces(intSelSceneryNo).tSizeTopLeft.x + 1))
+        shpScenery.Top = ((picPiece(1).Height + 15) * (SceneryPieces(intSelSceneryNo).tSizeTopLeft.Y - 1)) + picPiece(1).Top
+        shpScenery.Left = ((picPiece(1).Width + 15) * (SceneryPieces(intSelSceneryNo).tSizeTopLeft.X - 1)) + picPiece(1).Left
+        shpScenery.Height = ((picPiece(1).Height + 15) * (SceneryPieces(intSelSceneryNo).tSizeBotRight.Y - SceneryPieces(intSelSceneryNo).tSizeTopLeft.Y + 1))
+        shpScenery.Width = ((picPiece(1).Width + 15) * (SceneryPieces(intSelSceneryNo).tSizeBotRight.X - SceneryPieces(intSelSceneryNo).tSizeTopLeft.X + 1))
         
     End If
     
@@ -1154,8 +1154,8 @@ Function UpdateVisualMap()
     intPieceSizeY = picPiece(0).Width
     
     intN = 1
-    For intY = 1 To tMapSize.y
-        For intX = 1 To tMapSize.x
+    For intY = 1 To tMapSize.Y
+        For intX = 1 To tMapSize.X
             
             If intN > intVisualMapPiecesLoaded Then
             
@@ -1189,8 +1189,8 @@ Function UpdateVisualMap()
     Loop
         
     ' Resize MAP holder
-    picMapHolder.Height = (tMapSize.x + 2.5) * (intPieceSizeX + 15) - picMapHolder.Top
-    picMapHolder.Width = (tMapSize.y + 2.5) * (intPieceSizeY + 15) - picMapHolder.Left
+    picMapHolder.Height = (tMapSize.Y + 2.5) * (intPieceSizeY + 15) - picMapHolder.Top
+    picMapHolder.Width = (tMapSize.X + 2.5) * (intPieceSizeX + 15) - picMapHolder.Left
     
     
     Me.MousePointer = 0
@@ -1199,7 +1199,11 @@ End Function
 
 
 
-Private Sub Frame1_DragDrop(Source As Control, x As Single, y As Single)
+Private Sub Frame1_DragDrop(Source As Control, X As Single, Y As Single)
+
+End Sub
+
+Private Sub fraMapContainer_DragDrop(Source As Control, X As Single, Y As Single)
 
 End Sub
 
@@ -1385,6 +1389,14 @@ Private Sub mnuFileExit_Click()
     End
 End Sub
 
+Private Sub picMapHolder_Click()
+
+End Sub
+
+Private Sub picPiece_Resize(Index As Integer)
+
+End Sub
+
 '
 ' Episode panel controls ...
 '
@@ -1427,15 +1439,16 @@ Private Sub cmdAddLevel_Click()
     End If
     
     
-    tMapSize.x = 30
-    tMapSize.y = 30
+    tMapSize.X = 30
+    tMapSize.Y = 30
     sngMapTime = -1
-    ReDim sLogicalMap(tMapSize.x * tMapSize.y)
-    For n = 1 To (tMapSize.x * tMapSize.y)
+    ReDim sLogicalMap(tMapSize.X * tMapSize.Y)
+    For n = 1 To (tMapSize.X * tMapSize.Y)
         sLogicalMap(n) = "0"
     Next n
     
     ReDim tTransporterCorrds(0)
+    ReDim tLevelTrans(0)
     ReDim tInGameMessages(0)
     ReDim SceneryPieces(0)
     
@@ -1616,12 +1629,12 @@ End Sub
 
 Private Sub cmdLevelRegen_Click()
     Dim sTempMap(99, 99) As String * 1
-    Dim x As Integer
-    Dim y As Integer
+    Dim X As Integer
+    Dim Y As Integer
     Dim n As Long
     
     ' Check if data will be erased, if so, prompt user
-    If Int(txtMapSizeX.Text) < tMapSize.x Or Int(txtMapSizeY.Text) < tMapSize.y Then
+    If Int(txtMapSizeX.Text) < tMapSize.X Or Int(txtMapSizeY.Text) < tMapSize.Y Then
         If MsgBox("Some level pieces will be deleted, sure to continue?", vbYesNo, "Repton Returns Editor v2") = vbNo Then Exit Sub
     End If
     
@@ -1636,35 +1649,35 @@ Private Sub cmdLevelRegen_Click()
 
 
     ' Make sure 2D array is blank
-    For y = 1 To Int(txtMapSizeY.Text)
-        For x = 1 To Int(txtMapSizeX.Text)
-            sTempMap(x, y) = "0"
-        Next x
-    Next y
+    For Y = 1 To Int(txtMapSizeY.Text)
+        For X = 1 To Int(txtMapSizeX.Text)
+            sTempMap(X, Y) = "0"
+        Next X
+    Next Y
 
     ' Copy map to the blank 2D string array
     n = 1
-    For y = 1 To tMapSize.y
-        For x = 1 To tMapSize.x
-            sTempMap(x, y) = sLogicalMap(n)
+    For Y = 1 To tMapSize.Y
+        For X = 1 To tMapSize.X
+            sTempMap(X, Y) = sLogicalMap(n)
             n = n + 1
-        Next x
-    Next y
+        Next X
+    Next Y
     
     ReDim sLogicalMap(Int(txtMapSizeX.Text) * Int(txtMapSizeY.Text))
     
     ' Put data back into map string (at new desiered size)
     n = 1
-    For y = 1 To Int(txtMapSizeY.Text)
-        For x = 1 To Int(txtMapSizeX.Text)
-            sLogicalMap(n) = sTempMap(x, y)
+    For Y = 1 To Int(txtMapSizeY.Text)
+        For X = 1 To Int(txtMapSizeX.Text)
+            sLogicalMap(n) = sTempMap(X, Y)
             n = n + 1
-        Next x
-    Next y
+        Next X
+    Next Y
     
     ' Set new size
-    tMapSize.x = Int(txtMapSizeX.Text)
-    tMapSize.y = Int(txtMapSizeY.Text)
+    tMapSize.X = Int(txtMapSizeX.Text)
+    tMapSize.Y = Int(txtMapSizeY.Text)
     
     UpdateVisualMap
     
@@ -1824,7 +1837,7 @@ Private Sub cmdSceneryAdd_Click()
     ReDim Preserve SceneryPieces(UBound(SceneryPieces) + 1)
     
     intSelSceneryNo = UBound(SceneryPieces)
-    SceneryPieces(intSelSceneryNo).tSizeTopLeft.x = -1
+    SceneryPieces(intSelSceneryNo).tSizeTopLeft.X = -1
     
     MsgBox "Set the upper left limit of scenery piece on map", , "Repton Returns Editor v2"
     intMapPreAddType = 3
@@ -2114,7 +2127,7 @@ Private Sub mnuFileNew_Click()
 
 End Sub
 
-Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Integer, X As Single, Y As Single)
     Dim sTemp As String
     Dim n As Integer
     Dim b As Integer
@@ -2149,7 +2162,7 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
                     
                     ' Get trigger number
                     n = 1
-                    Do While Not (tInGameMessages(intSelMsgNo).tTriggers(n).x = Convert1Dto2Dcoords(Index).x And tInGameMessages(intSelMsgNo).tTriggers(n).y = Convert1Dto2Dcoords(Index).y)
+                    Do While Not (tInGameMessages(intSelMsgNo).tTriggers(n).X = Convert1Dto2Dcoords(Index).X And tInGameMessages(intSelMsgNo).tTriggers(n).Y = Convert1Dto2Dcoords(Index).Y)
                         n = n + 1
                     Loop
                     
@@ -2168,7 +2181,7 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
                 
             Case 3                      ' Scenery piece
             
-                If SceneryPieces(intSelSceneryNo).tSizeTopLeft.x = -1 Then
+                If SceneryPieces(intSelSceneryNo).tSizeTopLeft.X = -1 Then
             
                     SceneryPieces(intSelSceneryNo).tSizeTopLeft = Convert1Dto2Dcoords(Index)
                 
@@ -2179,8 +2192,8 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
                     SceneryPieces(intSelSceneryNo).tSizeBotRight = Convert1Dto2Dcoords(Index)
                     
                     ' Make sure up left is < low right
-                    If SceneryPieces(intSelSceneryNo).tSizeBotRight.x < SceneryPieces(intSelSceneryNo).tSizeTopLeft.x _
-                     Or SceneryPieces(intSelSceneryNo).tSizeBotRight.y < SceneryPieces(intSelSceneryNo).tSizeTopLeft.y Then
+                    If SceneryPieces(intSelSceneryNo).tSizeBotRight.X < SceneryPieces(intSelSceneryNo).tSizeTopLeft.X _
+                     Or SceneryPieces(intSelSceneryNo).tSizeBotRight.Y < SceneryPieces(intSelSceneryNo).tSizeTopLeft.Y Then
                         
                         MsgBox "Lower-right boundary must be greater or equal to the upper-left boundary, try again; set the lower right limit of scenery piece on map", , "Repton Returns Editor v2"
                     Else
@@ -2211,6 +2224,21 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
                         
                         ReDim Preserve tTransporterCorrds(UBound(tTransporterCorrds) - 1)
                         
+                    Case LevelTransport
+                        ' Get level-transporter number
+                        b = 0
+                        For n = 1 To Index
+                            If sLogicalMap(n) = DataInt2Str(LevelTransport) Then b = b + 1
+                        Next n
+                        
+                        ' Delete
+                        For n = b To UBound(tLevelTrans) - 1
+                            tLevelTrans(n) = tLevelTrans(n + 1)
+                        Next n
+                        
+                        ReDim Preserve tLevelTrans(UBound(tLevelTrans) - 1)
+
+                        
                 End Select
                 
                 ' Update logical map
@@ -2226,7 +2254,7 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
                 Select Case (intSelectedPieceType - 1)
                     
                     Case enmPieceType.Transporter
-                        MsgBox "Now select destiation", "Repton Returns Editor v1"
+                        MsgBox "Now select destiation", , "Repton Returns Editor v1"
                         
                         ' Get transporter number
                         b = 0
@@ -2238,7 +2266,7 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
                         
                     Case enmPieceType.LevelTransport
                                                                         
-                        CommonDialog.DialogTitle = "Select a saved Epsiode or Level filename"
+                        CommonDialog.DialogTitle = "Select a saved Episode or Level filename"
                         CommonDialog.Filter = "*.rre; *.rrl"
                         CommonDialog.ShowOpen
                         sTemp = CommonDialog.FileName
@@ -2246,10 +2274,23 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
                         If FileExists(sTemp) Then
                             ReDim Preserve tLevelTrans(UBound(tLevelTrans) + 1)
                             
+                            ' Get level-transporter number
+                            b = 0
+                            For n = 1 To Index
+                                If sLogicalMap(n) = DataInt2Str(LevelTransport) Then b = b + 1
+                            Next n
+                            ' Move any more level-trans up in array
+                            If UBound(tLevelTrans) > b Then
+                                For n = UBound(tLevelTrans) To (b + 1) Step -1
+                                    tLevelTrans(n).sLocalFile = tLevelTrans(n - 1).sLocalFile
+                                Next n
+                            End If
+                                                        
+                            sTemp = Right(sTemp, Len(sTemp) - InStr(sTemp, "data\episode") - 12)
                             
-                            
-                            tLevelTrans(UBound(tLevelTrans)).sLocalFile = sTemp
-                            tLevelTrans(UBound(tLevelTrans)).tPos = Convert1Dto2Dcoords(Index)
+                            tLevelTrans(b).sLocalFile = sTemp
+                            tLevelTrans(b).tPos.X = 0
+                            tLevelTrans(b).tPos.Y = 0
                         Else
                             picPiece(Index).Picture = picPieceType(1).Picture
                         End If
@@ -2268,7 +2309,7 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
     Else
         ' Give info about clicked upon piece::
         
-        ' If transporter than show 'TO' piece
+        ' If transporter then show 'TO' piece
         If sLogicalMap(Index) = "n" Then
             ' Get transporter number
             b = 0
@@ -2281,18 +2322,34 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
             picPiece(b).Picture = picPiece(0).Picture
             picPiece(b).BackColor = shpScenery.BorderColor
 
-            MsgBox "Selected transporter 'GO TO' position is " + Trim(Str(Convert1Dto2Dcoords(b).x)) + "," + Trim(Str(Convert1Dto2Dcoords(b).y)) + " as highlighted (green).", , "Repton Returns Editor v2"
+            MsgBox "Selected transporter 'GO TO' position is " + Trim(Str(Convert1Dto2Dcoords(b).X)) + "," + Trim(Str(Convert1Dto2Dcoords(b).Y)) + " as highlighted (green).", , "Repton Returns Editor v2"
             
             picPiece(b).Picture = picPieceType(DataStr2Int(sLogicalMap(b)) + 1).Picture
             picPiece(b).BackColor = picPiece(0).BackColor
             
+        ElseIf sLogicalMap(Index) = "y" Then
+            ' Get level-transporter number
+            b = 0
+            For n = 1 To Index
+                If sLogicalMap(n) = DataInt2Str(LevelTransport) Then b = b + 1
+            Next n
+            
+            n = Convert2Dto1Dcoords(tLevelTrans(b).tPos)
+            
+'            picPiece(n).Picture = picPiece(0).Picture
+'            picPiece(n).BackColor = shpScenery.BorderColor
+
+            tLevelTrans(b).sLocalFile = InputBox("Current", "Repton Returns Editor v2", tLevelTrans(b).sLocalFile)
+            
+'            picPiece(n).Picture = picPieceType(DataStr2Int(sLogicalMap(b)) + 1).Picture
+'            picPiece(n).BackColor = picPiece(0).BackColor
         End If
         
     End If
     
 End Sub
 
-Private Sub picPiece_MouseMove(Index As Integer, Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub picPiece_MouseMove(Index As Integer, Button As Integer, Shift As Integer, X As Single, Y As Single)
     ' auto paint?
 
 End Sub
@@ -2329,7 +2386,7 @@ End Sub
 Function EvaluateMap(Optional iNewPiece As Integer = -1) As Boolean
 'Returns 'true' if map is ready to publish
 
-    Dim iPieceCounts(32) As Integer
+    Dim iPieceCounts(33) As Integer
     Dim intY As Integer
     Dim intX As Integer
     Dim intN As Integer
@@ -2343,8 +2400,8 @@ Function EvaluateMap(Optional iNewPiece As Integer = -1) As Boolean
     If iNewPiece = -1 Then
     
         intN = 1
-        For intY = 1 To tMapSize.y
-            For intX = 1 To tMapSize.x
+        For intY = 1 To tMapSize.Y
+            For intX = 1 To tMapSize.X
                 
                 iT = DataStr2Int(sLogicalMap(intN))
                 iPieceCounts(iT) = iPieceCounts(iT) + 1
@@ -2438,27 +2495,27 @@ Function EvaluateMap(Optional iNewPiece As Integer = -1) As Boolean
 End Function
 
 Private Function Convert1Dto2Dcoords(int1Dcoord As Integer) As Corrds2D_T
-    Dim x As Integer
-    Dim y As Integer
+    Dim X As Integer
+    Dim Y As Integer
     Dim n As Integer
     
     n = 1
-    For y = 1 To tMapSize.y
-        For x = 1 To tMapSize.x
+    For Y = 1 To tMapSize.Y
+        For X = 1 To tMapSize.X
             If n = int1Dcoord Then
-                Convert1Dto2Dcoords.x = x
-                Convert1Dto2Dcoords.y = y
+                Convert1Dto2Dcoords.X = X
+                Convert1Dto2Dcoords.Y = Y
                 Exit Function
             End If
             
             n = n + 1
-        Next x
-    Next y
+        Next X
+    Next Y
     
 End Function
 
 Private Function Convert2Dto1Dcoords(int2Dcoord As Corrds2D_T) As Integer
-    Convert2Dto1Dcoords = (tMapSize.x * (int2Dcoord.y - 1)) + int2Dcoord.x
+    Convert2Dto1Dcoords = (tMapSize.X * (int2Dcoord.Y - 1)) + int2Dcoord.X
 End Function
 
 ' RR Save files::
@@ -2628,8 +2685,8 @@ End Function
 Function SaveFileLevel() As Boolean
 
     Dim n As Integer
-    Dim x As Integer
-    Dim y As Integer
+    Dim X As Integer
+    Dim Y As Integer
     Dim sTemp As String
 
     SaveFileLevel = False
@@ -2648,35 +2705,44 @@ Function SaveFileLevel() As Boolean
         Print #1, Trim(Str(sngMapTime))
         
         ' Map Size
-        Print #1, Trim(Str(tMapSize.x)) + "," + Trim(Str(tMapSize.y))
+        Print #1, Trim(Str(tMapSize.X)) + "," + Trim(Str(tMapSize.Y))
        
         ' Map data
         n = 1
-        For y = 1 To tMapSize.y
+        For Y = 1 To tMapSize.Y
             sTemp = ""
-            For x = 1 To tMapSize.x
+            For X = 1 To tMapSize.X
                 If sLogicalMap(n) = "" Or sLogicalMap(n) = " " Then sLogicalMap(n) = "0"
                 sTemp = sTemp + sLogicalMap(n)
             
                 n = n + 1
-            Next x
+            Next X
             Print #1, sTemp
-        Next y
+        Next Y
         
         ' Transporter info (in order as from map)
         If UBound(tTransporterCorrds) > 0 Then
             For n = 1 To UBound(tTransporterCorrds)
-                Print #1, Trim(Str(tTransporterCorrds(n).x)) + "," + Trim(Str(tTransporterCorrds(n).y))
+                Print #1, Trim(Str(tTransporterCorrds(n).X)) + "," + Trim(Str(tTransporterCorrds(n).Y))
             Next n
         End If
+        
+        ' Level-transorters (in order as from map)
+        If UBound(tLevelTrans) > 0 Then
+            For n = 1 To UBound(tLevelTrans)
+                Print #1, Trim(Str(tLevelTrans(n).tPos.X)) + "," + Trim(Str(tLevelTrans(n).tPos.Y))
+                Print #1, tLevelTrans(n).sLocalFile
+            Next n
+        End If
+        
         
         ' Sceinary filenames (in order as IDed)
         Print #1, Trim(Str(UBound(SceneryPieces)))              ' How many
         If UBound(SceneryPieces) > 0 Then
             For n = 1 To UBound(SceneryPieces)
-                Print #1, Trim(Str(SceneryPieces(n).tSizeTopLeft.x)) + "," + Trim(Str(SceneryPieces(n).tSizeTopLeft.y))
+                Print #1, Trim(Str(SceneryPieces(n).tSizeTopLeft.X)) + "," + Trim(Str(SceneryPieces(n).tSizeTopLeft.Y))
                
-                Print #1, Trim(Str(SceneryPieces(n).tSizeBotRight.x)) + "," + Trim(Str(SceneryPieces(n).tSizeBotRight.y))
+                Print #1, Trim(Str(SceneryPieces(n).tSizeBotRight.X)) + "," + Trim(Str(SceneryPieces(n).tSizeBotRight.Y))
                 
                 Print #1, CStr(SceneryPieces(n).bIsMovableTo)
                 
@@ -2694,9 +2760,9 @@ Function SaveFileLevel() As Boolean
                 
                 Print #1, Trim(Str(tInGameMessages(n).iTotTrigs))
                 If tInGameMessages(n).iTotTrigs > 0 Then
-                    For x = 1 To tInGameMessages(n).iTotTrigs
-                        Print #1, Trim(Str(tInGameMessages(n).tTriggers(x).x)) + "," + Trim(Str(tInGameMessages(n).tTriggers(x).y))
-                    Next x
+                    For X = 1 To tInGameMessages(n).iTotTrigs
+                        Print #1, Trim(Str(tInGameMessages(n).tTriggers(X).X)) + "," + Trim(Str(tInGameMessages(n).tTriggers(X).Y))
+                    Next X
                 End If
                 
                 sTemp = tInGameMessages(n).strMessage
@@ -2721,8 +2787,8 @@ End Function
 Function LoadFileLevel() As Boolean
 
     Dim n As Integer
-    Dim x As Integer
-    Dim y As Integer
+    Dim X As Integer
+    Dim Y As Integer
     Dim sTemp As String
     
     LoadFileLevel = False
@@ -2755,32 +2821,44 @@ Function LoadFileLevel() As Boolean
         
         ' Map Size
         Input #1, sTemp
-        tMapSize.x = Int(sTemp)
+        tMapSize.X = Int(sTemp)
         Input #1, sTemp
-        tMapSize.y = Int(sTemp)
+        tMapSize.Y = Int(sTemp)
         
         ' Map data
-        ReDim sLogicalMap(tMapSize.x * tMapSize.y)
+        ReDim sLogicalMap(tMapSize.X * tMapSize.Y)
         n = 1
-        For y = 1 To tMapSize.y
+        For Y = 1 To tMapSize.Y
             Input #1, sTemp
-            For x = 1 To tMapSize.x
+            For X = 1 To tMapSize.X
             
-                sLogicalMap(n) = Mid(sTemp, x, 1)
+                sLogicalMap(n) = Mid(sTemp, X, 1)
                 
-                If sLogicalMap(n) = "n" Then ReDim tTransporterCorrds(UBound(tTransporterCorrds) + 1) ' Keep track of no of transporters
+                If sLogicalMap(n) = "n" Then ReDim tTransporterCorrds(UBound(tTransporterCorrds) + 1)   ' Keep track of no of transporters
+                If sLogicalMap(n) = "y" Then ReDim tLevelTrans(UBound(tLevelTrans) + 1)                 ' Keep track of no of level-transporters
             
                 n = n + 1
-            Next x
-        Next y
+            Next X
+        Next Y
         
         ' Transporter info (in order as from map)
         If UBound(tTransporterCorrds) > 0 Then
             For n = 1 To UBound(tTransporterCorrds)
                 Input #1, sTemp
-                tTransporterCorrds(n).x = Int(sTemp)
+                tTransporterCorrds(n).X = Int(sTemp)
                 Input #1, sTemp
-                tTransporterCorrds(n).y = Int(sTemp)
+                tTransporterCorrds(n).Y = Int(sTemp)
+            Next n
+        End If
+        
+        ' Level-Transporter info (in order as from map)
+        If UBound(tLevelTrans) > 0 Then
+            For n = 1 To UBound(tLevelTrans)
+                Input #1, sTemp
+                tLevelTrans(n).tPos.X = Int(sTemp)
+                Input #1, sTemp
+                tLevelTrans(n).tPos.Y = Int(sTemp)
+                Input #1, tLevelTrans(n).sLocalFile
             Next n
         End If
         
@@ -2790,14 +2868,14 @@ Function LoadFileLevel() As Boolean
         If UBound(SceneryPieces) > 0 Then
             For n = 1 To UBound(SceneryPieces)
                 Input #1, sTemp
-                SceneryPieces(n).tSizeTopLeft.x = Int(sTemp)
+                SceneryPieces(n).tSizeTopLeft.X = Int(sTemp)
                 Input #1, sTemp
-                SceneryPieces(n).tSizeTopLeft.y = Int(sTemp)
+                SceneryPieces(n).tSizeTopLeft.Y = Int(sTemp)
                 
                 Input #1, sTemp
-                SceneryPieces(n).tSizeBotRight.x = Int(sTemp)
+                SceneryPieces(n).tSizeBotRight.X = Int(sTemp)
                 Input #1, sTemp
-                SceneryPieces(n).tSizeBotRight.y = Int(sTemp)
+                SceneryPieces(n).tSizeBotRight.Y = Int(sTemp)
                 
                 Input #1, sTemp
                 SceneryPieces(n).bIsMovableTo = CBool(sTemp)
@@ -2821,12 +2899,12 @@ Function LoadFileLevel() As Boolean
                 tInGameMessages(n).iTotTrigs = Int(sTemp)
                 
                 If tInGameMessages(n).iTotTrigs > 0 Then
-                    For x = 1 To tInGameMessages(n).iTotTrigs
+                    For X = 1 To tInGameMessages(n).iTotTrigs
                         Input #1, sTemp
-                        tInGameMessages(n).tTriggers(x).x = Int(sTemp)
+                        tInGameMessages(n).tTriggers(X).X = Int(sTemp)
                         Input #1, sTemp
-                        tInGameMessages(n).tTriggers(x).y = Int(sTemp)
-                    Next x
+                        tInGameMessages(n).tTriggers(X).Y = Int(sTemp)
+                    Next X
                 End If
                 
                 Input #1, sTemp
@@ -2853,7 +2931,7 @@ End Function
 Function DataInt2Str(intIn As enmPieceType) As String
 
 ' Used charicters:   abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ%*)^$(&£!|\`¬¦@;:.<>#~=+-_
-'  (underlined)      ------- - - -- - ----  - -----------                          -    ----
+'  (underlined)      ------- - - -- - ----  -------------                          -    ----
 
    If intIn = 0 Then DataInt2Str = "0"    'Space...
    If intIn = 1 Then DataInt2Str = "5"
@@ -2890,6 +2968,8 @@ Function DataInt2Str(intIn As enmPieceType) As String
    If intIn = enmPieceType.FilledWall3 Then DataInt2Str = "£"
    
    If intIn = enmPieceType.NavigationalMap Then DataInt2Str = "x"
+   
+   If intIn = enmPieceType.LevelTransport Then DataInt2Str = "y"
    
 End Function
 
@@ -2933,6 +3013,8 @@ Function DataStr2Int(strIn As String) As Integer
    If strIn = "£" Then DataStr2Int = enmPieceType.FilledWall3
    
    If strIn = "x" Then DataStr2Int = enmPieceType.NavigationalMap
+   
+   If strIn = "y" Then DataStr2Int = enmPieceType.LevelTransport
       
 End Function
 
@@ -2941,8 +3023,8 @@ Function ImportReptonFX(strFolder As String)
     Dim sTemp As String
     Dim sName As String
     Dim n As Integer
-    Dim x As Integer
-    Dim y As Integer
+    Dim X As Integer
+    Dim Y As Integer
     Dim iMap As Integer
     
     Dim tTranFrom(10) As Corrds2D_T
@@ -2973,10 +3055,10 @@ Function ImportReptonFX(strFolder As String)
             
                 ' map size x : map size y : no of transporters : time bomb time
                 Input #1, sTemp
-                tMapSize.x = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
+                tMapSize.X = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
                 sTemp = Right(sTemp, Len(sTemp) - InStr(1, sTemp, " "))
                 
-                tMapSize.y = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
+                tMapSize.Y = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
                 sTemp = Right(sTemp, Len(sTemp) - InStr(1, sTemp, " "))
                 
                 ReDim tTransporterCorrds(Int(Left(sTemp, InStr(1, sTemp, " ") - 1)))
@@ -2987,21 +3069,21 @@ Function ImportReptonFX(strFolder As String)
                 ' Password (level name) - note, is encoded
                 Input #1, sTemp
                 sName = ""
-                For y = 1 To Len(sTemp)
+                For Y = 1 To Len(sTemp)
                     
                     ' Decode
-                    x = Asc(Mid(sTemp, y))
-                    x = x - 13
-                    If x < Asc("a") Then
+                    X = Asc(Mid(sTemp, Y))
+                    X = X - 13
+                    If X < Asc("a") Then
                         'x = Asc("a") + x - Asc("z") - 1
-                        x = Asc("z") + x - Asc("a") + 1
+                        X = Asc("z") + X - Asc("a") + 1
                     End If
                     
                     ' Make first charictor upper case
-                    If y = 1 Then x = x - 32
-                    sName = sName + Chr(x)
+                    If Y = 1 Then X = X - 32
+                    sName = sName + Chr(X)
                     
-                Next y
+                Next Y
                 
                 ReDim Preserve strLevelOrder(iMap)
                 strLevelOrder(iMap) = sName
@@ -3012,64 +3094,64 @@ Function ImportReptonFX(strFolder As String)
                 If UBound(tTransporterCorrds) > 1 Then
                     
                     ' Load data into tempary structures ...
-                    For x = 1 To UBound(tTransporterCorrds)
+                    For X = 1 To UBound(tTransporterCorrds)
                         Input #1, sTemp
                         
                         
-                        tTranFrom(x).x = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
+                        tTranFrom(X).X = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
                         sTemp = Right(sTemp, Len(sTemp) - InStr(1, sTemp, " "))
                         
-                        tTranFrom(x).y = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
+                        tTranFrom(X).Y = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
                         sTemp = Right(sTemp, Len(sTemp) - InStr(1, sTemp, " "))
                         
-                        tTranTo(x).x = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
+                        tTranTo(X).X = Int(Left(sTemp, InStr(1, sTemp, " ") - 1))
                         sTemp = Right(sTemp, Len(sTemp) - InStr(1, sTemp, " "))
                         
-                        tTranTo(x).y = Int(sTemp)
+                        tTranTo(X).Y = Int(sTemp)
                         
-                    Next x
+                    Next X
                     
                     ' Sort transporters so that first to 'apper' in map is first in array ...
                     Do
-                        y = 0
+                        Y = 0
                         
-                        For x = 1 To (UBound(tTransporterCorrds) - 1)  ' - (x-1)  ???
-                            If Convert2Dto1Dcoords(tTranFrom(x)) > Convert2Dto1Dcoords(tTranFrom(x + 1)) Then
+                        For X = 1 To (UBound(tTransporterCorrds) - 1)  ' - (x-1)  ???
+                            If Convert2Dto1Dcoords(tTranFrom(X)) > Convert2Dto1Dcoords(tTranFrom(X + 1)) Then
                                 
-                                tTranFrom(0) = tTranFrom(x)
-                                tTranTo(0) = tTranTo(x)
+                                tTranFrom(0) = tTranFrom(X)
+                                tTranTo(0) = tTranTo(X)
                                 
-                                tTranFrom(x) = tTranFrom(x + 1)
-                                tTranTo(x) = tTranTo(x + 1)
+                                tTranFrom(X) = tTranFrom(X + 1)
+                                tTranTo(X) = tTranTo(X + 1)
                                 
-                                tTranFrom(x + 1) = tTranFrom(0)
-                                tTranTo(x + 1) = tTranTo(0)
+                                tTranFrom(X + 1) = tTranFrom(0)
+                                tTranTo(X + 1) = tTranTo(0)
                                 
-                                y = 1       ' Say that there has been a change
+                                Y = 1       ' Say that there has been a change
                             End If
-                        Next x
+                        Next X
                     
-                    Loop Until y = 0
+                    Loop Until Y = 0
                     
                     ' Save transporter corrds
-                    For x = 1 To UBound(tTransporterCorrds)
-                        tTransporterCorrds(x).x = tTranTo(x).x + 1
-                        tTransporterCorrds(x).y = tTranTo(x).y + 1
-                    Next x
+                    For X = 1 To UBound(tTransporterCorrds)
+                        tTransporterCorrds(X).X = tTranTo(X).X + 1
+                        tTransporterCorrds(X).Y = tTranTo(X).Y + 1
+                    Next X
                 End If
                 
                 
                 ' Map data
                 n = 1
-                ReDim sLogicalMap(tMapSize.x * tMapSize.y)
-                For y = 1 To tMapSize.y
+                ReDim sLogicalMap(tMapSize.X * tMapSize.Y)
+                For Y = 1 To tMapSize.Y
                     Input #1, sTemp
-                    For x = 1 To tMapSize.x
+                    For X = 1 To tMapSize.X
                     
-                        sLogicalMap(n) = DataInt2Str(DataFxRepton2RRInt(Mid(sTemp, x, 1)))
+                        sLogicalMap(n) = DataInt2Str(DataFxRepton2RRInt(Mid(sTemp, X, 1)))
                         n = n + 1
-                    Next x
-                Next y
+                    Next X
+                Next Y
                 
             Close #1
             
