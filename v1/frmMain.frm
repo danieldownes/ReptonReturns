@@ -4,11 +4,11 @@ Begin VB.Form frmMain
    ClientHeight    =   10080
    ClientLeft      =   165
    ClientTop       =   480
-   ClientWidth     =   11400
+   ClientWidth     =   14085
    Icon            =   "frmMain.frx":0000
    LinkTopic       =   "Form1"
    ScaleHeight     =   10080
-   ScaleWidth      =   11400
+   ScaleWidth      =   14085
    StartUpPosition =   3  'Windows Default
    Begin VB.Label lblRef 
       BackStyle       =   0  'Transparent
@@ -55,14 +55,8 @@ Private Sub Form_Load()
     ' Data Structure Initalization (LookUp tables, etc)
     SetupWallAroundInfo_LookUpTable
     
-
-    'Load the Repton Level
-    rrMap.ThemeDir = "Repton 3"
-    rrMap.CurGameLevel = 1
-    rrMap.GameLevelsDir = "Repton 3"
-
-    rrMap.LoadLevelData App.Path & "\data\episode\" & "Repton 3\1.rr"    '"tests\test_level.rr"
-
+    ' Start Game
+    rrGame.Init
     
     ' GUI inits
     txt2D.InitText "REPTON RETURNS", lblRef.Font
