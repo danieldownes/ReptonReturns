@@ -1,0 +1,719 @@
+Repton Returns version 2
+QDwares(TM)
+All rights reserved.
+
+
+----------------------------------------------------------------------------
+Development history overview:
+
+v2.00 Start:      03-01-2011
+v1.00 BETA 2 end: 13-04-2007 (unreleased)
+v1.00 BETA 1 end: 17-08-2003
+v1.00 start:      13-10-2001
+Prototype end:    12-10-2000
+Start:            23-08-2000 
+
+
+----------------------------------------------------------------------------
+-- Version 2 --  :  C# using Unity
+----------------------------------------------------------------------------
+
+Development history detail:
+
+20-03-2011: (8 hours)
+		^ Rocks now move and fall down, still needs testing
+		^ reworked parts of how rocks work, learning Unity3D further
+		
+
+19-03-2011: (~3 hours)
+		^ Rocks (still in progress)
+		^ Better player movement
+
+07-03-2011: (~2 hours)
+		^ cMap > rr2level class
+		^ rr2moveable class
+
+04-03-2011: (~3 hours)
+		^ RockAndEggs class is now rr2movable
+		^ Player movement code, proper interpolation and rotations (still in progress)
+		
+21-01-2011: (~1 hours)
+		^ Player movement code (still in progress)
+
+12-01-2011: (~3 hours)
+		+ Implementing level pieces
+
+11-01-2011: (1.5 hours)
+		^ Converting LoadFileLevel() to C#
+
+03-01-2011: (1 hour)
+		+ Created Unity project, imported files, organising assets
+		
+
+
+
+
+----------------------------------------------------------------------------
+To Debug:
+
+Reported    Detail
+----------------------------------------------------------------------------
+
+13-04-2007:
+		! Tutorial Sill not totally fool proof
+
+15-02-2005:
+	    ! From testing Repton 3; rock ontop of cracking egg should not fall, including slighted fall
+
+12-02-2005: 
+	    ! It is possible to collect a piece before diying by falling rock;
+		e.g. holding a rock that is slighted from the right or left (pos directly above too)
+			then let that rock fall onto you (as to die) but then quickly collect a piece in 
+			the next place to the side of the falling rock, as if you progressed without diying!
+
+
+
+
+Possibly fixed:
+15-02-2005: Rock rumbleing (blipping) sound problem possibly fixed (finally!)
+14-02-2005: Egg fell and made cracking sound more than once
+12-02-2005: Particles only work on the first instence of of a ccGame init
+12-02-2005: Rock was pushed to the left into monster, but Repton did not walk
+12-02-2005: Monsters will not process while hatching off screen
+19-06-2003: Still problems with monster killing
+26-05-2003: Rocks can be pused in free fall when Repton releases a rock and then moves
+		down then push the free falling rock
+13-02-2003: Bomb incorrectly detects that all diamonds have been collected; ~70 were still rememining, and
+                 bomb was able to defuse
+
+
+To Test:
+29-05-2003: Monsters now die via funguses
+
+
+----------------------------------------------------------------------------
+
+## To Do: ##
+
+ Programming:      
+  level and game completed screen
+  Fountain Particle Engine -- need better particle control; emitting speed, particle life control +radius, (clumping?)
+	- Earth digging
+	- Repton die
+	- monster die
+	- egg crack
+	- spirit capture
+	- transporting
+	- level trasporting / player spawning
+	- bomb explode
+	- glittering dimonds
+	- Dust behind rocks
+	- Dust behind monsters?
+	- Sparkles behind spirits
+	- Diamond (item) collection?
+	- Screen flashing (for egg crack, spirt catch, bomb explode)?
+	- other FXs? (warning of overuse)?
+
+  remove directory data from packed files
+  (Map View)?
+  Dubug file output?
+  Editor integration
+
+
+ update 'About' to include BETA testers
+          - slow down the music?
+ review sounds	
+ nicer icon
+ testing; 	
+	Game is Completable?
+	Game works for limited user?
+	Windows 2000 admin/limited user?	
+	Windows 98/ME?
+	Timing problems?
+
+	- Testing documentation? e.g. game specs
+		
+
+
+
+## Other Ideas ##
+  
+  Convert to .NET ?
+  Secure Files -- Player files to do!
+
+    
+ 
+Episode/Level selector:
+    'user levels' selected via a user defined 3x3 map that is merged with 
+    episode selector map
+
+
+Art:
+  Repton Animation (pushing rock, pushing non-movable piece)
+  More scenery pieces
+ 
+sound effects:
+
+   monster moving 
+
+   squashed by rock 
+   die by monster 
+   die by spirt 
+   die by fungus 
+   die by skull         
+   cannt push
+
+   completed level		*	- Maybe in B2 ??
+   completed game		*
+   completed episode
+
+   map colected
+
+
+
+new levels? 
+   nature 
+   food 
+In-game save points 
+   player can exit level at any time and return to exactly same setup 
+
+
+
+show the world RR!! 
+ 
+
+
+
+----------------------------------------------------------------------------
+-- Version 1 --  :  VisualBasic 6 using DirectX 9
+----------------------------------------------------------------------------
+Development history detail:
+
+13-04-2007: (~6 hours)
+			+ Egg opening particles (may need additional attention)
+			* Opening Animation tweeks for smoother flow
+			+ Sparkling Diamond Particles
+			+ Particles when digging
+			* Additional work/fixing on particle system
+			! Tutorial Sill not totally fool-proof
+
+16-02-2005:
+	    * Particle generator can now set particles in rotation 
+	    * Modified Mead.mp3 to sound better (less harsh and slightly slower)
+	    * Fixed 12-02-05 3rd discovered bug (Rock was pushed to the left 
+		into monster, but Repton did not walk)
+
+15-02-2005:
+	    * Rock rumbleing (blipping) sound problem possibly fixed (finally!)
+	    ! You can push rocks though spirits!
+	    ! Rock didn't kill monster when falling down sloping pieces
+	    * Fixed time bomb problem
+
+14-02-2005:
+	    ! Time bomb didn't kill Repton when the time expired
+	    ! Egg fell and cracked twice on a 7 slighted (possibly wall type 2) piece
+	    * Worked on rock falling sonund; slightly better, but still needs more thought
+
+12-02-2005: 
+	    ! It is possible to collect a piece before diying by falling rock;
+		e.g. holding a rock that is slighted from the right or left (pos directly above too)
+			then let that rock fall onto you (as to die) but then quickly collect a piece in 
+			the next place, as if you progessed without dieing!
+	    ! Rock was pushed to the left into monster, but Repton did not walk
+	    ! Monsters will not process while hatching off screen
+	    * Working on particles implementation and engine, plus fixing of below bug
+	    ! Particles only work on the first instence of of a ccGame init
+
+10-02-2005:
+	    + 'Dust behind repton' effect (coding only) using emitter generator
+	    + Emitter generator
+	    * Debugging particle emmitter class
+
+09-02-2005:
+	    ! After playing a game with 4 (or possibly more) sprits, then 
+		playing a game with only 3 spirits, a visual spirit was seen
+	    + Level loading screen 
+	    * Nicer animation on Ex-D logo
+	    * Nicer usage of gramma fader
+
+08-02-2005:
+	    * Cleaned-up sides of wall rendering; now has better efficentcy
+		and visually appeal
+
+07-02-2005:
+	    + Shuddering egg visual animation effect
+	    * Single particle fountain up and flowing
+
+06-02-2005:
+	    * Working on particle fountain engine
+
+05-02-2005:
+	    + Implementing simple particle fountain engine (for use with 
+		Repton die, monster die, egg crack, bomb explode, spirit 
+		capture, transporting, etc)
+
+02-02-2005: (35 mins)
+	    * Fixed memory leak error which caused application to not fully 
+		unload (introduced in BETA 2 dev.)
+
+01-02-2005: (3 hours)
+	    ! Loading a level from 2nd scenero cause IO error
+	    + Res Selector integration
+
+31-01-2005: (~3 hours)
+	    * Finalised Res Selector
+
+15-11-2003:
+	    * Finnished making all main level files secure and working (not 
+		inc. player 'Home' level)
+
+08-10-2003:
+	    * Continued work to make media files secure
+
+17-09-2003:
+	    * Monster can now move though earth. Also the earth is drawn 
+		while monster is moving though it.
+		...and is replaced when moving from out of it. Also 
+			rock/eggs detect if monster is in earth,
+		...and while is so, does not move and kill the monster.
+
+15-09-2003:
+	    + Started to implement 'loading screen'
+
+11-09-2003:
+	    + Started to implement 'secure files' feature; media files are 
+		located in several 'data' file
+	    
+----------------------------------------------------------------------------
+-- v1 BETA 2 Development --
+----------------------------------------------------------------------------
+
+
+
+17-08-2003:
+	    * Fixed error; After Repton dies, the location were he died was 
+		not reset to a 'Space'
+	    * Other last minuete tweeks b4 BETA release
+	    + Player lives managment
+
+16-08-2003:
+	    * Corrected colour for Repton's legs
+
+15-08-2003:
+	    + Put messages into 'home' level, acting as completed level 
+		screen (for beta at least)
+	    * Should now not be posible to illegally move falling 
+		rock (see 26-05-03 bug)
+	    * Redid Repton animation in max and implemented
+
+13-08-2003:
+	    * Fixed 28-07-2003 bug
+	    * Improved some graphics
+
+06-08-2003:
+	    + Standard die sound
+	    + Monster sounds
+	    + Dig sound
+
+05-08-2003:
+	    + Finnished 'Meed' music and implemented into the about titles
+	    * More Repton animation
+
+03-08-2003:
+	    + Started VisualFX class
+
+01-08-2003:
+	    
+	    * Debuged 30-07-03 error
+
+30-07-2003:
+	    * Tweeked menu navigation
+	    * Tweeked intro logo timings + added Fade in for the stars
+      * More work to 'Home' level
+	    ! Problems with loading and saving levels - Level management
+
+29-07-2003:
+	    + Active player can now delete from the HOME level
+	    + Many sounds implemented
+
+28-07-2003:
+	    + More sounds decided upon
+	    * Level loading management finnished
+
+26-07-2003:
+	    * Level loading management
+
+24-07-2003:
+	    + Level loading management
+
+20-07-2003:
+	    + Mastered intro music 
+
+~15-07-2003:
+	    + Monster art and animation
+
+10-07-2003:	    
+	    * Better monster dieing handlling; may have cured bugs
+    	+ rock hitting sound
+	    + Rock falling sound; needs extra work
+	    ! Player dosn't init correctly when transporting to new 
+		level (reason for 06-07-03 bug)
+	    * Small tweeks in RocksOrEggs class
+	    + Visual fader in menu; not fully intergrated
+
+~08-07-2003:
+	    + Level-transporters
+
+06-07-2003:
+	    ! A rock in prelude falls incorrectly
+	    * Game can now be quit to menu and then replayed in correct manner
+
+21-06-2003:
+	    * Finnished menu programming (may still need tweeking)
+
+20-06-2003: (~2:30 hours)
+	    + Started options menu
+	    + About titles programming
+
+19-06-2003: (~3:30 hours)
+	    + Fungus texture only
+	    * Finnished crown mesh 
+	    ! Still problems with monsters killing
+	    + Barrier mesh
+	    + Cage mesh
+	    + Safe mesh
+	    + Time-bomb mesh + tex
+	    + Time Capsule mesh
+	    + Transporter mesh + tex
+
+18-06-2003: (~2 hours)
+	    * Continued work on menu system; player select, new player
+
+16-06-2003:
+	    + Started work on the menu functionality
+
+15-06-2003:
+	    + Implemented main menu system graphics
+
+09-06-2003:
+	    + Started intro sequence
+
+08-06-2003: (~0:10)
+	    * Finnished spirit art
+
+06-06-2003: (~00:20)
+	    * Tutorial level - Result from testing with Hermione
+	    + Started spirit art
+
+05-06-2003:
+	    + Inserted Ex-D logo
+	    * Fixed top-Wall bug
+	    + Now using FMOD sound system to play MP3's
+
+04-06-2003:
+	    * Finnished making rocks rotate (more or less) accuretly - had to 
+		update Ex-Perspective in order to make this work
+
+03-06-2003:
+	    * Started to make rocks rotate accuretly
+
+02-06-2003:
+	    * Implemented 'stags' visual pieices
+	    * Viewing and player position now correctly set on game init
+	    + Scenery pieces are now loaded and rendered - still need 'MoveableTo' check, and
+		selective rendering (i.e, do not render if outside of viewing)
+31-05-2003: 
+	    * Message is now split up into pages, and includes next-page/resume navigation
+	    * Messages now only appear once
+
+30-05-2003: (~7:00)
+	    + Messages appear at desinated triggers; still need to delete messages, and other tweaks
+	    * Fixed 'Monsters hold rocks until they move down, then get squished' bug (today)
+	    ! Skulls disappear when walking into them
+	    * Fixed 'Transporters do not get overwritten' bug (today)
+	    * Fixed 'Rocks still not falling correctly' bug (today)
+	    * Fixed 'Problems with ground textures' bug (today)
+	    ! Monsters hold rocks until they move down, then get squished
+	    ! Can push rock onto 'breaking', 'hatching' egg
+	    ! Transporters do not get overwritten
+	    ! Rocks still not falling correctly
+	    ! Problems with ground textures
+	    * Varible tweeks, such as MapSizeX/Y and strEpisodeName
+	    + Loads '.rre' episode files (v1.0)
+	    + Loads '.rrl' level files (v1.1)
+	    ! Ex-Perspective cann't show translusent textured meshes
+	    + Message board art and animation
+
+29-05-2003: (~4:30)
+	    + In game pauseing functionallity - inc stopping time-bomb
+	    + Time-bomb functionallity
+	    * Monsters now die via funguses (untested)
+	    * Monsters now die; bugs 11-05-2003 and 22-03-2003 
+	    + FPS counter
+            + Research; do monsters die via funguses? answer, yes
+	    * Possibly have fixed bug 30-04-2003; now applies rock fall FX-Repton algorithm
+
+26-05-2003: (~0:35)
+	    * Implemented a timed pause when transporting
+	    * Timed paused
+            ! Rocks can be pused in free fall when Repton releases a rock and then moves
+		down then push the free falling rock
+	    + On/Off pausing
+	
+11-05-2003: (~0:20 hours)
+	    * Some test/confirmation of bugs on rock falls
+	    + Animation walk is only animated when walking
+
+06-05-2003: (~1:30 hours)
+            ! Dimond sound dosn't play multiple instences; known for a while
+	    + Transport functionality (no visual and timing effects or control)
+	   */+ Minor in-source documentaion 
+	  
+30-04-2003: (~1 hour)
+	    + Game Pause code (not user controled); intended for transporter control and user control
+	    ! Rocks fall incorrectly, in wrong order
+
+24-03-2003: (~1 hour)
+	    * Fixed spirits bug as reported on the 13-02-2003
+	    + Started earth meshes (used std_walls as a bases)
+
+23-03-2003: (~1 hour)
+	    + Created and added missing ground meshes (10 - 15), (such as 4-6, etc)
+
+22-03-2003: (~2 hours)
+	    ! Monster dies when rock free falls on top - rock terminates and monster continues
+	    * Made skulls, keys, and dimonds rotate
+	    + Added skull and key mesh (both created ages ago)
+
+14-02-2003: (~5 hours)
+	    ! Enviroment lighting will need to be looked at
+	    * Modified rock meshs so that their centre is now at the origon
+	    + Standard wall sides meshes + textures (had many technical issues that held-up production)
+
+13-02-2003: (~2 hour)
+	    ! Bomb incorrectly detects that all diamonds have been collected; ~70 were still rememining, and
+                 bomb was able to defuse
+	    ! Depending on MAP design, visual walls do not have any backs to them
+	    + Visual 3D standard wall meshes - started
+	    ! Spirts on 'prelude' map merge together
+
+
+###  Started effects & final Visual implentaions                      ###
+###   (+ coding of any other features missed or need to be debugged)  ###
+
+
+10-02-2003: (~2 hours)
+	    * Monsters movment is now operational, but not exact
+	    * Off-map sections of the screen now correctly show the wall piece (5)
+	    + Monsters can now be killed with rocks/eggs
+
+22-12-2002: (~3 hours)
+	    + Implement Monsters; needs debugging greately
+
+21-12-2002: (~4 hours)
+	    + Funguses can grow; seems very reasonable
+	    + Added fungus, skull and barrier
+	    * It is now not posible for Repton to not get killed if walking in opposit direct of oncomming spirit
+	    + Spirits can now determine which direct they should first be going; this complies with origonal Repton (see tests)
+	    + Research; Made MAPs for Repton 3 (origonal) to determine how spirits work; such as starting determination
+
+20-12-2002: (~~3 hours)
+	    + Spirits can now be caught in cage
+	    * Spirits now keep formation, only the timer within the last spirit in the array is used
+	    ! Spirits do not keep in formation, ie, the same distence between each other; becase they each have thire own timer
+	    * Mutiple spirits can now pass each other
+
+18-12-2002: (~~1:30 hour)
+	    ! It is posible for Repton to not get killed if walking in opposit direct of oncomming spirit
+	    ! Multiple spirits can not pass each other (on the same map piece) - design error
+	    * Spirits now 'hug-wall-left'
+
+09-12-2002: (~~1 hour)
+	    * Spirits do now not 'eat earth'
+
+02-12-2002: (~~2:30 hours)
+	    ! Spirits eat earth	
+	    ! Design error, spirits do not hug-wall-left, they simply look for a wall in front and turn left if there is
+		a wall there
+	    + Spirits are now implemented	
+
+14-11-2002: (~~4 hours)
+	    + Detection of Repton dieing by a falling rock or egg
+	    + Working on detection of killing Repton (by falling rocks), and detection of cracking egg; both related.
+	    + Rocks can now fall right
+
+08-11-2002: (~~5 hours)
+	    ! Rocks now fall left, may need additional work and testing
+	    + Rocks now fall left
+	    * Jitter bug (while moveing) has now been totally iradicated
+	    + Rocks and eggs now fall stright down when not supported (not done left or right falling yet)
+	    * Attempted yet again to recreate Repton 3 intro sound in Logic pro audio - much better than other attempts, 
+	       also started to add rythem, but this was lost.
+
+27-10-2002: (~~2 hours)
+	    + Repton can now push rocks
+
+26-10-2002: (~~2 hours)
+	    + Rendering of ground; LookUp table for ground type selection ('GetWallAroundInfo', etc)
+	    + Ground Art (still need to do ground types > 9)
+
+25-10-2002: (~~1 hour)
+	    + 3D Egg and Rock Art
+
+24-10-2002: (~~2 hours)
+	    * Repton 'animation (engine)' is better - needed to export from MAX at 60 frame res, 
+	       also had to change frame selection (* by 160)
+	    + Repton now turns to direction of movement
+	   */+ Other map graphics to game
+
+23-10-2002: (~~5 hours)
+	    + Bomb can now be defused after all dimonds are cleared
+	    ! On some frames a white flash occures
+	    + Keys and Safes are now handeled
+	    + GUI Dimond counter
+	    ! Still pauses when continually moveing 
+	    * Made repton movement animation smoother; transition from one to another adjacent place 
+
+18-03-2002: (~~1 hour)
+	    * Attempted to make movment smoother - not succesful
+
+05-03-2002: (~~1:30 hours)
+	    + Detection of stitic map pieces
+	    ! Movment is not very smooth - jitters if continually moving from one piece to another
+	    * Repton and cam now moves around map.
+
+02-03-2002: (~~1 hour)
+	    * Minor tweeks; such as B/G and Font colours and moving Repton around map
+
+28-02-2002: (~~1 hour)
+	    + Started work on logical map data
+
+27-02-2002: (~~1:30 hours)
+	    * Repton can move around level (not logically) - still needs alot of work
+	    ! No internal animation on Repton mesh
+	    + Displays Repton mesh
+
+09-02-2002: (~~
+	    + The 'Visual' based functions in 'cPlayer' - started
+	    + Testing of the Repton Returns font
+	    * Font file now works in XP, also now includes the Arial Rounded characters
+               where Repton based characters have not been allocated
+
+05-02-2002:
+	    + Skull Mesh (and mesh bones)
+	    + Egg mesh
+	   +/* Animation to Repton - started to walk
+
+03-02-2002:
+	    * General debug for rendering - now scrolls the map + moves cam
+
+14-12-2001:
+	    * Working on rendering (using 'postion and render' method)
+	    - 'intihideandshow' and 'hideandshow' function - not needed because of changed rendering method
+
+12-12-2001:
+	    * Reattempted Repton 3 intro sound in Logic pro audio
+
+11-12-2001:
+	    * Now displays a 27by30 matrix of '3.x' models with correct intervals
+
+26-10-2001:
+            + Attempted to recreate Repton 3 intro sound in Cakewalk
+
+15-10-2001:
+	    * Continued work on coverstion.
+
+13-10-2001:
+	    * Started to convert to VB and Ex-Perspective, in (OOP)
+
+
+
+----------------------------------------------------------------------------
+-- v1 --  :  VB 6 + Ex-Perspective
+----------------------------------------------------------------------------
+
+
+12-10-2000:
+            + Movement core
+            + intihideandshow function
+            + findobno function
+
+11-10-2000:
+            + hideandshow function
+
+06-09-2000:
+            + Load SUB program for Editor
+
+03-09-2000:
+            + User function list
+            * getmapdat funtion, now uses the convertdatstring function
+            + convertdatstring function
+            + convertdat function
+            + givemapdat function
+            + dorocksfall function
+
+01-09-2000:
+            + Save SUB program for Editor.
+
+30-08-2000:
+            + Most of Editor made! inc(Graphics, Core, GUI, MAP engine, etc.)
+
+29-08-2000:
+            * MAP engine is now a set of plains, not a DarkBASIC graphical matrix.
+
+25-08-2000:
+            + Most Grapghics.
+            + getmapdata function.
+            + Finished first MAP file in pure ASCII!
+            * MAP file lay design - single charictor for each cell.
+
+24-08-2000:
+            + themap function.
+            + Making first MAP file in pure ASCII!
+            + MAP file layout design.
+            + Created the DBA file.
+
+23-08-2000:
+	    + Research; Scanned all document material; tape covers, instuctions
+	    + Research; Took screen shots from origonal Acorn Election output
+            + Font made!
+
+----------------------------------------------------------------------------
+-- Protype --  :  Dark BASIC 1
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+                                                      |
+                                                      | Key:
+                                                      |  + = added
+                                                      |  - = removed
+                                                      |  * = changed/updated
+						      						  |  " = communication
+						      						  |  ^ = code conversion
+                                                      \---------------------
+
+
+
+From Prototype version (DB)::
+
+User function list, with syntax and description:
+
+Function Name:            Syntax:               Description:
+dorocksfall               ()                     Cheaks if rocks need to fall.
+
+systemsetup               ()                     Sets up system! (Like, derr!)
+
+themap                    (mapfilename$)         Loads images and map array.
+
+getmapdata                (x,y)                  Returns the type of charicter at x,y from arrray.
+givemapdate               (x,y,dat)              Changes map array.
+convertdat                (dat)                  Returns the converted string from the value.
+convertdatstring          (dat$)                 Returns the converted value from the string.
+
+del                       ()                     Unloads images, arrays, etc.
+
+intihideandshow           ()                     Hides titles that are not being displayed.
+hideandshow               (move)                 Shows/Hide new/old tiles when you move.
+
+findobno                  (x,y)                  Returns the object number at x,y.

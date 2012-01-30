@@ -1,0 +1,18 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" ctype="Workspace" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="..\..\_dd\RR2\RR2.pidb" ctype="Workbench">
+    <Files>
+      <File FileName="Assets\rr2game.cs" Line="31" Column="13" />
+      <File FileName="Assets\rr2level.cs" Line="124" Column="1" />
+      <File FileName="Assets\rr2moveable2.cs" Line="4" Column="26" />
+      <File FileName="Assets\rr2monster.cs" Line="196" Column="44" />
+      <File FileName="Assets\rr2fire.cs" Line="37" Column="33" />
+      <File FileName="Assets\_doc\History.txt" Line="1" Column="1" />
+      <File FileName="..\..\_dd\RR2\RR2.pidb" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches ctype="PinnedWatchStore" />
+</Properties>
