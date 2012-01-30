@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 
 public class rr2gui : MonoBehaviour 
 {
@@ -13,6 +13,11 @@ public class rr2gui : MonoBehaviour
     private int iShowQuestion = 0;
     private string sQuestionText = "Sample Question ... ?";
 
+    private List<rr2data.tsChoice> lChoices = new List<rr2data.tsChoice>();
+
+    private float fMsgTime = 0.0f;
+
+    string sAnswer;
 
 
 	// Use this for initialization
@@ -70,31 +75,13 @@ public class rr2gui : MonoBehaviour
         GUI.Label(new Rect(10, 200, 100, 300), sInventory);
 
 
-        // Show Question
-        if (iShowQuestion != 0)
-        {
-            GUI.Box(new Rect(200, 200, 400, 300), "Question");
-            GUI.Label(new Rect(210, 210, 390, 290), sQuestionText);
-            
-            // Choices
-            for (int n = 0; n < 4; n++)
-            {
-                if (GUI.Button(new Rect(220 + (85 * n), 250, 80, 40), "Answer " + n.ToString() ))
-                {
-                }
-            }
-        }
 
         /*
          * 
          * GUI.Box (Rect (Screen.width - 100,0,100,50), "Top-right");
-	GUI.Box (Rect (0,Screen.height - 50,100,50), "Bottom-left");
-	GUI.Box (Rect (Screen.width - 100,Screen.height - 50,100,50), "Bottom-right");
+	        GUI.Box (Rect (0,Screen.height - 50,100,50), "Bottom-left");
+	        GUI.Box (Rect (Screen.width - 100,Screen.height - 50,100,50), "Bottom-right");
          */
 	}
 
-    public void ShowQuestion( int iQuestionNumber)
-    {
-        iShowQuestion = iQuestionNumber;
-    }
 }

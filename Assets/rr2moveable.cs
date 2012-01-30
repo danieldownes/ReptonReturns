@@ -6,14 +6,12 @@ public class rr2moveable : rr2moveable2
 {
 		
 	public bool bFalling;
+    public bool bWasFalling;
 	public bool bFreeFall;
 	public bool bPlayingSnd;
 
 	public bool bEggCracking;  //Public bEggCracking As Boolean
-	
-	private float fTime;
-	private float fTimeToMove; 	//Private cintTimeToMove As Single     ' Number of seconds it take for rock/egg to move from one map piece to another.
-	
+		
 	private string sSlantedLeft;		// Pieces that this movable will fall/slide off to the left from when unsupported
 	private string sSlantedRight;		//  "" but for right
 	
@@ -85,34 +83,43 @@ public class rr2moveable : rr2moveable2
 		if( bEggCracking )
 		{
 			
-			/*
-			 * fTimeToMove
-			 * 
-				' Remove reference that this is an egg
-                rrMap.intTotEggs = rrMap.intTotEggs - 1
-                intMyRockOrEggID = -1
-                
-                ' Prevent egg from further prosessing
-                rrPieces(intCurX, intCurY).intRockOrEggID = -1
+			if( fTime <= 0.0f)
+            {
+				
+                rr2gameObject.loadedLevel.iEggs--;
+
                 
                 
-                ' Flash vis effect/emitter?
-                '
-                
-                ' Start particle emitter?
-                '
+                // Prevent egg from further prosessing
+                //rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x - 1, (int)-vPosition.z + 1].id = -1;
                 
                 
-                ' Spawn monster
-                rrMonster(rrMap.intTotMonstersAlive + 1).Spawn intCurX, intCurY
-             */
+                
+                // Start particle emitter?
+                //
+
+                // Remove self
+                rr2gameObject.loadedLevel.ReplacePiece(vPosition, '0');
+
+
+                // Spawn monster
+                rr2gameObject.loadedLevel.SpawnMonster(vPosition);
+
+                // Remove reference that this is an egg
+                iId = -1;
+            }
+		}else
+        {
+		    Move3D();
+            CheckIfFall();
 		}
-		
-		
-		//CheckIfFall();
-		
-		move3D();
-		
+
+        // Stop sound?
+        if( fTime <= 0.00f && bPlayingSnd)
+        {
+            this.audio.Stop();
+            bPlayingSnd = false;
+        }
 	}
 	
 	public bool Move(Vector3 vDir)
@@ -129,7 +136,7 @@ public class rr2moveable : rr2moveable2
 		if( vDir == Vector3.forward)
 			return false;
 		
-		// Space for the rock to move?
+		// Space for the rock to move? -- this check is already being done in rr2player.
 		//if( rr2gameObject.loadedLevel.RrMapDetail[(int)vNewPos.x, (int)-vNewPos.z].TypeID != (char)rr2level.enmPiece.Space 
 		// && rr2gameObject.loadedLevel.RrMapDetail[(int)vNewPos.x, (int)-vNewPos.z].TypeID != (char)rr2level.enmPiece.Monster)
 		//	return false;
@@ -158,31 +165,21 @@ public class rr2moveable : rr2moveable2
 	    // Before we do though, are there any monsters in the way? if so they should die..
 	    
 	    // Is monster under rock?
-		//if( rr2gameObject.RrMapDetail[(int) vPosition.x, (int)-vPosition.z].TypeID == (char)rr2level.enmPiece.Monster )
-		//{
-		//	 
-		//}
-	    /*
-	    
-	    If rrMap.GetData(intCurX, intCurY) = "m" Then
-	        ' Find ID of this monster and kill it - should also work if more than one monster is in same place
-	        For n = 1 To rrMap.intTotMonstersAlive
-	            If (rrMonster(n).GetXPos = intCurX And rrMonster(n).GetYPos = intCurY) Or _
-	               (rrMonster(n).GetXPos = intOldX And rrMonster(n).GetYPos = intOldY) Then
-	                rrMonster(n).Die
-	            End If
-	        Next n
-	    End If
-	    */
-		
+		if( rr2gameObject.loadedLevel.GetMapP(vPosition) == (char)rr2level.enmPiece.Monster )
+        {
+			rr2gameObject.loadedLevel.KillMonsters(vPosition);
+        }
+
+
+	   		
 		rr2gameObject.loadedLevel.SetMapP(vPosition, (char)pPieceType, iId);
 		rr2gameObject.loadedLevel.SetMapP(vLastPosition, (char)rr2level.enmPiece.Space, -1);
 				
 		return true;
 	}
-	
-	
-	private void move3D()
+
+
+    private void Move3D()
 	{
 		// Interpolate
 		transform.position = Vector3.Lerp(vLastPositionAbs, vPosition, (fTimeToMove - fTime) / fTimeToMove);
@@ -205,15 +202,13 @@ public class rr2moveable : rr2moveable2
 	
 	public void CheckIfFall()
 	{
-		bool bWasFalling;
+		
 		char sTemp;
 		int i;
 		//int n;
-		
-		// If egg is cracking then exit now as eggs don't fall while cracking
-    	if( bEggCracking )
-			return;
-		
+
+        bWasFalling = false;
+			
 		
 		
 		// Have we stoped falling?
@@ -224,39 +219,21 @@ public class rr2moveable : rr2moveable2
     		bFalling = false;
         	bWasFalling = true;
 			
-			Debug.Log("Rock Stoped Falling");
-        
 			// TODO: falling stop sound
 			//If bPlayingSnd Then rrGame.PlayRockRumbleSound False
 			//bPlayingSnd = False
         	//If intPieceType = Rock Then ExSnds(5).PlaySound (False) Else ExSnds(8).PlaySound (False)
+
+
+            if (pPieceType == rr2level.enmPiece.Egg)
+            {
+                CrackEgg();
+                return;
+            }
     
 		}
 		
-		
-		
-		/*
-		' Can only fall if not already falling
-	    If blnFalling = False Then
-	    
-	        ' Is below rock still falling? If so, don't do anything until that rock is out of the way
-	        If rrPieces(intCurX, intCurY + 1).intRockOrEggID <> -1 Then
-	            If rrRocksOrEggs(rrPieces(intCurX, intCurY + 1).intRockOrEggID).blnFalling = True Then
-	                'Exit Function
-	            End If
-	        End If
-		*/
-		
-		// Can only fall if not already falling
-		if( !bFalling )
-		{
-			// Is below rock still falling? If so, don't do anything until that rock is out of the way
-            if (rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x, (int)-vPosition.z + 1].id != -1)
-			{
-				
-			}
-			
-		}
+	
 		
 		// Fall stright down?
         sTemp = (char)rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x, (int)-vPosition.z + 1].TypeID;
@@ -281,45 +258,18 @@ public class rr2moveable : rr2moveable2
                 If blnFalling Then Me.Move Down
             End If
             */
+            //if( sTemp == (char)rr2level.enmPiece.Monster)
+                rr2gameObject.loadedLevel.KillMonsters(vPosition + Vector3.back);
 		} 
         // Is player already under moving rock?
         else if( sTemp == (char)rr2level.enmPiece.Repton )
 		{
             if( bWasFalling )
 			{
-             //   rrRepton.Die
-             //   GoTo CrackEgg
+                rr2gameObject.playerObject.Die();
 			}
 		}
-		
-		/*
-		
-		Else
-CrackEgg:
-            ' Eggs should crack at this point
-            If intPieceType = Egg And bWasFalling = True Then
-                               
-                
-                bEggCracking = True     ' Flag for egg cracking animation sequence
-                bWasFalling = False
-                
-                cintTimeToMove = 0  ' Now acts as a counter to control cracking/twitching animation
-                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(1, 2, 0), ExPrj.exReturn3DVec(0, 0, 0), (1 / rrGame.sngGameSpeed)
 
-                ExSnds(7).PlaySound False
-                
-                
-                Exit Function
-                
-                
-            End If
-        
-        End If
-                
-    End If
-		    */
-		
-	
 	
 	
 	    // Still not falling?
@@ -363,6 +313,9 @@ CrackEgg:
                     sTemp = (char)rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x - 1, (int)-vPosition.z + 1].TypeID;
                     if( (sTemp == '0' || sTemp == 'm') && ( rr2gameObject.playerObject.vPosition != (vPosition + Vector3.left + Vector3.back)) )
 				    {
+                        if( sTemp == 'm')
+                            rr2gameObject.loadedLevel.KillMonsters(vPosition + Vector3.left + Vector3.back);
+
 					    /*
                         iTemp = rrPieces(intCurX - 1, intCurY + 1).intMonsterID
                         If iTemp <> -1 Then
@@ -415,6 +368,9 @@ CrackEgg:
 				    sTemp = (char)rr2gameObject.loadedLevel.RrMapDetail[(int) vPosition.x + 1, (int)-vPosition.z + 1].TypeID;
                     if( (sTemp == '0' || sTemp == 'm') && ( rr2gameObject.playerObject.vPosition != (vPosition + Vector3.right + Vector3.back)) )
 				    {
+                        //if( sTemp == 'm')
+                        rr2gameObject.loadedLevel.KillMonsters(vPosition + Vector3.right + Vector3.back);
+
 					    /*
                         iTemp = rrPieces(intCurX - 1, intCurY + 1).intMonsterID
                         If iTemp <> -1 Then
@@ -440,26 +396,22 @@ CrackEgg:
 	        bFreeFall = false;
 	
 	
-	    // Should falling sound stop?
-        if (!bFalling ) // && bWasFalling
-        {
-            
-            if (bPlayingSnd)
-            {
-                this.audio.Stop();
-                
-                
-
-                bPlayingSnd = false;
-            }
-	     
-            // Crash sound
-    //	    if( intPieceType == Rock 
-      //            ExSnds(5).PlaySound (False) 
-            //Else ExSnds(8).PlaySound (False)
-	    }
 
         //bWasFalling = bFalling;
 
 	}
+
+
+    void CrackEgg()
+    {
+        bEggCracking = true;     // Flag for egg cracking animation sequence
+        bWasFalling = false;
+                
+        fTime = 2.0f;  // Now acts as a counter to control cracking/twitching animation
+        //ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(1, 2, 0), ExPrj.exReturn3DVec(0, 0, 0), (1 / rrGame.sngGameSpeed)
+
+        //ExSnds(7).PlaySound False
+                
+    }
+
 }

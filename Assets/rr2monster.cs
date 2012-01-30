@@ -1,14 +1,12 @@
 using UnityEngine;
 using System.Collections;
 
-public class rr2monster : MonoBehaviour
+public class rr2monster : rr2moveable2
 {
 	public rr2game rr2gameObject;
 	
 	public int iId; // lObjects ref
 	
-	
-	public rr2level.enmPiece pPieceType;
 	
 	public enum enmState
 	{
@@ -21,42 +19,53 @@ public class rr2monster : MonoBehaviour
 
 	public enmState iState;
 	
-	public Vector3 vPosition;
-	public Vector3 vLastPosition;
-	public Vector3 vLastPositionAbs;
-	
-	private Vector3 vDirection;         	// The direction that the visual mesh is facing
-	private Vector3 vLastDirection;
-	
-	private float fTime;
-	private float fTimeToMove = 0.45f;
-	
 	
 	//public bool bEarth;
 	public char cOnPiece; // Monsters can go through Earth + Space, this tracks what the monster may be on
 	public char cLastOnPiece;
 	public int iOnId;
 	public int iLastOnId;
-	
-	
-	// Use this for initialization
-	void Start ()
-	{
-		pPieceType = rr2level.enmPiece.Monster;
-		
-    	cOnPiece = '0';
-		iOnId = -1;
 
-    	//intMyID = rrMap.intTotMonsters
-    
-    	iState = enmState.InEgg;
+    bool bEarth = false;
 	
-	}
 	
+	public void Init(Vector3 vPos)
+    {
+        pPieceType = rr2level.enmPiece.Monster;
+
+        fTimeToMove = 0.45f;
+
+        cOnPiece = '0';
+        iOnId = -1;
+
+        //intMyID = rrMap.intTotMonsters
+
+        iState = enmState.Waking;
+        fTime = 1.0f;
+
+
+        vPosition = vLastPosition = vPos;
+        vDirection = vLastDirection = Vector3.back;
+        //rr2gameObject.loadedLevel.ReplacePiece(vPos, (char)pPieceType);
+    }
+
 	// Update is called once per frame
-	void Update ()
+	void Update()
 	{
-		//If enmMonsterState = EggIsCracking Or enmMonsterState = MonsterWaking Or enmMonsterState = SeekingRepton Then
+        if( fTime > 0.0f)
+            fTime -= Time.deltaTime;
+
+        //Debug.Log("state:" + iState.ToString());
+
+		if( iState == enmState.Waking)
+        {
+            if( fTime <= 0.0f)
+                iState = enmState.Seeking;
+        }else
+        {
+            ControlSeek();
+        }
+
 		
 		Move3D();
 	}
@@ -74,15 +83,20 @@ public class rr2monster : MonoBehaviour
 		
 		cLastOnPiece = cOnPiece;
 		iLastOnId = iOnId;
-		
-		cOnPiece = rr2gameObject.loadedLevel.GetMapP(vPosition);
+
+        fTime = fTimeToMove;
+
+
+		//cOnPiece = rr2gameObject.loadedLevel.GetMapP(vPosition);
 		iOnId = rr2gameObject.loadedLevel.GetMapPId(vPosition);
 		
 		// Does Repton die in result of this move?
 		if( rr2gameObject.loadedLevel.GetMapP(vPosition) == 'i' 
 		 || rr2gameObject.loadedLevel.GetMapP(vLastPosition) == 'i' )
+        {
 			rr2gameObject.playerObject.Die();
-			
+            //cOnPiece = '0';
+		}	
 		
 		rr2gameObject.loadedLevel.SetMapP(vLastPosition, cOnPiece, iOnId);
 		rr2gameObject.loadedLevel.SetMapP(vPosition, (char)pPieceType, iId);
@@ -102,6 +116,7 @@ public class rr2monster : MonoBehaviour
 		// Interpolate
 		transform.position = Vector3.Lerp(vLastPosition, vPosition, (fTimeToMove - fTime) / fTimeToMove);
 		
+        /*
 		if( vLastDirection != vDirection )
 		{
 			
@@ -117,17 +132,18 @@ public class rr2monster : MonoBehaviour
 			
 			// Apply the rotation
 			//GameObject reptonObject = GameObject.Find("ReptonMesh");
-			transform.rotation = Quaternion.identity;
-			transform.rotation = Quaternion.Lerp(vRotFrom, vRotTo, (fTimeToMove - fTime) / fTimeToMove);
+			//transform.rotation = Quaternion.identity;
+			//transform.rotation = Quaternion.Lerp(vRotFrom, vRotTo, (fTimeToMove - fTime) / fTimeToMove);
 			
 		}
+         */
 	}
 	
-	void ControlMove()
+	void ControlSeek()
 	{
 		char cT;
-		bool bMove;
-		
+		//bool bMove;
+
 		// Control spawn timing sequences ...
 		if( iState == enmState.EggCracking)
 		{
@@ -152,69 +168,75 @@ public class rr2monster : MonoBehaviour
 		}
 		else if( iState == enmState.Seeking)
 		{
-			// Ready to move (again)?
-			if( fTime < 0f) 
+		
+		//Debug.Log("ControlMove");
+
+		// Ready to move (again)?
+		if( fTime <= 0.0f) 
+		{
+		    vLastDirection = vDirection;
+				
+			// Simply move towards Repton ...
+            Vector3 vToReptonV = (rr2gameObject.playerObject.vPosition - vPosition); //.Normalize;
+            Vector3 vToRepton = Vector3.zero;
+				
+			// Check possible movement for all axis directions .. randomly so that no axis has a preference
+			if( Random.Range(0, 2) == 0)
 			{
-				 vLastDirection = vDirection;
-				
-				// Simply move towards Repton ...
-				Vector3 vToRepton = (vPosition - rr2gameObject.playerObject.vPosition); //.Normalize;
-				
-				// Check possible movement for all axis directions .. randomly so that no axis has a preference
-				if( Random.Range(0, 2) == 0)
+                if (vToReptonV.x != 0f)
 				{
-					if( vToRepton.x != 0f )
-					{
-						if( vToRepton.x > 0)
-							vToRepton = Vector3.right;
-						else
-							vToRepton = Vector3.left;
-					}
-				}else
-				{
-					if( vToRepton.z != 0f )
-					{
-						if( vToRepton.z > 0)
-							vToRepton = Vector3.forward;
-						else
-							vToRepton = Vector3.back;
-					}
+                    if (vToReptonV.x > 0)
+						vToRepton = Vector3.right;
+					else
+						vToRepton = Vector3.left;
 				}
-				
-				// Check if it is okay to move in this direction ...
-				cT = rr2gameObject.loadedLevel.GetMapP(vPosition + vToRepton);
-				if( cT == '0' || cT == 'i' || cT == 'e')
-					Move(vToRepton);
+			}else
+			{
+                if (vToReptonV.z != 0f)
+				{
+                    if (vToReptonV.z > 0)
+						vToRepton = Vector3.forward;
+					else
+						vToRepton = Vector3.back;
+				}
 			}
+				
+			// Check if it is okay to move in this direction ...
+			cT = rr2gameObject.loadedLevel.GetMapP(vPosition + vToRepton);
+			if( cT == '0' || cT == 'i' || cT == 'e')
+				Move(vToRepton);
+		}
 		}
 	}
-	
-	void Spawn(Vector3 vPos)
-	{
-		vPosition = vLastPosition = vPos;
-		vDirection = vLastDirection = Vector3.back;
-		rr2gameObject.loadedLevel.ReplacePiece(vPos, pPieceType);
-	}
+
+    public bool Die()
+    {
+        Debug.Log("Die");
+        if (!bEarth)
+        {
+            DieForced();
+            return true;
+        }
+        else
+            return false;
+    }
+
+    void DieForced()
+    {
+        Debug.Log("DieForced:" + iId);
+        Destroy(rr2gameObject.loadedLevel.lMonsters[iId]);
+        //lMonsters.Remove(i);
+        //Destroy(rr2gameObject.loadedLevel.lMonsters[iId]);
+        //rr2gameObject.loadedLevel.lMonsters.Remove(iId);
+        rr2gameObject.loadedLevel.iMonstersAlive--;
+        rr2gameObject.loadedLevel.SetMapP(vPosition, '0');
+    }
 }
 
 
 
+
 /*
-Function Spawn(intX As Integer, intY As Integer)
-    
-    'intPieceType = Egg
-    
-    rrMap.SetData intX, intY, intPieceType
-    rrPieces(intX, intY).intMonsterID = intMyID
-    
-    rrMap.intTotMonstersAlive = rrMap.intTotMonstersAlive + 1
-    
-    enmMonsterState = EggIsCracking
-    
-       
-    timMonsterSpawnCont.ReSet
-    
-End Function
 
 Function Die() As Boolean
     If (enmMonsterState = SeekingRepton Or enmMonsterState = MonsterWaking) And blnEarth = False Then

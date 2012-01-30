@@ -8,19 +8,57 @@ using System.Collections.Generic;
 
 public class rr2game : MonoBehaviour
 {
-    //public rr2gui guiObject;
+    public rr2gui guiObject;
 
     public rr2player playerObject;
 
     public rr2level loadedLevel;
 
-    //public rr2data dataManager = new rr2data();
-
+    public rr2data dataManager;
 
 	public int gameState; // 2 == paused
 
 
-    /*
+/*
+' Repton Returns
+' Ex-D Software Development(TM)
+' All rights reserved.
+
+
+Public bGameCompleted As Boolean
+
+Public iCurGameLevel As Integer
+Public iTotGameLevels As Integer
+Public bEpisodeCompeted As Boolean
+Public iLevelCompeted As Integer
+
+Public strEpisodeName As String
+Public sEpisodeDir As String
+Public intGamePlayType As Integer
+Dim strLevelOrder()               As String
+Public strVisualTheme As String
+
+Public sngGameSpeed As Single
+Public sngSfxVol As Single
+Public sngMusicVol As Single
+
+Private Type type_Pause
+    timPauseContol As New exTools_Timer     ' See 'Pause' function for detail
+    sngDelay       As Single                '  " . . .
+    bPaused        As Boolean
+End Type
+Dim tPause As type_Pause
+
+Private iRockRumbleSounds As Integer    ' Controls the sound of the rock rumbling for all instences of 'cRockOrEgg'
+
+Private Type type_MusicControl
+    exMusicControl   As New exTools_Timer
+    strMusicFiles(3) As String
+    sngMusicLen(3)   As Single
+    intCurMusicTrack As Integer
+End Type
+     * 
+Private tMusicControl As type_MusicControl
      * Public Type type_Transporter
     iToX As Integer
     iToY As Integer
@@ -32,30 +70,19 @@ Public Type type_LevelTrans
 End Type
 
 
-Public rrMap             As New cMap        ' The loaded level
-Public rrRepton          As New cPlayer     ' A human player (Repton)
-Public rrPieces()        As New cPiece      ' A piece on the level
-Public rrRocksOrEggs()   As New cRockOrEgg  ' A rock or egg; moveable piece
-Public rrMonster(4)      As New cMonster
-Public rrSpirit(8)       As New cSpirt
+
 
 Public tTransporters()   As type_Transporter
 Public tLevelTrans()     As type_LevelTrans
 
 Public sPrimPlayerName   As String
-Public intPlayerLives    As Integer
-
-Public fxParticles(15)   As New cGameFxParticle
-
-Private tDiamondFxTimer  As New exTools_Timer
 
 
 'Dim intWallAround_LOOKUP(1, 1, 1, 1) As Integer       ' (2,4,6,8) - wall is there(1) or not(0) for each
                                                       '  Down [2], Left [4], Right [6], Up [8]  (KeyPad)
                                                       '  Used in 'GetWallAroundInfo'
 
-'Dim timRockSndPlaying As New exTools_Timer
-'Public bRockSndPlaying As Boolean
+
 
 Dim iFPScount As Integer
 Dim iFPSval As Integer
@@ -85,6 +112,7 @@ Dim intLastKeyPress As exInputKeys
 		
         */
 
+        
 
     }
 
@@ -92,60 +120,79 @@ Dim intLastKeyPress As exInputKeys
     // Update is called once per frame
     void Update()
     {
+        /*
+        Function MainLoop() As Boolean
+' Returns:
+'  1 if MainLoop should be recalled
+'  0 if not
 
+    ' The main loop. Each cycle represents one frame.
+    Do While Not (UserInteraction) And (iLevelCompeted = 0 Or rrGame.Pause(-2))           ' {  Input
+        
+        ' Allow events in this game to accour                                             ' /
+        GameEvents                                                                        ' |
+                                                                                          '-   Process
+        ' Allow other events to process.                                                  ' |
+        DoEvents                                                                          ' \
+          
+        DrawFrame                                                                         ' {  Output
+                
+    Loop
+    
+    If intPlayerLives < 0 Then
+        ' All lives are gone
+        MainLoop = False
+        Exit Function
+    End If
+    
+    If iLevelCompeted = 1 Then
+    
+        If rrGame.strEpisodeName = "Home" Then
+            ' Whole game has been completed
+            bGameCompleted = True
+        Else
+            ' This level has been completed, copy 'Home' into 'Home\old\'
+            DeleteFile App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl", False
+            CopyFile App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl", App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl"
+        End If
+        
+    ElseIf iLevelCompeted = -1 Then
+        ' Player has deleted their account; Do nothing
+        
+    Else
+        ' This level was uncompleted, copy 'old/Home' into 'Home'
+        DeleteFile App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl", False
+        CopyFile App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl", App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl"
+    End If
+    
+    
+    If rrGame.strEpisodeName = "Home" Then
+        ' Exit to menu
+        MainLoop = False
+    Else
+        ' Load 'Home' level
+        
+        rrGame.DeInit
+        rrGame.sEpisodeDir = App.Path & "\data\players\" & sPrimPlayerName & "\Home\"
+        rrGame.Init
+        
+        MainLoop = True
+    End If
+    
+End Function
+         * */
     }
+
+
+
+    
+
 }
 
 
 
-
-		
-	
-	
-
-
-
 /*
- * ' Repton Returns
-' Ex-D Software Development(TM)
-' All rights reserved.
 
-Option Explicit
-
-Public bGameCompleted As Boolean
-
-Public pckLevelFiles As New cFilePackage
-Public iCurGameLevel As Integer
-Public iTotGameLevels As Integer
-Public bEpisodeCompeted As Boolean
-Public iLevelCompeted As Integer
-
-Public strEpisodeName As String
-Public sEpisodeDir As String
-Public intGamePlayType               As Integer
-Dim strLevelOrder()               As String
-Public strVisualTheme As String
-
-Public sngGameSpeed As Single
-Public sngSfxVol As Single
-Public sngMusicVol As Single
-
-Private Type type_Pause
-    timPauseContol As New exTools_Timer     ' See 'Pause' function for detail
-    sngDelay       As Single                '  " . . .
-    bPaused        As Boolean
-End Type
-Dim tPause As type_Pause
-
-Private iRockRumbleSounds As Integer    ' Controls the sound of the rock rumbling for all instences of 'cRockOrEgg'
-
-Private Type type_MusicControl
-    exMusicControl   As New exTools_Timer
-    strMusicFiles(3) As String
-    sngMusicLen(3)   As Single
-    intCurMusicTrack As Integer
-End Type
-Private tMusicControl As type_MusicControl
 
 Function Init(Optional bTransporting As Boolean = False)
 
@@ -207,65 +254,7 @@ Function Init(Optional bTransporting As Boolean = False)
 
 End Function
 
-Function MainLoop() As Boolean
-' Returns:
-'  1 if MainLoop should be recalled
-'  0 if not
 
-    ' The main loop. Each cycle represents one frame.
-    Do While Not (UserInteraction) And (iLevelCompeted = 0 Or rrGame.Pause(-2))           ' {  Input
-        
-        ' Allow events in this game to accour                                             ' /
-        GameEvents                                                                        ' |
-                                                                                          '-   Process
-        ' Allow other events to process.                                                  ' |
-        DoEvents                                                                          ' \
-          
-        DrawFrame                                                                         ' {  Output
-                
-    Loop
-    
-    If intPlayerLives < 0 Then
-        ' All lives are gone
-        MainLoop = False
-        Exit Function
-    End If
-    
-    If iLevelCompeted = 1 Then
-    
-        If rrGame.strEpisodeName = "Home" Then
-            ' Whole game has been completed
-            bGameCompleted = True
-        Else
-            ' This level has been completed, copy 'Home' into 'Home\old\'
-            DeleteFile App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl", False
-            CopyFile App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl", App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl"
-        End If
-        
-    ElseIf iLevelCompeted = -1 Then
-        ' Player has deleted their account; Do nothing
-        
-    Else
-        ' This level was uncompleted, copy 'old/Home' into 'Home'
-        DeleteFile App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl", False
-        CopyFile App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl", App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl"
-    End If
-    
-    
-    If rrGame.strEpisodeName = "Home" Then
-        ' Exit to menu
-        MainLoop = False
-    Else
-        ' Load 'Home' level
-        
-        rrGame.DeInit
-        rrGame.sEpisodeDir = App.Path & "\data\players\" & sPrimPlayerName & "\Home\"
-        rrGame.Init
-        
-        MainLoop = True
-    End If
-    
-End Function
 
 Function DeInit()
 

@@ -21,13 +21,4 @@ public class rr2moveable2 : MonoBehaviour
 	public float fTime;
 	public float fTimeToMove;
 	
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 }

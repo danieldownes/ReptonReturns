@@ -4,8 +4,17 @@ All rights reserved.
 
 
 ----------------------------------------------------------------------------
-Development history overview:
+Current Focus:
+ - Completable tutorial (re-implement main Repton 3 features)
+ - Redesigned menu system
+ - Different episode/level selector
+ - Upgrade of graphics
 
+
+----------------------------------------------------------------------------
+Development history overview:
+v2.00 BETA end:   20-12-2011 (UI and upgraded graphics)
+v2.00 ALPHA end:  31-10-2011 (repton 3 features ready)
 v2.00 Start:      03-01-2011
 v1.00 BETA 2 end: 13-04-2007 (unreleased)
 v1.00 BETA 1 end: 17-08-2003
@@ -20,10 +29,20 @@ Start:            23-08-2000
 
 Development history detail:
 
-01-07-2011: (~8 hours)  [from Mingmei's & Josh's home]
+06-09-2011: (~2 hours)
+		* When player die rocks continue to fall
+		* Rock moving sound now stops
+		^ Monsters now die
+
+02-08-2011: (~4 hours)
+		^ Eggs now movable and crackable
+		^ Monsters spawn + follow player
+
+01-07-2011: (~13 hours)  [from Mingmei's & Josh's home]
 		* Fixed Repton shuffle
 		* Fixed problem with rocks falling
 		* Fixed other minor map problems
+		^ Converting monster class from VB6
 		^ Transporters (need to do timer control)
 		^ Converted some old VB code (funguses > fire), not yet tested
 		^ Open Safes
@@ -127,7 +146,6 @@ Timer (for transporter)
 	- Sparkles behind spirits
 	- Diamond (item) collection?
 	- Screen flashing (for egg crack, spirt catch, bomb explode)?
-	- other FXs? (warning of overuse)?
 
   remove directory data from packed files
   (Map View)?
@@ -141,9 +159,6 @@ Timer (for transporter)
  nicer icon
  testing; 	
 	Game is Completable?
-	Game works for limited user?
-	Windows 2000 admin/limited user?	
-	Windows 98/ME?
 	Timing problems?
 
 	- Testing documentation? e.g. game specs
@@ -152,11 +167,7 @@ Timer (for transporter)
 
 
 ## Other Ideas ##
-  
-  Convert to .NET ?
-  Secure Files -- Player files to do!
-
-    
+      
  
 Episode/Level selector:
     'user levels' selected via a user defined 3x3 map that is merged with 

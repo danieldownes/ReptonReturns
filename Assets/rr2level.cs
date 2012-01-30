@@ -35,7 +35,8 @@ public class rr2level : MonoBehaviour
 
 
     // older stuff...
-
+    //Public rrMonster(4)      As New cMonster
+    //Public rrSpirit(8)       As New cSpirt
 
 
     float fTime; 	 //Public sngTimeLeft As Single
@@ -44,15 +45,17 @@ public class rr2level : MonoBehaviour
 
 
     // Totals in level:
-    int iDiamonds;			 	//     \
-    int iCrowns;				//      -  All must = 0 before bomb can be defused
-    int iEggs;					//    /
-    int iMonstersAlive;			//   /
+    public int iDiamonds;			 	//    \
+    public int iCrowns;				    //     -  All must = 0 before bomb can be defused
+    public int iEggs;					//    /
+    public int iMonstersAlive;			//   /
+    public int iSpirits;                //  /
 
-    int iMonsters;
+
+    public int iMonsters;
+    public Dictionary<int, GameObject> lMonsters = new Dictionary<int, GameObject>();
 
     int iMovables;
-    int iSpirits;
     public int iFires;				// Needed for fire growth determination
     int iTransporters;
     int iLevelTrans;
@@ -266,7 +269,7 @@ public class rr2level : MonoBehaviour
 						RrMapDetail[x, y].iRef = iPieceTot[110-32]; // References vTransporter array
 					
 					// Count piece types
-					Debug.Log( "count:" +  (((int)sTemp[x])-32).ToString() );
+					//Debug.Log( "count:" +  (((int)sTemp[x])-32).ToString() );
 					iPieceTot[ ((int)sTemp[x])-32 ]++;
 				}
 			}
@@ -288,8 +291,8 @@ public class rr2level : MonoBehaviour
 			tTransporter[n].z = -Convert.ToInt32(aTemp[1]) + 1;
 		}
 
-		
 
+        sTemp = tr.ReadLine();
 //        
 //        ' In-game messages data (in order as IDed)
 //        Input #1, sTemp                              ' How many
@@ -332,10 +335,10 @@ public class rr2level : MonoBehaviour
 
 		// Coloured Keys, door info (indexed in order as from map)
         //data eg: 2;4;3   .. key 0 opens door 2, key 1 opens door 4, etc...
-		if( iPieceTot[ ((int)(char)enmPiece.ColourKey) - 32 ] > 0 )
+        if (iPieceTot[67 - 32] > 0)  //((int)(char)enmPiece.ColourKey)
 		{
 			sTemp = tr.ReadLine();
-			Debug.Log(sTemp);
+			Debug.Log("Coloured Keys:" + sTemp);
 	
 	        string[] aKeyTemp = sTemp.Split(';');
 	
@@ -354,7 +357,9 @@ public class rr2level : MonoBehaviour
 
         
         // Post-read operations
-		iPieceTot[((int)(char)enmPiece.ColourKey) - 32] = 0;	// Reset coloured key count (ugly as we are counting them twice, but sfor now..)
+        iPieceTot[67 - 32] = 0; //((int)(char)enmPiece.ColourKey)	// Reset coloured key count (ugly as we are counting them twice, but sfor now..)
+        iPieceTot[68 - 32] = 0; // Door
+
 
         // Process map data
         for (int y = 0; y < iMapSizeY; y++)
@@ -375,23 +380,26 @@ public class rr2level : MonoBehaviour
                     char cT = RrMapDetail[x, y].TypeID;
                     string sExtra = "";
                     iPType = 0;
-
+                    
                     // Coloured Key
                     if (cT == (char)enmPiece.ColourKey)
                     {
                         iPType = 67-32;
                         sExtra = iPieceTot[iPType].ToString();
                         RrMapDetail[x, y].iRef = iPieceTot[iPType]; // Record key id ref in map data
+                        iPieceTot[iPType]++;
                     }
                     if (cT == (char)enmPiece.Door)
                     {
                         iPType = 68-32;
                         sExtra = colourKey[iPieceTot[iPType]].ToString(); // Select corrisponding colour as indexed by key
                         RrMapDetail[x, y].iRef = iPieceTot[iPType]; // Record door id ref in map data
+                        iPieceTot[iPType]++;
                     }
 
-					if( iPType != 0)
-						iPieceTot[iPType]++;
+						
+
+                    
 
 
                     //GameObject.Find("d")
@@ -451,8 +459,9 @@ public class rr2level : MonoBehaviour
                     {
                         vStartPos.x = x;
                         vStartPos.z = -y;
+                        rr2gameObject.playerObject.vStartPos = vStartPos;
 						rr2gameObject.playerObject.MoveToPos(vStartPos);
-						Debug.Log("MoveToPos");
+						
                     }
                 }
             }
@@ -827,23 +836,51 @@ Function SaveFileLevel(strFile As String) As Boolean
 End Function
 
 
-Public Function OpenSafes()
-    Dim intX As Integer
-    Dim intY As Integer
-    
-    For intY = 1 To rrMap.intMapSizeY
-        For intX = 1 To rrMap.intMapSizeX
-        
-            If intRTData(intX, intY) = "s" Then
-                intRTData(intX, intY) = "d"
-                rrPieces(intX, intY).TypeID = "d"
-            End If
-            
-        Next intX
-    Next intY
-End Function
 */
-	
+
+    public void SpawnMonster(Vector3 vPos)
+    {
+        Debug.Log("SpawnMonster");
+
+        lMonsters.Add(iMonsters, (GameObject)Instantiate(Resources.Load("m")));
+        lMonsters[iMonsters].transform.Translate(vPos);
+        
+
+        rr2monster oScript = lMonsters[iMonsters].GetComponent("rr2monster") as rr2monster;
+        if (oScript)
+        {
+            Debug.Log("INIT script");
+            oScript.Init(vPos);
+            oScript.iId = iMonsters;
+            oScript.rr2gameObject = rr2gameObject;
+        }else
+            Debug.Log("INIT script PROBLEM");
+
+        iMonsters++;
+        iMonstersAlive++;
+    }
+
+    public void KillMonsters(Vector3 vP)
+    {
+        Debug.Log("KillMonsters");
+        foreach (KeyValuePair<int, GameObject> lM in lMonsters)
+        {
+            if( lM.Value != null)
+            {
+                rr2monster oScript = lM.Value.GetComponent("rr2monster") as rr2monster;
+                if( oScript)
+                {
+                    Debug.Log("FOUND MONSTER " + oScript.iId);
+                    if( oScript.vPosition == vP || oScript.vLastPosition == vP)
+                        oScript.Die();
+                   
+                }
+            }
+        }
+    }
+
+
+
 	public void OpenSafes()
 	{
 		for( int y = 0; y < iMapSizeY; y++)
@@ -864,8 +901,16 @@ End Function
 	
 	public char GetMapP(Vector3 vP)
 	{
-		return RrMapDetail[(int)vP.x,(int)-vP.z].TypeID;
+		return GetMapP( (int)vP.x,(int)-vP.z);
 	}
+    public char GetMapP(int x, int y)
+    {
+        if( x >= 0 && x < iMapSizeX && y >= 0 & y < iMapSizeY)
+            return RrMapDetail[x, y].TypeID;
+        else
+            return ' ';
+    }
+
 	public int GetMapPId(Vector3 vP)
 	{
 		return RrMapDetail[(int)vP.x,(int)-vP.z].id;
@@ -903,16 +948,51 @@ End Function
 			
 		// Replace GFX
 		Destroy(rr2gameObject.loadedLevel.lObjects3[pId]);
-			
-		lObjects3[pId] = ((GameObject)Instantiate(Resources.Load(RrMapDetail[x, y].TypeID.ToString())));
-		
-		//rr2gameObject.loadedLevel.RrMapDetail[(int)x, (int)y].id = pId;
-		lObjects3[pId].transform.Translate(vPos);
+		if( cNewTypeID != '0')
+        {
+		    lObjects3[pId] = ((GameObject)Instantiate(Resources.Load(RrMapDetail[x, y].TypeID.ToString())));
+		    lObjects3[pId].transform.Translate(vPos);
+        }
 	}
 	public void ReplacePiece(Vector3 vP, char cNewTypeID)
 	{
 		ReplacePiece( (int)vP.x, (int)-vP.z, cNewTypeID);
 	}
+
+
+    public void RemovePiece(int x, int y)
+    {
+        try
+        {
+            int pId = rr2gameObject.loadedLevel.RrMapDetail[x, y].id;
+
+            if (pId != -1)
+                Destroy(rr2gameObject.loadedLevel.lObjects3[pId]);
+        }
+        catch { }
+    }
+    public void RemovePiece(Vector3 vP)
+    {
+        RemovePiece( (int)vP.x, (int)-vP.z);
+    }
+
+
+    public void RemoveNearBy(Vector3 vP, int iRadius, char cPieceType)
+    {
+        int xP = (int)vP.x;
+        int yP = (int)-vP.z;
+
+        for( int y = yP - iRadius; y < yP + iRadius; y++)
+        {
+            for( int x = xP - iRadius; x < xP + iRadius; x++)
+            {
+                if( GetMapP(x, y) == cPieceType) 
+                    ReplacePiece(x, y, '0');
+            }
+        }
+    }
+
+  
 
 /*
 

@@ -13,15 +13,19 @@ public class rr2player : rr2moveable2
 	    Board = 5
 	};
 	
+    public Vector3 vStartPos;
 	
 	public enmPlayerState iPlayerState;
-	
-	
+
+    public bool bCanMove = true;
 
     private bool updatedMove = true;
+
+    private int iDontReplace = 0;  // If set, wont replace old map piece with a space (eg monster, fungus, etc..)
 	
 	public int iLives;
 	
+    public string sName;
 
     public List<string> lInventory = new List<string>();
 
@@ -45,33 +49,44 @@ public class rr2player : rr2moveable2
 		{
 			fTime -= Time.deltaTime;
 
-			// Update movmement of Repton on map
-            if (!updatedMove && fTime <= fTimeToMove * 0.3 )
+			// Update movmement of Player on map
+            if( !updatedMove && fTime <= fTimeToMove * 0.3 )
             {
 				CheckPickup();
-                rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x, (int)-vPosition.z].TypeID = (char)rr2level.enmPiece.Repton;
-                rr2gameObject.loadedLevel.RrMapDetail[(int)vLastPosition.x, (int)-vLastPosition.z].TypeID = (char)rr2level.enmPiece.Space;
+                if( iDontReplace != 2)
+                    rr2gameObject.loadedLevel.SetMapP(vPosition, (char)rr2level.enmPiece.Repton);
+                if( iDontReplace != 1 )
+                    rr2gameObject.loadedLevel.SetMapP(vLastPosition, (char)rr2level.enmPiece.Space);
+                else
+                    iDontReplace = 0;
+                iDontReplace--;
+
                 updatedMove = true;
             }
 		}else
 		{
 			fTime = 0.0f;
+
+            iPlayerState = enmPlayerState.Stoped;
 			
-			// Check for new movement			
-			if( Input.GetAxis("Horizontal") < 0 )
-				Move( Vector3.left);
-			
-			else if( Input.GetAxis("Horizontal") > 0 )
-				Move( Vector3.right);
-			
-			else if( Input.GetAxis("Vertical") > 0 )
-				Move( Vector3.forward);
-			
-			else if( Input.GetAxis("Vertical") < 0 )
-				Move( Vector3.back);			
+			// Check for new movement, if allowed
+            if( bCanMove)
+            {
+                if (Input.GetAxis("Horizontal") < 0)
+                    Move(Vector3.left);
+
+                else if (Input.GetAxis("Horizontal") > 0)
+                    Move(Vector3.right);
+
+                else if (Input.GetAxis("Vertical") > 0)
+                    Move(Vector3.forward);
+
+                else if (Input.GetAxis("Vertical") < 0)
+                    Move(Vector3.back);
+            }
 		}
 		
-		Move3D();
+        Move3D();
 	}
 	
 	public void MoveToPos(Vector3 vNewPos)
@@ -106,6 +121,8 @@ public class rr2player : rr2moveable2
                 //rr2gameObject.guiObject.sInventory = vDirectionToMove.x.ToString();
                 //Debug.Log("sInventory=" + vDirectionToMove.x.ToString());
 
+
+                iPlayerState = enmPlayerState.Walk;
             }
             else
             {
@@ -154,9 +171,7 @@ public class rr2player : rr2moveable2
 	public bool MoveableTo( Vector3 vPos, Vector3 vDir)
 	{
 		bool bMoveableTo = true;
-        bool bUpdateMap = true;
-		
-		
+        		
 		rr2level.MapPiece2d cPiece = rr2gameObject.loadedLevel.RrMapDetail[(int) vPos.x, (int) -vPos.z];
 		
 		// Static pieces...
@@ -167,7 +182,7 @@ public class rr2player : rr2moveable2
                 // Has the key to this door?
                 if( lInventory.Contains("Coloured Key:" + rr2gameObject.loadedLevel.colourKey[cPiece.iRef].ToString()) )
                 {
-                    lInventory.Add("DOOR:" + cPiece.iRef.ToString());
+                    //lInventory.Add("DOOR:" + cPiece.iRef.ToString());
                 }else
                     bMoveableTo = false;
 
@@ -181,7 +196,13 @@ public class rr2player : rr2moveable2
 				bMoveableTo = false;
 				break;
 
+            case rr2level.enmPiece.Monster:
+            case rr2level.enmPiece.Skull:
+            case rr2level.enmPiece.Fungus:
+                iDontReplace = 2;
+                break;
 
+            
             case rr2level.enmPiece.Wall:
             case rr2level.enmPiece.Wall1:
             case rr2level.enmPiece.Wall2:
@@ -220,19 +241,15 @@ public class rr2player : rr2moveable2
 			if( vDir == Vector3.left || vDir == Vector3.right )
 			{
                 rr2level.MapPiece2d cPieceTo = rr2gameObject.loadedLevel.RrMapDetail[(int)(vPos.x + vDir.x), (int)-vPos.z];
-				
-				Debug.Log("rock: " + cPieceTo.TypeID);
-				
+								
 				bMoveableTo = false;
-				
-				if( cPieceTo.TypeID == (char)rr2level.enmPiece.Space )
+
+                if (cPieceTo.TypeID == (char)rr2level.enmPiece.Space || cPieceTo.TypeID == (char)rr2level.enmPiece.Monster)
 				{
 					rr2moveable oScript = rr2gameObject.loadedLevel.lObjects3[cPiece.id].GetComponent("rr2moveable") as rr2moveable;
                     if (oScript)
                     {
-                        Debug.Log("dir:" + (int)vDir.x);
                         bMoveableTo = oScript.Move(vDir);
-						Debug.Log("rock move: " + bMoveableTo);
                     }
 				}
 			}
@@ -300,8 +317,6 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
                 lInventory.Add("Coloured Key:" + cPiece.iRef.ToString());
                 break;
 
-            
-
             case rr2level.enmPiece.Bomb:
 				
 				// Already cheked if objectives are completed in MoveableTo
@@ -310,18 +325,22 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
 
             case rr2level.enmPiece.Monster:
 				//If rrMonster(rrPieces(intX, intY).intMonsterID).blnEarth Then MoveableTo = False
+                bUpdateMap = false;
+                iDontReplace = 2;
 				break;
 
             case rr2level.enmPiece.Skull:
 			case rr2level.enmPiece.Fungus:
                 bUpdateMap = false;
+                Die();
+
                 break;
 			
 			case rr2level.enmPiece.Transporter:
             	rr2gameObject.loadedLevel.RrMapDetail[(int)vLastPosition.x, (int)-vLastPosition.z].TypeID = (char)rr2level.enmPiece.Space;
 				vLastPosition = vPosition;
-				vPosition = rr2gameObject.loadedLevel.tTransporter[cPiece.iRef];
-				vDirection = new Vector3(0f,0f,-1f);
+                vPosition = vStartPos = rr2gameObject.loadedLevel.tTransporter[cPiece.iRef];
+				vDirection = Vector3.back;
 			
 				cPiece.iRef = 0;
 					
@@ -335,18 +354,12 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
                 // Start FX
 
 				break; 
-
 		}
 		
 		if (bUpdateMap)
         {
             // Remove the graphic
-            try
-            {
-				int pId = rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x, (int)-vPosition.z].id;
-				if( pId != -1)
-                	Destroy(rr2gameObject.loadedLevel.lObjects3[pId]);
-            } catch {}
+            rr2gameObject.loadedLevel.RemovePiece(vPosition);
         }
 
 		return;
@@ -357,8 +370,12 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
 	{
 		iLives--;
 		
-		// Reset to starting position
-		//MoveToPos(
+		// Reset to starting position]
+        rr2gameObject.loadedLevel.SetMapP(vPosition, '0');
+		MoveToPos(vStartPos);
+        vDirection = Vector3.back;
+
+        
 		
 		// Reset bomb?
 		
