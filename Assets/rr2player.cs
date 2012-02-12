@@ -91,8 +91,11 @@ public class rr2player : rr2moveable2
 	
 	public void MoveToPos(Vector3 vNewPos)
 	{
-		vLastPosition = vPosition = vNewPos;
+		if( iDontReplace != 1 )
+        	rr2gameObject.loadedLevel.SetMapP(vLastPosition, (char)rr2level.enmPiece.Space);
+		rr2gameObject.loadedLevel.SetMapP(vNewPos, (char)rr2level.enmPiece.Repton);
 		
+		vLastPosition = vPosition = vNewPos;
 		
 		//rr2gameObject.guiObject.OnGUI ();
 	}
@@ -171,7 +174,7 @@ public class rr2player : rr2moveable2
 	public bool MoveableTo( Vector3 vPos, Vector3 vDir)
 	{
 		bool bMoveableTo = true;
-        		
+        bool bUpdateMap = true;
 		rr2level.MapPiece2d cPiece = rr2gameObject.loadedLevel.RrMapDetail[(int) vPos.x, (int) -vPos.z];
 		
 		// Static pieces...
@@ -257,12 +260,12 @@ public class rr2player : rr2moveable2
         else if (bUpdateMap && bMoveableTo)
         {
             // Remove the graphic
-            try
-            {
-				int pId = rr2gameObject.loadedLevel.RrMapDetail[(int)vPos.x, (int)-vPos.z].id;
-				if( pId != -1)
-                	Destroy(rr2gameObject.loadedLevel.lObjects3[pId]);
-            } catch {}
+            //try
+            //{
+			//	int pId = rr2gameObject.loadedLevel.RrMapDetail[(int)vPos.x, (int)-vPos.z].id;
+		//		if( pId != -1)
+          //      	Destroy(rr2gameObject.loadedLevel.lObjects3[pId]);
+            //} catch {}
         }
 
 		return bMoveableTo;
@@ -301,6 +304,8 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
         bool bUpdateMap = true;
 				
 		rr2level.MapPiece2d cPiece = rr2gameObject.loadedLevel.RrMapDetail[(int) vPosition.x, (int) -vPosition.z];
+		
+		Debug.Log("moving to:" + (rr2level.enmPiece)cPiece.TypeID);
 		
 		// Static pieces...
 		switch( (rr2level.enmPiece)cPiece.TypeID )

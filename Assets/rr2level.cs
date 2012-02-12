@@ -426,7 +426,7 @@ public class rr2level : MonoBehaviour
                             }
                         }
 						
-						if (cT == (char)enmPiece.Egg)
+						else if (cT == (char)enmPiece.Egg)
                         {
                             rr2moveable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as rr2moveable;
                             if (oScript)
@@ -436,16 +436,17 @@ public class rr2level : MonoBehaviour
                                 oScript.rr2gameObject = rr2gameObject;
                             }
                         }
-
-
-
-                        //                    ' Keep track of piece count
-                        //                    Select Case rrPieces(X, Y).TypeID
-                        //                        Case "n"
-                        //                            ReDim tTransporters(UBound(tTransporters) + 1)
-                        //                        Case "y"
-                        //                            ReDim tLevelTrans(UBound(tLevelTrans) + 1)
-                        //                    End Select
+						
+						else if (cT == (char)enmPiece.Spirit)
+                        {
+                            rr2spirit oScript = lObjects3[iObjTot].GetComponent("rr2spirit") as rr2spirit;
+                            if (oScript)
+                            {
+                                oScript.Init(vThisPos);
+                                oScript.iId = iObjTot;
+                                oScript.rr2gameObject = rr2gameObject;
+                            }
+                        }
 
                         iObjTot++;
                     }

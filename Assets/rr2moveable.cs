@@ -21,42 +21,6 @@ public class rr2moveable : rr2moveable2
 	
 	}
 	
-	/*
-	 * Function Init(intType As enmPieceType, intX As Integer, intY As Integer)
-	' intType should only be Rock OR Egg
-	
-	    Dim strThemeDir As String
-	    strThemeDir = rrGame.strVisualTheme
-	
-	    intPieceType = intType
-	    
-	    intCurX = intX
-	    intCurY = intY
-	    
-	    
-	    If intType = Rock Then
-	        
-	        ExLog3D.InitXFile pckOrigThemeFiles.GetPackedFile("rock.x"), pckOrigThemeFiles.GetPackedFile("ROCK.BMP")
-	        
-	        ' Random post rotation?
-	        ExLog3D.RotateVecs Rnd() * 360, Rnd() * 360, 0
-	        
-	    Else
-	        ' Egg
-	        ExLog3D.InitXFile pckOrigThemeFiles.GetPackedFile("egg.x"), pckOrigThemeFiles.GetPackedFile("egg.bmp")
-	    End If
-	
-	    ExLog3D.ResetMatrix
-	    ExLog3D.position Ret3DPos(intCurX), Ret3DPos(intCurY), -200, True
-	    
-	    blnFalling = False
-	    bEggCracking = False
-	    
-	    cintTimeToMove = 0.22 / rrGame.sngGameSpeed
-	
-	
-	End Function
-*/
 	public void Init(rr2level.enmPiece iSetPieceType, Vector3 vSetPos)
 	{
 		pPieceType = iSetPieceType;
@@ -72,7 +36,7 @@ public class rr2moveable : rr2moveable2
 		bFalling = false;
 	}
 	
-	void Update () 
+	void Update() 
 	{
 		
 		
@@ -236,7 +200,10 @@ public class rr2moveable : rr2moveable2
 	
 		
 		// Fall stright down?
-        sTemp = (char)rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x, (int)-vPosition.z + 1].TypeID;
+		// TODO: Fix
+		sTemp = '5';
+        //sTemp = (char)rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x, (int)-vPosition.z + 1].TypeID;
+		
 		
 		if( sTemp == (char)rr2level.enmPiece.Space )
 		{
@@ -297,7 +264,7 @@ public class rr2moveable : rr2moveable2
 			}
         
             // Is the support currently under rock slanted to the left?
-            sTemp = (char)rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x, (int)-vPosition.z + 1].TypeID;
+            sTemp = rr2gameObject.loadedLevel.GetMapPId(vPosition + Vector3.back);
 		    //Debug.Log("Contains:" + sTemp.ToString());
             if( sSlantedLeft.Contains( sTemp.ToString() ) )
 		    {

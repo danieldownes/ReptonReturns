@@ -20,7 +20,6 @@ public class rr2monster : rr2moveable2
 	public enmState iState;
 	
 	
-	//public bool bEarth;
 	public char cOnPiece; // Monsters can go through Earth + Space, this tracks what the monster may be on
 	public char cLastOnPiece;
 	public int iOnId;
@@ -53,10 +52,8 @@ public class rr2monster : rr2moveable2
 	void Update()
 	{
         if( fTime > 0.0f)
-            fTime -= Time.deltaTime;
-
-        //Debug.Log("state:" + iState.ToString());
-
+            fTime -= Time.deltaTime;
+		
 		if( iState == enmState.Waking)
         {
             if( fTime <= 0.0f)
@@ -232,27 +229,3 @@ public class rr2monster : rr2moveable2
         rr2gameObject.loadedLevel.SetMapP(vPosition, '0');
     }
 }
-
-
-
-
-/*
-
-Function Die() As Boolean
-    If (enmMonsterState = SeekingRepton Or enmMonsterState = MonsterWaking) And blnEarth = False Then
-        DieForced
-        Die = True
-        
-        ExSnds(18).PlaySound False
-    Else
-        Die = False
-    End If
-End Function
-
-Function DieForced()
-    enmMonsterState = Dead
-    rrMap.intTotMonstersAlive = rrMap.intTotMonstersAlive - 1
-End Function
-
-
-*/
