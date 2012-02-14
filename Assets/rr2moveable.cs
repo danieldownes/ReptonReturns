@@ -264,7 +264,7 @@ public class rr2moveable : rr2moveable2
 			}
         
             // Is the support currently under rock slanted to the left?
-            sTemp = rr2gameObject.loadedLevel.GetMapPId(vPosition + Vector3.back);
+            sTemp = rr2gameObject.loadedLevel.GetMapP(vPosition + Vector3.back);
 		    //Debug.Log("Contains:" + sTemp.ToString());
             if( sSlantedLeft.Contains( sTemp.ToString() ) )
 		    {

@@ -2,11 +2,7 @@ using System;
 using UnityEngine;
 
 public class rr2spirit : rr2moveable2
-{
-	public rr2game rr2gameObject;
-	
-	public int iId; // lObjects ref
-	
+{	
 	public int iState;  // 0 = Seek (check direction), 1 = Moving
 	
 	private bool bFirstMove;		// Helps to make sure the first move of the spirit is the same as origonal version of Repton
@@ -41,27 +37,7 @@ public class rr2spirit : rr2moveable2
 
         vPosition = vLastPosition = vPos;
 		
-		// Determine starting direction ...      ' (in origonal Repton this is done on every spirt move; hence 'dazed sprits')
-		
-		// If nothing is set, then default to Up
-        vDirection = vLastDirection = Vector3.forward;
-        
-		// Move Right?
-    	if( !MoveableTo(vPosition, Vector3.back))
-        	vDirection = Vector3.right;
-    
-    	// Move Down?
-    	if( !MoveableTo(vPosition, Vector3.right))
-        	vDirection = Vector3.back;
-    
-    	// Move Left?
-    	if( !MoveableTo(vPosition, Vector3.forward))
-        	vDirection = Vector3.left;
-    
-
-    	bFirstMove = true;
-    	//bDidNotMoveLast = true;
-		
+    	bFirstMove = true;		
 		
 		vLastDirection = vDirection;
         
@@ -88,8 +64,8 @@ public class rr2spirit : rr2moveable2
 	void Move( Vector3 vDir)
 	{
 		// Update local info
-		
-		Debug.Log("Spirit Move:" + vDir);
+				
+		iState = 1;
 		
 		vLastPosition = vPosition;
 		vLastDirection = vDirection;
@@ -123,7 +99,7 @@ public class rr2spirit : rr2moveable2
 		char cT;
 		
 		cT = rr2gameObject.loadedLevel.GetMapP(vPos + vDir);
-		
+				
 		// Checks if a spirit can move to the piece at the given map coords.
 		bMoveableTo = ( cT == '0' || cT == 'i' || cT == 'e' || cT == 'c' );
 		
@@ -136,33 +112,50 @@ public class rr2spirit : rr2moveable2
 		bool bCanMove;
 		Vector3 vOldDir;
 		
+		bCanMove = false;
 		
-		while( iCornTry < 4)
-		{
+		iCornTry = 0;
+		
+		while( iCornTry < 4 && !bCanMove)
+		{			
 	        vOldDir = vDirection;
 	        
-	        // Is there a wall there we should hug? ...
-			if( !bFirstMove)	// Only do this if not the first move
+	        
+			if( bFirstMove)	// Only do this if the first move
 			{
-	            vDirection = vOldDir;      // In case we turned right (if wall was infront) //??
-				bCanMove = MoveableTo(vPosition, vDirection);
+	            // Determine starting direction ...      ' (in origonal Repton this is done on every spirt move; hence 'dazed sprits')
+		
+				// If nothing is set, then default to Up
+		        vDirection = vLastDirection = Vector3.forward;
+		        
+				// Move Right?
+		    	if( !MoveableTo(vPosition, Vector3.forward))
+		        	vDirection = Vector3.right;
+		    
+		    	// Move Down?
+		    	if( !MoveableTo(vPosition, Vector3.right))
+		        	vDirection = Vector3.back;
+		    
+		    	// Move Left?
+		    	if( !MoveableTo(vPosition, Vector3.back))
+		        	vDirection = Vector3.left;
+								
+				bFirstMove = false;
+			}else
+			{
+				// Is there a wall (to the right) that we should hug? ...
+				//vDirection = vOldDir;      // In case we turned right (if wall was infront) //??
+				bCanMove = MoveableTo(vPosition, TurnCCW(vDirection));
 	            
 				// Do the check
 				if( bCanMove)
 				{
-					// No! Then turn left
-					// AKA: Hug wall left (antturn CCW)
-					if( vDirection == Vector3.forward)
-						vDirection = Vector3.left;
-					else if( vDirection == Vector3.back)
-						vDirection = Vector3.right;
-					else if( vDirection == Vector3.left)
-						vDirection = Vector3.back;
-					else if( vDirection == Vector3.right)
-						vDirection = Vector3.forward;
+					// So there was No wall there! Turn left Now
+					// AKA: Hug wall left (turn CCW)
+					vDirection = TurnCCW(vDirection);
 				}
-			}else
-				bFirstMove = false;
+				
+			}
 	
 			// Which way are we facing?
 			bCanMove = MoveableTo(vPosition, vDirection);
@@ -171,8 +164,7 @@ public class rr2spirit : rr2moveable2
 			if( bCanMove)
 			{
 				Move(vDirection);
-				iCornTry = 0;
-				
+								
 				cT = rr2gameObject.loadedLevel.GetMapP(vPosition);
 	
 				// If we went into a cage, we should turn into a dimond (deactivate and change map)
@@ -191,24 +183,44 @@ public class rr2spirit : rr2moveable2
 	//                rrRepton.Die
 	//            End If
 	//            
-				// Remember last coords. - used to check if Repton moved where spirit has just been (Repton should die if this is true)
-				vLastPosition = vPosition;
 				
-			}else
+				
+			}else 
 			{
 				// Try next direction (turn clockwise)
-				if( vDirection == Vector3.forward)
-					vDirection = Vector3.right;
-				else if( vDirection == Vector3.back)
-					vDirection = Vector3.left;
-				else if( vDirection == Vector3.left)
-					vDirection = Vector3.forward;
-				else if( vDirection == Vector3.right)
-					vDirection = Vector3.back;
+				vDirection = TurnCW(vDirection);
 				
 				iCornTry++;
 			}
 		}
+	}
+	
+	private Vector3 TurnCW(Vector3 vDir)
+	{		
+		if( vDir == Vector3.forward)
+			vDir = Vector3.right;
+		else if( vDir == Vector3.back)
+			vDir = Vector3.left;
+		else if( vDir == Vector3.left)
+			vDir = Vector3.forward;
+		else if( vDir == Vector3.right)
+			vDir = Vector3.back;
+		
+		return vDir;
+	}
+	
+	private Vector3 TurnCCW(Vector3 vDir)
+	{
+		if( vDir == Vector3.forward)
+			vDir = Vector3.left;
+		else if( vDir == Vector3.back)
+			vDir = Vector3.right;
+		else if( vDir == Vector3.left)
+			vDir = Vector3.back;
+		else if( vDir == Vector3.right)
+			vDir = Vector3.forward;
+		
+		return vDir;
 	}
 	
 }

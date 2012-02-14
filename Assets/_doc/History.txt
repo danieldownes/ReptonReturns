@@ -29,6 +29,8 @@ Start:            23-08-2000
 
 Development history detail:
 
+14-02-2012: (~1 hour)
+		^ Spirit Class conversion finished
 11-02-2012: (~3 hours)
 		^ Spirit Class conversion
 
