@@ -1,7 +1,6 @@
 using UnityEngine;
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 
 
@@ -9,24 +8,22 @@ using System.Collections.Generic;
 // Ex-D Software Development(TM)
 // All rights reserved.
 
-public class rr2level : MonoBehaviour
+public class Level : MonoBehaviour
 {
-    public rr2game rr2gameObject;
+    public Game game;
 
-
-    public int iMapSizeX;
-    public int iMapSizeY;
+    public int MapSizeX;
+    public int MapSizeY;
 	public float fMapSlant = 0.35f; // For every Z, Y increases this much
 	//public Vector3 vMapSize3d;
 	
-    public MapPiece2d[,] RrMapDetail;
+    public MapPiece2d[,] MapDetail;
 	
 	public Vector3[] tTransporter;
 
     public int[] colourKey;  // index = key, value = door, as numbered in the order they apper in the file
 
     public int[] iPieceTot; // Count types of pieces (useful for keeping track of coloured keys, etc)
-	
 	
 
     public List<GameObject> lObjects3 = new List<GameObject>();	// Reference to all our game object map pieces, including movables
@@ -61,7 +58,7 @@ public class rr2level : MonoBehaviour
     int iTransporters;
     int iLevelTrans;
 
-    public enum enmPiece
+    public enum Piece
     {
         // Used charicters:   abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ%*)^$(&£!|\`¬¦@;:.<>#~=+-_
         // (underlined)      ------- - - -- - ----  -------------            --            -    ----                 
@@ -112,35 +109,13 @@ public class rr2level : MonoBehaviour
 
         public int iRef;  // Look-up reference used by some piece types (eg coloured keys, transporters, etc..)
     }
-	
-	
-
-
-    // Use this for initialization
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-
-
 
     	
-//	Function LoadFileLevel() As Boolean
 	public bool LoadFileLevel()
 	{
-		
-		//int iId;
-		iMapSizeX = 30;
-		iMapSizeY = 30;
-        // Map data
-        RrMapDetail = new MapPiece2d[iMapSizeX, iMapSizeY];
+		MapSizeX = 30;
+		MapSizeY = 30;
+        MapDetail = new MapPiece2d[MapSizeX, MapSizeY];
 
 		int iPType = 0;
 
@@ -155,16 +130,8 @@ public class rr2level : MonoBehaviour
 
 		//int iMapEdgeSize = 2;
 		
-		//StartCoroutine("getDataTest");
-	
 		string sTemp;
 	
-	//	string sFile;
-	
-	//    intShowingMsg = -1
-		
-		
-	//    LoadFileLevel = False
 		bool loadedOk = false;
 		
 		// Individual level info::
@@ -236,38 +203,36 @@ public class rr2level : MonoBehaviour
 //        Input #1, sTemp
 		sTemp = tr.ReadLine();
 		Debug.Log(sTemp);
-        iMapSizeX = Convert.ToInt32(sTemp.Split(',')[0]);
-        iMapSizeY = Convert.ToInt32(sTemp.Split(',')[1]);
+        MapSizeX = Convert.ToInt32(sTemp.Split(',')[0]);
+        MapSizeY = Convert.ToInt32(sTemp.Split(',')[1]);
 		
-		Debug.Log(iMapSizeX + ":" + iMapSizeY);
-
-
+		Debug.Log(MapSizeX + ":" + MapSizeY);
        		
 		
 		// Get map layout data	
-		for( int y = 0; y < iMapSizeY; y++ )
+		for( int y = 0; y < MapSizeY; y++ )
 		{
-			if( y >= 0 && y < iMapSizeY )
+			if( y >= 0 && y < MapSizeY )
 				sTemp = tr.ReadLine();
 			
 			Debug.Log(sTemp);
 						
-			for( int x = 0; x < iMapSizeX; x++)
+			for( int x = 0; x < MapSizeX; x++)
 			{
 				//Vector3 vThisPos = new Vector3(x * 1.0f, 0.0f, y * -1.0f);
 				
 				
 				// Put wall boarder around map
-				if( x < 0 || x >= (iMapSizeX-2) || y < 0 || y >= (iMapSizeY-2) )
+				if( x < 0 || x >= (MapSizeX-2) || y < 0 || y >= (MapSizeY-2) )
 				{
 					//RrMapDetail[x,y].TypeID = '5';
 				}else
 				{
                 	// Else use read in value
-					RrMapDetail[x,y].TypeID = sTemp[x];
+					MapDetail[x,y].TypeID = sTemp[x];
 					
-					if (sTemp[x] == (char)enmPiece.Transporter)
-						RrMapDetail[x, y].iRef = iPieceTot[110-32]; // References vTransporter array
+					if (sTemp[x] == (char)Piece.Transporter)
+						MapDetail[x, y].iRef = iPieceTot[110-32]; // References vTransporter array
 					
 					// Count piece types
 					//Debug.Log( "count:" +  (((int)sTemp[x])-32).ToString() );
@@ -275,7 +240,6 @@ public class rr2level : MonoBehaviour
 				}
 			}
 		}
-
 		
 		
 		// Transporter info (indexed in order as from map)
@@ -355,97 +319,89 @@ public class rr2level : MonoBehaviour
 		tr.Close();
 
         
-
-        
         // Post-read operations
         iPieceTot[67 - 32] = 0; //((int)(char)enmPiece.ColourKey)	// Reset coloured key count (ugly as we are counting them twice, but sfor now..)
         iPieceTot[68 - 32] = 0; // Door
 
 
         // Process map data
-        for (int y = 0; y < iMapSizeY; y++)
+        for (int y = 0; y < MapSizeY; y++)
         {
 
-            for (int x = 0; x < iMapSizeX; x++)
+            for (int x = 0; x < MapSizeX; x++)
             {
                 Vector3 vThisPos = new Vector3(x * 1.0f, -y * fMapSlant, y * -1.0f);
 
                 // Put wall boarder around map
-                if (x < 0 || x >= (iMapSizeX - 2) || y < 0 || y >= (iMapSizeY - 2))
+                if (x < 0 || x >= (MapSizeX - 2) || y < 0 || y >= (MapSizeY - 2))
                 {
                     //RrMapDetail[x,y].TypeID = '5';
                 }
                 else
                 {
 
-                    char cT = RrMapDetail[x, y].TypeID;
+                    char cT = MapDetail[x, y].TypeID;
                     string sExtra = "";
                     iPType = 0;
                     
                     // Coloured Key
-                    if (cT == (char)enmPiece.ColourKey)
+                    if (cT == (char)Piece.ColourKey)
                     {
                         iPType = 67-32;
                         sExtra = iPieceTot[iPType].ToString();
-                        RrMapDetail[x, y].iRef = iPieceTot[iPType]; // Record key id ref in map data
+                        MapDetail[x, y].iRef = iPieceTot[iPType]; // Record key id ref in map data
                         iPieceTot[iPType]++;
                     }
-                    if (cT == (char)enmPiece.Door)
+                    if (cT == (char)Piece.Door)
                     {
                         iPType = 68-32;
                         sExtra = colourKey[iPieceTot[iPType]].ToString(); // Select corrisponding colour as indexed by key
-                        RrMapDetail[x, y].iRef = iPieceTot[iPType]; // Record door id ref in map data
+                        MapDetail[x, y].iRef = iPieceTot[iPType]; // Record door id ref in map data
                         iPieceTot[iPType]++;
                     }
 
-						
-
-                    
-
-
-                    //GameObject.Find("d")
                     try
                     {
-                        lObjects3.Add((GameObject)Instantiate(Resources.Load(RrMapDetail[x, y].TypeID.ToString() + sExtra)));
+                        lObjects3.Add((GameObject)Instantiate(Resources.Load(MapDetail[x, y].TypeID.ToString() + sExtra)));
                         //RrMapDetail[x,y].go = (GameObject)Instantiate(Resources.Load(RrMapDetail[x,y].TypeID.ToString())); 
                         lObjects3[iObjTot].transform.Translate(vThisPos);
-                        RrMapDetail[x, y].id = iObjTot;
+                        MapDetail[x, y].id = iObjTot;
 
 
 
                         //if( lObjects3[iId] != null)
 
 
-                        if (cT == (char)enmPiece.Rock)
+                        if (cT == (char)Piece.Rock)
                         {
-                            rr2moveable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as rr2moveable;
+                            Moveable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as Moveable;
                             if (oScript)
                             {
-                                oScript.Init(enmPiece.Rock, vThisPos);
+                                oScript.Init(Piece.Rock, vThisPos);
                                 oScript.iId = iObjTot;
-                                oScript.rr2gameObject = rr2gameObject;
+                                oScript.game = game;
                             }
                         }
 						
-						else if (cT == (char)enmPiece.Egg)
+						else if (cT == (char)Piece.Egg)
                         {
-                            rr2moveable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as rr2moveable;
+                            Moveable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as Moveable;
                             if (oScript)
                             {
-                                oScript.Init(enmPiece.Egg, vThisPos);
+                                oScript.Init(Piece.Egg, vThisPos);
                                 oScript.iId = iObjTot;
-                                oScript.rr2gameObject = rr2gameObject;
+                                oScript.game = game;
                             }
                         }
 						
-						else if (cT == (char)enmPiece.Spirit)
+						else if (cT == (char)Piece.Spirit)
                         {
-                            rr2spirit oScript = lObjects3[iObjTot].GetComponent("rr2spirit") as rr2spirit;
+                            Spirit oScript = lObjects3[iObjTot].GetComponent("rr2spirit") as Spirit;
                             if (oScript)
                             {
                                 oScript.Init(vThisPos);
                                 oScript.iId = iObjTot;
-                                oScript.rr2gameObject = rr2gameObject;
+                                oScript.game = game;
                             }
                         }
 
@@ -453,7 +409,7 @@ public class rr2level : MonoBehaviour
                     }
                     catch
                     {
-						RrMapDetail[x, y].id = -1;
+						MapDetail[x, y].id = -1;
                     }
 
                     // Move Player to starting position
@@ -461,8 +417,8 @@ public class rr2level : MonoBehaviour
                     {
                         vStartPos.x = x;
                         vStartPos.z = -y;
-                        rr2gameObject.playerObject.vStartPos = vStartPos;
-						rr2gameObject.playerObject.MoveToPos(vStartPos);
+                        game.playerObject.vStartPos = vStartPos;
+						game.playerObject.MoveToPos(vStartPos);
 						
                     }
                 }
@@ -851,13 +807,13 @@ End Function
         lMonsters[iMonsters].transform.Translate(vPos);
         
 
-        rr2monster oScript = lMonsters[iMonsters].GetComponent("rr2monster") as rr2monster;
+        Monster oScript = lMonsters[iMonsters].GetComponent("rr2monster") as Monster;
         if (oScript)
         {
             Debug.Log("INIT script");
             oScript.Init(vPos);
             oScript.iId = iMonsters;
-            oScript.rr2gameObject = rr2gameObject;
+            oScript.rr2gameObject = game;
         }else
             Debug.Log("INIT script PROBLEM");
 
@@ -872,7 +828,7 @@ End Function
         {
             if( lM.Value != null)
             {
-                rr2monster oScript = lM.Value.GetComponent("rr2monster") as rr2monster;
+                Monster oScript = lM.Value.GetComponent("rr2monster") as Monster;
                 if( oScript)
                 {
                     Debug.Log("FOUND MONSTER " + oScript.iId);
@@ -888,13 +844,13 @@ End Function
 
 	public void OpenSafes()
 	{
-		for( int y = 0; y < iMapSizeY; y++)
+		for( int y = 0; y < MapSizeY; y++)
 		{
-			for( int x = 0; x < iMapSizeX; x++)
+			for( int x = 0; x < MapSizeX; x++)
 			{
-				if( RrMapDetail[x,y].TypeID == (char)enmPiece.Safe)
+				if( MapDetail[x,y].TypeID == (char)Piece.Safe)
 				{
-					ReplacePiece(x, y, (char)enmPiece.Dimond);
+					ReplacePiece(x, y, (char)Piece.Dimond);
 				}
 			}
 		}
@@ -910,34 +866,34 @@ End Function
 	}
     public char GetMapP(int x, int y)
     {
-        if( x >= 0 && x < iMapSizeX && y >= 0 & y < iMapSizeY)
-            return RrMapDetail[x, y].TypeID;
+        if( x >= 0 && x < MapSizeX && y >= 0 & y < MapSizeY)
+            return MapDetail[x, y].TypeID;
         else
             return ' ';
     }
 
 	public int GetMapPId(Vector3 vP)
 	{
-		return RrMapDetail[(int)vP.x,(int)-vP.z].id;
+		return MapDetail[(int)vP.x,(int)-vP.z].id;
 	}
 	
 	public void SetMapP(Vector3 vP, char cType)
 	{
-		RrMapDetail[(int)vP.x,(int)-vP.z].TypeID = cType;
+		MapDetail[(int)vP.x,(int)-vP.z].TypeID = cType;
 	}
 	public void SetMapP(Vector3 vP, char cType, int id)
 	{
-		RrMapDetail[(int)vP.x,(int)-vP.z].TypeID = cType;
-		RrMapDetail[(int)vP.x,(int)-vP.z].id = id;
+		MapDetail[(int)vP.x,(int)-vP.z].TypeID = cType;
+		MapDetail[(int)vP.x,(int)-vP.z].id = id;
 	}
 	
 	public void AddPiece(int x, int y, char cNewTypeID)
 	{
 		Vector3 vPos = new Vector3(x * 1.0f, 0.0f, y * -1.0f);
 			
-		RrMapDetail[x,y].TypeID = cNewTypeID;
+		MapDetail[x,y].TypeID = cNewTypeID;
 			
-		lObjects3[iObjTot] = ((GameObject)Instantiate(Resources.Load(RrMapDetail[x, y].TypeID.ToString())));
+		lObjects3[iObjTot] = ((GameObject)Instantiate(Resources.Load(MapDetail[x, y].TypeID.ToString())));
 		
 		lObjects3[iObjTot].transform.Translate(vPos);
 		
@@ -947,15 +903,15 @@ End Function
 	public void ReplacePiece(int x, int y, char cNewTypeID)
 	{
 		Vector3 vPos = new Vector3(x * 1.0f, 0.0f, y * -1.0f);
-		int pId = rr2gameObject.loadedLevel.RrMapDetail[(int)x, (int)y].id;
+		int pId = game.loadedLevel.MapDetail[(int)x, (int)y].id;
 			
-		RrMapDetail[x,y].TypeID = cNewTypeID;
+		MapDetail[x,y].TypeID = cNewTypeID;
 			
 		// Replace GFX
-		Destroy(rr2gameObject.loadedLevel.lObjects3[pId]);
+		Destroy(game.loadedLevel.lObjects3[pId]);
 		if( cNewTypeID != '0')
         {
-		    lObjects3[pId] = ((GameObject)Instantiate(Resources.Load(RrMapDetail[x, y].TypeID.ToString())));
+		    lObjects3[pId] = ((GameObject)Instantiate(Resources.Load(MapDetail[x, y].TypeID.ToString())));
 		    lObjects3[pId].transform.Translate(vPos);
         }
 	}
@@ -969,10 +925,10 @@ End Function
     {
         try
         {
-            int pId = rr2gameObject.loadedLevel.RrMapDetail[x, y].id;
+            int pId = game.loadedLevel.MapDetail[x, y].id;
 
             if (pId != -1)
-                Destroy(rr2gameObject.loadedLevel.lObjects3[pId]);
+                Destroy(game.loadedLevel.lObjects3[pId]);
         }
         catch { }
     }

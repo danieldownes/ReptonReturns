@@ -1,23 +1,18 @@
 using UnityEngine;
-using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
 
-
-
-public class rr2game : MonoBehaviour
+public class Game : MonoBehaviour
 {
-    public rr2gui guiObject;
+    public Player playerObject;
+    public Level loadedLevel;
+    public int gameState; // 2 == paused
 
-    public rr2player playerObject;
+    void Start()
+    {
+        loadedLevel.LoadFileLevel();
+        playerObject.MoveToPos(loadedLevel.vStartPos);
+    }
 
-    public rr2level loadedLevel;
-
-    public rr2data dataManager;
-
-	public int gameState; // 2 == paused
-
+}
 
 /*
 ' Repton Returns
@@ -94,32 +89,6 @@ Dim intLastKeyPress As exInputKeys
 
 
 
-    // Use this for initialization
-    void Start() //IEnumerator
-    {
-        loadedLevel.LoadFileLevel();
-
-        playerObject.MoveToPos(loadedLevel.vStartPos);
-
-        /*
-        GameObject go = GameObject.Find("Player");
-        rr2player oPlayer = go.GetComponent(rr2player) as rr2player;
-        if (oPlayer)
-            oPlayer.MoveToPos( vStartPos );
-		
-        //rr2player playerObject = GameObject.Find("Player");
-        //playerObject.GetComponent(rr2player)
-		
-        */
-
-        
-
-    }
-
-
-    // Update is called once per frame
-    void Update()
-    {
         /*
         Function MainLoop() As Boolean
 ' Returns:
@@ -180,18 +149,8 @@ Dim intLastKeyPress As exInputKeys
     End If
     
 End Function
-         * */
-    }
+  
 
-
-
-    
-
-}
-
-
-
-/*
 
 
 Function Init(Optional bTransporting As Boolean = False)
