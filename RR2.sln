@@ -1,9 +1,7 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-
-Project("{478E6C83-B910-56F7-61CB-AFF1FD8C7C53}") = "RR2", "Assembly-CSharp.csproj", "{17F0D2A3-6DB4-487C-7DBD-722135EEBF6A}"
-EndProject
-Project("{478E6C83-B910-56F7-61CB-AFF1FD8C7C53}") = "RR2", "Assembly-UnityScript.unityproj", "{B4E3CA21-B7E7-EBCB-30CB-63F04CFE1B9E}"
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RR2", "Assembly-CSharp.csproj", "{17F0D2A3-6DB4-487C-7DBD-722135EEBF6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,13 +13,11 @@ Global
 		{17F0D2A3-6DB4-487C-7DBD-722135EEBF6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17F0D2A3-6DB4-487C-7DBD-722135EEBF6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17F0D2A3-6DB4-487C-7DBD-722135EEBF6A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B4E3CA21-B7E7-EBCB-30CB-63F04CFE1B9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B4E3CA21-B7E7-EBCB-30CB-63F04CFE1B9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B4E3CA21-B7E7-EBCB-30CB-63F04CFE1B9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B4E3CA21-B7E7-EBCB-30CB-63F04CFE1B9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
 EndGlobal
