@@ -19,28 +19,28 @@ public class Spirit : Moveable2
     public void Init(Vector3 vPos)
     {
         pPieceType = Level.Piece.Spirit;
-        fTimeToMove = 0.45f;
+        TimeToMove = 0.45f;
         OnPiece = '0';
         OnId = -1;
         State = 1;
-        fTime = 1.0f;
-        vPosition = vLastPosition = vPos;
+        LastTime = 1.0f;
+        Position = LastPosition = vPos;
         firstMove = true;
-        vLastDirection = vDirection;
+        LastDirection = Direction;
     }
 
     void Update()
     {
-        fTime -= Time.deltaTime;
+        LastTime -= UnityEngine.Time.deltaTime;
 
-        if (State == 1 && fTime <= 0.0f)
+        if (State == 1 && LastTime <= 0.0f)
             State = 0;
         else
             ControlSeek();
 
         //Move3D();
         // Interpolate
-        transform.position = Vector3.Lerp(vLastPosition, vPosition, (fTimeToMove - fTime) / fTimeToMove);
+        transform.position = Vector3.Lerp(LastPosition, Position, (TimeToMove - LastTime) / TimeToMove);
     }
 
     void Move(Vector3 vDir)
@@ -49,29 +49,29 @@ public class Spirit : Moveable2
 
         State = 1;
 
-        vLastPosition = vPosition;
-        vLastDirection = vDirection;
+        LastPosition = Position;
+        LastDirection = Direction;
 
-        vPosition += vDir;
-        vDirection = vDir;
+        Position += vDir;
+        Direction = vDir;
 
         LastOnPiece = OnPiece;
         LastOnId = OnId;
 
-        fTime = fTimeToMove;
+        LastTime = TimeToMove;
 
-        OnId = game.loadedLevel.GetMapPId(vPosition);
+        OnId = game.loadedLevel.GetMapPId(Position);
 
         // Does Repton die in result of this move?
-        if (game.loadedLevel.GetMapP(vPosition) == 'i'
-         || game.loadedLevel.GetMapP(vLastPosition) == 'i')
+        if (game.loadedLevel.GetMapP(Position) == 'i'
+         || game.loadedLevel.GetMapP(LastPosition) == 'i')
         {
             game.playerObject.Die();
             //cOnPiece = '0';
         }
 
-        game.loadedLevel.SetMapP(vLastPosition, OnPiece, OnId);
-        game.loadedLevel.SetMapP(vPosition, (char)pPieceType, iId);
+        game.loadedLevel.SetMapP(LastPosition, OnPiece, OnId);
+        game.loadedLevel.SetMapP(Position, (char)pPieceType, iId);
     }
 
     public bool MoveableTo(Vector3 vPos, Vector3 vDir)
@@ -99,26 +99,26 @@ public class Spirit : Moveable2
 
         while (cornTry < 4 && !bCanMove)
         {
-            vOldDir = vDirection;
+            vOldDir = Direction;
 
             if (firstMove) // Only do this if the first move
             {
                 // Determine starting direction ...      ' (in origonal Repton this is done on every spirt move; hence 'dazed sprits')
 
                 // If nothing is set, then default to Up
-                vDirection = vLastDirection = Vector3.forward;
+                Direction = LastDirection = Vector3.forward;
 
                 // Move Right?
-                if (!MoveableTo(vPosition, Vector3.forward))
-                    vDirection = Vector3.right;
+                if (!MoveableTo(Position, Vector3.forward))
+                    Direction = Vector3.right;
 
                 // Move Down?
-                if (!MoveableTo(vPosition, Vector3.right))
-                    vDirection = Vector3.back;
+                if (!MoveableTo(Position, Vector3.right))
+                    Direction = Vector3.back;
 
                 // Move Left?
-                if (!MoveableTo(vPosition, Vector3.back))
-                    vDirection = Vector3.left;
+                if (!MoveableTo(Position, Vector3.back))
+                    Direction = Vector3.left;
 
                 firstMove = false;
             }
@@ -126,26 +126,26 @@ public class Spirit : Moveable2
             {
                 // Is there a wall (to the right) that we should hug? ...
                 //vDirection = vOldDir;      // In case we turned right (if wall was infront) //??
-                bCanMove = MoveableTo(vPosition, TurnCCW(vDirection));
+                bCanMove = MoveableTo(Position, TurnCCW(Direction));
 
                 // Do the check
                 if (bCanMove)
                 {
                     // So there was No wall there! Turn left Now
                     // AKA: Hug wall left (turn CCW)
-                    vDirection = TurnCCW(vDirection);
+                    Direction = TurnCCW(Direction);
                 }
 
             }
 
             // Which way are we facing?
-            bCanMove = MoveableTo(vPosition, vDirection);
+            bCanMove = MoveableTo(Position, Direction);
 
             // Ok to move forward??
             if (bCanMove)
             {
-                Move(vDirection);
-                cT = game.loadedLevel.GetMapP(vPosition);
+                Move(Direction);
+                cT = game.loadedLevel.GetMapP(Position);
 
                 // If we went into a cage, we should turn into a dimond (deactivate and change map)
                 //if (cT == 'c')
@@ -167,7 +167,7 @@ public class Spirit : Moveable2
             else
             {
                 // Try next direction (turn clockwise)
-                vDirection = TurnCW(vDirection);
+                Direction = TurnCW(Direction);
 
                 cornTry++;
             }

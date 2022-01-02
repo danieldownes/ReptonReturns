@@ -17,25 +17,25 @@ public class Moveable : Moveable2
     public void Init(Level.Piece iSetPieceType, Vector3 vSetPos)
     {
         pPieceType = iSetPieceType;
-        vPosition = vSetPos;
+        Position = vSetPos;
 
         sSlantedLeft = "d7rkgtb&";
         sSlantedRight = "d9rkgtb(";  // Can fall to the right if did not fall left
 
         bEggCracking = false;
 
-        fTime = 0f;
-        fTimeToMove = 0.3f;
+        LastTime = 0f;
+        TimeToMove = 0.3f;
         bFalling = false;
     }
 
     void Update()
     {
-        if (fTime > 0.00f)
-            fTime -= Time.deltaTime;
+        if (LastTime > 0.00f)
+            LastTime -= UnityEngine.Time.deltaTime;
 
         // TODO: Control cracking animation
-        if (bEggCracking && fTime <= 0.0f)
+        if (bEggCracking && LastTime <= 0.0f)
         {
             game.loadedLevel.iEggs--;
 
@@ -46,11 +46,11 @@ public class Moveable : Moveable2
             //
 
             // Remove self
-            game.loadedLevel.ReplacePiece(vPosition, '0');
+            game.loadedLevel.ReplacePiece(Position, '0');
 
 
             // Spawn monster
-            game.loadedLevel.SpawnMonster(vPosition);
+            game.loadedLevel.SpawnMonster(Position);
 
             // Remove reference that this is an egg
             iId = -1;
@@ -62,7 +62,7 @@ public class Moveable : Moveable2
         }
 
         // Stop sound?
-        if (fTime <= 0.00f && bPlayingSnd)
+        if (LastTime <= 0.00f && bPlayingSnd)
         {
             this.GetComponent<AudioSource>().Stop();
             bPlayingSnd = false;
@@ -76,7 +76,7 @@ public class Moveable : Moveable2
         //vNewPos = vPosition + vDir;
 
         // Not currently moving down?
-        if (vDir == Vector3.back && fTime > 0.01f)
+        if (vDir == Vector3.back && LastTime > 0.01f)
             return false;
 
         // Can't move up
@@ -90,12 +90,12 @@ public class Moveable : Moveable2
 
         // Ok, start the move...
 
-        fTime = fTimeToMove;
+        LastTime = TimeToMove;
 
         // Update the position
-        vLastPosition = vPosition;
+        LastPosition = Position;
         vLastPositionAbs = transform.position;
-        vPosition += vDir;
+        Position += vDir;
 
         // Play Rock Sound
         if (!bPlayingSnd)
@@ -110,15 +110,15 @@ public class Moveable : Moveable2
         // Before we do though, are there any monsters in the way? if so they should die..
 
         // Is monster under rock?
-        if (game.loadedLevel.GetMapP(vPosition) == (char)Level.Piece.Monster)
+        if (game.loadedLevel.GetMapP(Position) == (char)Level.Piece.Monster)
         {
-            game.loadedLevel.KillMonsters(vPosition);
+            game.loadedLevel.KillMonsters(Position);
         }
 
 
 
-        game.loadedLevel.SetMapP(vPosition, (char)pPieceType, iId);
-        game.loadedLevel.SetMapP(vLastPosition, (char)Level.Piece.Space, -1);
+        game.loadedLevel.SetMapP(Position, (char)pPieceType, iId);
+        game.loadedLevel.SetMapP(LastPosition, (char)Level.Piece.Space, -1);
 
         return true;
     }
@@ -127,7 +127,7 @@ public class Moveable : Moveable2
     private void Move3D()
     {
         // Interpolate
-        transform.position = Vector3.Lerp(vLastPositionAbs, vPosition, (fTimeToMove - fTime) / fTimeToMove);
+        transform.position = Vector3.Lerp(vLastPositionAbs, Position, (TimeToMove - LastTime) / TimeToMove);
 
         /*
 		' Movment should be slower if not falling down
@@ -154,7 +154,7 @@ public class Moveable : Moveable2
         // Have we stoped falling?
         bWasFalling = false;
 
-        if (bFalling && fTime <= 0.0f)
+        if (bFalling && LastTime <= 0.0f)
         {
             bFalling = false;
             bWasFalling = true;
@@ -180,7 +180,7 @@ public class Moveable : Moveable2
         if (sTemp == (char)Level.Piece.Space)
         {
             // Is player currently moving under rock?
-            if (game.playerObject.vPosition != (vPosition + Vector3.back))
+            if (game.playerObject.Position != (Position + Vector3.back))
             {
                 // It is ok to make rock fall
                 bFalling = true;
@@ -198,7 +198,7 @@ public class Moveable : Moveable2
             End If
             */
             //if( sTemp == (char)rr2level.enmPiece.Monster)
-            game.loadedLevel.KillMonsters(vPosition + Vector3.back);
+            game.loadedLevel.KillMonsters(Position + Vector3.back);
         }
         // Is player already under moving rock?
         else if (sTemp == (char)Level.Piece.Repton)
@@ -216,12 +216,12 @@ public class Moveable : Moveable2
         {
 
             // Is left-below rock still falling? If so, don't do anything until that rock is out of the way
-            if (vPosition.x > 0)
+            if (Position.x > 0)
             {
-                sTemp = game.loadedLevel.MapDetail[(int)vPosition.x - 1, (int)-vPosition.z + 1].TypeID;
+                sTemp = game.loadedLevel.MapDetail[(int)Position.x - 1, (int)-Position.z + 1].TypeID;
                 if (sTemp == (char)Level.Piece.Rock || sTemp == (char)Level.Piece.Egg)
                 {
-                    i = game.loadedLevel.MapDetail[(int)vPosition.x - 1, (int)-vPosition.z + 1].id;
+                    i = game.loadedLevel.MapDetail[(int)Position.x - 1, (int)-Position.z + 1].id;
                     if (i != -1)
                     {
                         Moveable oScript = game.loadedLevel.lObjects3[i].GetComponent("rr2moveable") as Moveable;
@@ -235,24 +235,24 @@ public class Moveable : Moveable2
             }
 
             // Is the support currently under rock slanted to the left?
-            sTemp = game.loadedLevel.GetMapP(vPosition + Vector3.back);
+            sTemp = game.loadedLevel.GetMapP(Position + Vector3.back);
             //Debug.Log("Contains:" + sTemp.ToString());
             if (sSlantedLeft.Contains(sTemp.ToString()))
             {
                 // Debug.Log("IN Contains:" + sTemp.ToString());	
 
                 // Check if room exists to the left (And Repton isn't there)
-                sTemp = (char)game.loadedLevel.MapDetail[(int)vPosition.x - 1, (int)-vPosition.z].TypeID;
+                sTemp = (char)game.loadedLevel.MapDetail[(int)Position.x - 1, (int)-Position.z].TypeID;
 
-                if ((sTemp == '0' || sTemp == 'm') && (game.playerObject.vPosition != (vPosition + Vector3.left)))
+                if ((sTemp == '0' || sTemp == 'm') && (game.playerObject.Position != (Position + Vector3.left)))
                 {
                     // Check if room exists to 1 left, 1 down (And Repton isn't there)
                     //sTemp = rrMap.GetData(intCurX - 1, intCurY + 1)   
-                    sTemp = (char)game.loadedLevel.MapDetail[(int)vPosition.x - 1, (int)-vPosition.z + 1].TypeID;
-                    if ((sTemp == '0' || sTemp == 'm') && (game.playerObject.vPosition != (vPosition + Vector3.left + Vector3.back)))
+                    sTemp = (char)game.loadedLevel.MapDetail[(int)Position.x - 1, (int)-Position.z + 1].TypeID;
+                    if ((sTemp == '0' || sTemp == 'm') && (game.playerObject.Position != (Position + Vector3.left + Vector3.back)))
                     {
                         if (sTemp == 'm')
-                            game.loadedLevel.KillMonsters(vPosition + Vector3.left + Vector3.back);
+                            game.loadedLevel.KillMonsters(Position + Vector3.left + Vector3.back);
 
                         /*
                         iTemp = rrPieces(intCurX - 1, intCurY + 1).intMonsterID
@@ -276,10 +276,10 @@ public class Moveable : Moveable2
         if (!bFalling)
         {
             // Is left-below rock still falling? If so, don't do anything until that rock is out of the way
-            sTemp = game.loadedLevel.MapDetail[(int)vPosition.x + 1, (int)-vPosition.z + 1].TypeID;
+            sTemp = game.loadedLevel.MapDetail[(int)Position.x + 1, (int)-Position.z + 1].TypeID;
             if (sTemp == (char)Level.Piece.Rock || sTemp == (char)Level.Piece.Egg)
             {
-                i = game.loadedLevel.MapDetail[(int)vPosition.x + 1, (int)-vPosition.z + 1].id;
+                i = game.loadedLevel.MapDetail[(int)Position.x + 1, (int)-Position.z + 1].id;
                 if (i != -1)
                 {
                     Moveable oScript = game.loadedLevel.lObjects3[i].GetComponent("rr2moveable") as Moveable;
@@ -293,21 +293,21 @@ public class Moveable : Moveable2
 
 
             // Is the support currently under rock slanted to the right?
-            sTemp = (char)game.loadedLevel.MapDetail[(int)vPosition.x, (int)-vPosition.z + 1].TypeID;
+            sTemp = (char)game.loadedLevel.MapDetail[(int)Position.x, (int)-Position.z + 1].TypeID;
             if (sSlantedRight.Contains(sTemp.ToString()))
             {
                 // Check if room exists to the right (And Repton isn't there)
-                sTemp = (char)game.loadedLevel.MapDetail[(int)vPosition.x + 1, (int)-vPosition.z].TypeID;
+                sTemp = (char)game.loadedLevel.MapDetail[(int)Position.x + 1, (int)-Position.z].TypeID;
 
-                if ((sTemp == '0' || sTemp == 'm') && (game.playerObject.vPosition != (vPosition + Vector3.right)))
+                if ((sTemp == '0' || sTemp == 'm') && (game.playerObject.Position != (Position + Vector3.right)))
                 {
                     // Check if room exists to 1 left, 1 down (And Repton isn't there)
                     //sTemp = rrMap.GetData(intCurX - 1, intCurY + 1)   
-                    sTemp = (char)game.loadedLevel.MapDetail[(int)vPosition.x + 1, (int)-vPosition.z + 1].TypeID;
-                    if ((sTemp == '0' || sTemp == 'm') && (game.playerObject.vPosition != (vPosition + Vector3.right + Vector3.back)))
+                    sTemp = (char)game.loadedLevel.MapDetail[(int)Position.x + 1, (int)-Position.z + 1].TypeID;
+                    if ((sTemp == '0' || sTemp == 'm') && (game.playerObject.Position != (Position + Vector3.right + Vector3.back)))
                     {
                         //if( sTemp == 'm')
-                        game.loadedLevel.KillMonsters(vPosition + Vector3.right + Vector3.back);
+                        game.loadedLevel.KillMonsters(Position + Vector3.right + Vector3.back);
 
                         /*
                         iTemp = rrPieces(intCurX - 1, intCurY + 1).intMonsterID
@@ -342,7 +342,7 @@ public class Moveable : Moveable2
         bEggCracking = true;     // Flag for egg cracking animation sequence
         bWasFalling = false;
 
-        fTime = 2.0f;  // Now acts as a counter to control cracking/twitching animation
+        LastTime = 2.0f;  // Now acts as a counter to control cracking/twitching animation
                        //ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(1, 2, 0), ExPrj.exReturn3DVec(0, 0, 0), (1 / rrGame.sngGameSpeed)
 
         //ExSnds(7).PlaySound False

@@ -417,7 +417,7 @@ public class Level : MonoBehaviour
                     {
                         vStartPos.x = x;
                         vStartPos.z = -y;
-                        game.playerObject.vStartPos = vStartPos;
+                        game.playerObject.StartPos = vStartPos;
 						game.playerObject.MoveToPos(vStartPos);
 						
                     }
@@ -832,7 +832,7 @@ End Function
                 if( oScript)
                 {
                     Debug.Log("FOUND MONSTER " + oScript.iId);
-                    if( oScript.vPosition == vP || oScript.vLastPosition == vP)
+                    if( oScript.Position == vP || oScript.LastPosition == vP)
                         oScript.Die();
                    
                 }

@@ -27,7 +27,7 @@ public class Monster : Moveable2
     {
         pPieceType = Level.Piece.Monster;
 
-        fTimeToMove = 0.45f;
+        TimeToMove = 0.45f;
 
         cOnPiece = '0';
         iOnId = -1;
@@ -35,24 +35,24 @@ public class Monster : Moveable2
         //intMyID = rrMap.intTotMonsters
 
         iState = State.Waking;
-        fTime = 1.0f;
+        LastTime = 1.0f;
 
 
-        vPosition = vLastPosition = vPos;
-        vDirection = vLastDirection = Vector3.back;
+        Position = LastPosition = vPos;
+        Direction = LastDirection = Vector3.back;
         //rr2gameObject.loadedLevel.ReplacePiece(vPos, (char)pPieceType);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (fTime > 0.0f)
-            fTime -= Time.deltaTime;
+        if (LastTime > 0.0f)
+            LastTime -= UnityEngine.Time.deltaTime;
 
 
         if (iState == State.Waking)
         {
-            if (fTime <= 0.0f)
+            if (LastTime <= 0.0f)
                 iState = State.Seeking;
         }
         else
@@ -68,31 +68,31 @@ public class Monster : Moveable2
     {
         // Update local info
 
-        vLastPosition = vPosition;
-        vLastDirection = vDirection;
+        LastPosition = Position;
+        LastDirection = Direction;
 
-        vPosition += vDir;
-        vDirection = vDir;
+        Position += vDir;
+        Direction = vDir;
 
         cLastOnPiece = cOnPiece;
         iLastOnId = iOnId;
 
-        fTime = fTimeToMove;
+        LastTime = TimeToMove;
 
 
         //cOnPiece = rr2gameObject.loadedLevel.GetMapP(vPosition);
-        iOnId = rr2gameObject.loadedLevel.GetMapPId(vPosition);
+        iOnId = rr2gameObject.loadedLevel.GetMapPId(Position);
 
         // Does Repton die in result of this move?
-        if (rr2gameObject.loadedLevel.GetMapP(vPosition) == 'i'
-         || rr2gameObject.loadedLevel.GetMapP(vLastPosition) == 'i')
+        if (rr2gameObject.loadedLevel.GetMapP(Position) == 'i'
+         || rr2gameObject.loadedLevel.GetMapP(LastPosition) == 'i')
         {
             rr2gameObject.playerObject.Die();
             //cOnPiece = '0';
         }
 
-        rr2gameObject.loadedLevel.SetMapP(vLastPosition, cOnPiece, iOnId);
-        rr2gameObject.loadedLevel.SetMapP(vPosition, (char)pPieceType, iId);
+        rr2gameObject.loadedLevel.SetMapP(LastPosition, cOnPiece, iOnId);
+        rr2gameObject.loadedLevel.SetMapP(Position, (char)pPieceType, iId);
     }
 
     public void Move3D()
@@ -106,7 +106,7 @@ public class Monster : Moveable2
         Quaternion from = Quaternion.LookRotation(Vector3.back);
 
         // Interpolate
-        transform.position = Vector3.Lerp(rr2gameObject.loadedLevel.AddSlant(vLastPosition), rr2gameObject.loadedLevel.AddSlant(vPosition), (fTimeToMove - fTime) / fTimeToMove);
+        transform.position = Vector3.Lerp(rr2gameObject.loadedLevel.AddSlant(LastPosition), rr2gameObject.loadedLevel.AddSlant(Position), (TimeToMove - LastTime) / TimeToMove);
 
         /*
 		if( vLastDirection != vDirection )
@@ -161,12 +161,12 @@ public class Monster : Moveable2
         else if (iState == State.Seeking)
         {
             // Ready to move (again)?
-            if (fTime <= 0.0f)
+            if (LastTime <= 0.0f)
             {
-                vLastDirection = vDirection;
+                LastDirection = Direction;
 
                 // Simply move towards Repton ...
-                Vector3 vToReptonV = (rr2gameObject.playerObject.vPosition - vPosition); //.Normalize;
+                Vector3 vToReptonV = (rr2gameObject.playerObject.Position - Position); //.Normalize;
                 Vector3 vToRepton = Vector3.zero;
 
                 // Check possible movement for all axis directions .. randomly so that no axis has a preference
@@ -192,7 +192,7 @@ public class Monster : Moveable2
                 }
 
                 // Check if it is okay to move in this direction ...
-                cT = rr2gameObject.loadedLevel.GetMapP(vPosition + vToRepton);
+                cT = rr2gameObject.loadedLevel.GetMapP(Position + vToRepton);
                 if (cT == '0' || cT == 'i' || cT == 'e')
                     Move(vToRepton);
             }
@@ -219,6 +219,6 @@ public class Monster : Moveable2
         //Destroy(rr2gameObject.loadedLevel.lMonsters[iId]);
         //rr2gameObject.loadedLevel.lMonsters.Remove(iId);
         rr2gameObject.loadedLevel.iMonstersAlive--;
-        rr2gameObject.loadedLevel.SetMapP(vPosition, '0');
+        rr2gameObject.loadedLevel.SetMapP(Position, '0');
     }
 }

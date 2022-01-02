@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 public class Player : Moveable2
 {
+    private GameObject playerObject;
+    private GameObject camObject;
+
     public enum State
     {
         Stoped = 0,
@@ -13,12 +16,21 @@ public class Player : Moveable2
         Board = 5
     };
 
-    public Vector3 vStartPos;
-    public State iPlayerState;
+    public Vector3 StartPos;
+    public State PlayerState;
+    private State OldState;
+    private State LastAction;
+
     public bool bCanMove = true;
     private bool updatedMove = true;
-    private int iDontReplace = 0;  // If set, wont replace old map piece with a space (eg monster, fungus, etc..)
+    // If set, wont replace old map piece with a space (eg monster, fungus, etc..)
+    private int iDontReplace = 0;
     public int iLives;
+
+    bool bStepSoundTog;
+    bool InterMove;
+    int iWantMoveMe;
+
 
     public List<string> lInventory = new List<string>();
     public string[] playerVars;
@@ -26,88 +38,117 @@ public class Player : Moveable2
     void Start()
     {
         iLives = 3;
-        iPlayerState = 0; //enmPlayerState.Stopped;
-        fTime = 0.0f;
-        fTimeToMove = 0.3f;
-        vLastDirection = Vector3.back;
-        vDirection = Vector3.forward;
+        PlayerState = State.Stoped;
+        LastTime = 0.0f;
+        TimeToMove = 0.3f;
+        LastDirection = Vector3.back;
+        Direction = Vector3.forward;
     }
+
 
     void Update()
     {
-        if (fTime > 0.01f)
+        LastTime -= UnityEngine.Time.deltaTime;
+
+        // Inter-mediate move (half way)
+        if (LastTime < (TimeToMove * 0.4f) && InterMove)
         {
-            fTime -= Time.deltaTime;
+            // Almost finished move (interval-move)? 
+            InterMove = false;
+
+            // Probably not continusouly moving?
+            if (iWantMoveMe < 2)
+            {
+                //playStepSound();
+            }
 
             // Update movmement of Player on map
-            if (!updatedMove && fTime <= fTimeToMove * 0.3)
-            {
-                CheckPickup();
-                if (iDontReplace != 2)
-                    game.loadedLevel.SetMapP(vPosition, (char)Level.Piece.Repton);
-                if (iDontReplace != 1)
-                    game.loadedLevel.SetMapP(vLastPosition, (char)Level.Piece.Space);
-                else
-                    iDontReplace = 0;
-                iDontReplace--;
-
-                updatedMove = true;
-            }
+            //updatedMove = true;
         }
-        else
+
+        // Still going, or ready for next move?
+        if (LastTime < 0.001f)
         {
-            fTime = 0.0f;
+            LastTime = 0.0f;
 
-            iPlayerState = State.Stoped;
-
-            // Check for new movement, if allowed
-            if (bCanMove)
+            if (PlayerState != State.Stoped)
             {
-                if (Input.GetAxis("Horizontal") < 0)
-                    Move(Vector3.left);
 
-                else if (Input.GetAxis("Horizontal") > 0)
-                    Move(Vector3.right);
-
-                else if (Input.GetAxis("Vertical") > 0)
-                    Move(Vector3.forward);
-
-                else if (Input.GetAxis("Vertical") < 0)
-                    Move(Vector3.back);
             }
+
+            // Just stopped pushing?
+            if (PlayerState == State.Push)
+            {
+
+            }
+            OldState = PlayerState;
+            PlayerState = State.Stoped;
+
+            // Just finished doing? Then stop undo sound
+            /*
+            if (wasUndoing)
+            {
+                camObject.GetComponent<AudioSource>().Stop();
+                camObject.GetComponent<AudioSource>().clip = SndPush;
+                camObject.GetComponent<AudioSource>().loop = false;
+                wasUndoing = false;
+            }
+            */
         }
+
+
+        if (Input.GetAxis("Horizontal") < 0)
+            Move(Vector3.left);
+
+        else if (Input.GetAxis("Horizontal") > 0)
+            Move(Vector3.right);
+
+        else if (Input.GetAxis("Vertical") > 0)
+            Move(Vector3.forward);
+
+        else if (Input.GetAxis("Vertical") < 0)
+            Move(Vector3.back);
 
         Move3D();
+
+        // Was pushing (continuously), and now stopped?
+        if (OldState == State.Push && PlayerState != State.Push)
+        {
+            // Stop pushing sound
+            camObject.GetComponent<AudioSource>().Stop();
+        }
+
+        if (iWantMoveMe > 0)
+            iWantMoveMe--;
     }
+
 
     public void MoveToPos(Vector3 vNewPos)
     {
         if (iDontReplace != 1)
-            game.loadedLevel.SetMapP(vLastPosition, (char)Level.Piece.Space);
+            game.loadedLevel.SetMapP(LastPosition, (char)Level.Piece.Space);
         game.loadedLevel.SetMapP(vNewPos, (char)Level.Piece.Repton);
 
-        vLastPosition = vPosition = vNewPos;
+        LastPosition = Position = vNewPos;
 
         //rr2gameObject.guiObject.OnGUI ();
     }
 
-    public void Move(Vector3 vDirectionToMove)
+    public void Move(Vector3 DirectionToMove)
     {
-        if (iPlayerState == State.Stoped || iPlayerState == State.PushNoWalk)
+        if (PlayerState == State.Stoped || PlayerState == State.PushNoWalk)
         {
-            if (MoveableTo(vPosition + vDirectionToMove, vDirectionToMove))
+            if (MoveableTo(Position + DirectionToMove, DirectionToMove))
             {
-                fTime = fTimeToMove;
-                vLastPosition = vPosition;
+                LastTime = TimeToMove;
+                LastPosition = Position;
                 //iPlayerState = enmPlayerState.Walk;
 
-                //Debug.Log("Move" + vPosition.x.ToString() + "," + vPosition.z.ToString());
-
-                vLastDirection = vDirection;
-                vDirection = vDirectionToMove;
+                LastDirection = Direction;
+                Direction = DirectionToMove;
 
                 // Add the movement
-                vPosition += vDirectionToMove;
+                Position += DirectionToMove;
 
                 updatedMove = false;
 
@@ -115,7 +156,7 @@ public class Player : Moveable2
                 //Debug.Log("sInventory=" + vDirectionToMove.x.ToString());
 
 
-                iPlayerState = State.Walk;
+                PlayerState = State.Walk;
             }
             else
             {
@@ -126,7 +167,6 @@ public class Player : Moveable2
 
     public void Move3D()
     {
-
         // This is needed to force player to turn towards camera when going left>right & right>left
         Vector3 vLeft = new Vector3(-0.99f, 0f, -0.01f);
         Vector3 vRight = new Vector3(0.99f, 0f, -0.01f);
@@ -135,25 +175,25 @@ public class Player : Moveable2
         Quaternion vRotFrom = Quaternion.LookRotation(Vector3.back);
 
         // Interpolate //
-        transform.position = Vector3.Lerp(AddSlant(vLastPosition), AddSlant(vPosition), (fTimeToMove - fTime) / fTimeToMove);
+        transform.position = Vector3.Lerp(AddSlant(LastPosition), AddSlant(Position), (TimeToMove - LastTime) / TimeToMove);
 
-        if (vLastDirection != vDirection)
+        if (LastDirection != Direction)
         {
 
-            vRotFrom = Quaternion.LookRotation(vLastDirection);
-            vRotTo = Quaternion.LookRotation(vDirection);
+            vRotFrom = Quaternion.LookRotation(LastDirection);
+            vRotTo = Quaternion.LookRotation(Direction);
 
             // Spectial case to ensure repton moves in the right direction
-            if (vLastDirection == Vector3.left)
+            if (LastDirection == Vector3.left)
                 vRotFrom = Quaternion.LookRotation(vLeft);
 
-            if (vLastDirection == Vector3.right)
+            if (LastDirection == Vector3.right)
                 vRotFrom = Quaternion.LookRotation(vRight);
 
             // Apply the rotation
             GameObject reptonObject = GameObject.Find("ReptonMesh");
             reptonObject.transform.rotation = Quaternion.identity;
-            reptonObject.transform.rotation = Quaternion.Lerp(vRotFrom, vRotTo, (fTimeToMove - fTime) / fTimeToMove);
+            reptonObject.transform.rotation = Quaternion.Lerp(vRotFrom, vRotTo, (TimeToMove - LastTime) / TimeToMove);
 
         }
     }
@@ -289,7 +329,7 @@ public class Player : Moveable2
     {
         bool bUpdateMap = true;
 
-        Level.MapPiece2d cPiece = game.loadedLevel.MapDetail[(int)vPosition.x, (int)-vPosition.z];
+        Level.MapPiece2d cPiece = game.loadedLevel.MapDetail[(int)Position.x, (int)-Position.z];
 
         Debug.Log("moving to:" + (Level.Piece)cPiece.TypeID);
 
@@ -328,15 +368,15 @@ public class Player : Moveable2
                 break;
 
             case Level.Piece.Transporter:
-                game.loadedLevel.MapDetail[(int)vLastPosition.x, (int)-vLastPosition.z].TypeID = (char)Level.Piece.Space;
-                vLastPosition = vPosition;
-                vPosition = vStartPos = game.loadedLevel.tTransporter[cPiece.iRef];
-                vDirection = Vector3.back;
+                game.loadedLevel.MapDetail[(int)LastPosition.x, (int)-LastPosition.z].TypeID = (char)Level.Piece.Space;
+                LastPosition = Position;
+                Position = StartPos = game.loadedLevel.tTransporter[cPiece.iRef];
+                Direction = Vector3.back;
 
                 cPiece.iRef = 0;
 
                 // Set to update position of player
-                fTime = 0.2f;
+                LastTime = 0.2f;
 
                 // Start pause
                 //rrGame.Pause 2.5
@@ -349,7 +389,7 @@ public class Player : Moveable2
         if (bUpdateMap)
         {
             // Remove the graphic
-            game.loadedLevel.RemovePiece(vPosition);
+            game.loadedLevel.RemovePiece(Position);
         }
 
         return;
@@ -361,9 +401,9 @@ public class Player : Moveable2
         iLives--;
 
         // Reset to starting position]
-        game.loadedLevel.SetMapP(vPosition, '0');
-        MoveToPos(vStartPos);
-        vDirection = Vector3.back;
+        game.loadedLevel.SetMapP(Position, '0');
+        MoveToPos(StartPos);
+        Direction = Vector3.back;
 
         // Reset bomb?
 
