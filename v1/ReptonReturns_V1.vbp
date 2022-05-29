@@ -1,5 +1,5 @@
 Type=Exe
-Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\..\..\..\..\WINDOWS\system32\stdole2.tlb#OLE Automation
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\..\..\..\..\WINDOWS\System32\stdole2.tlb#OLE Automation
 Reference=*\G{5BC6BAB2-E5C7-440D-86AF-309C98B36700}#1.0#0#..\..\..\..\..\..\..\..\..\WINDOWS\system32\EX-PERSPECTIVE.DLL#ExPerspective
 Reference=*\G{3D5C6BF0-69A3-11D0-B393-00A0C9055D8E}#1.0#0#..\..\..\..\..\..\..\..\..\Program Files\Common Files\designer\MSDERUN.DLL#Microsoft Data Environment Instance 1.0
 Reference=*\G{00000200-0000-0010-8000-00AA006D2EA4}#2.0#0#..\..\..\..\..\..\..\..\..\Program Files\Common Files\system\ado\msado20.tlb#Microsoft ActiveX Data Objects 2.0 Library
@@ -16,6 +16,7 @@ Class=cMonster; classes\cMonster.cls
 Class=cSpirt; classes\cSpirt.cls
 Class=cGame; classes\cGame.cls
 Class=cRockOrEgg; classes\cRockOrEgg.cls
+Class=cGameMenu; classes\cGameMenu.cls
 IconForm="frmMain"
 Startup="frmMain"
 HelpFile=""

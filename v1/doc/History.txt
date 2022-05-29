@@ -8,13 +8,20 @@ All rights reserved.
 To Debug:
 
 Reported    Detail
-11-05-2003: Can not kill monster via pushing rock from side
-11-05-2003: Error when two Monsters are active (1st to release was top, 2nd was bottom of map; order of which
-		monster is released first may be dependable on different errors. 
+26-05-2003: Rocks can be pused in free fall when Repton releases a rock and then moves
+		down then push the free falling rock
+
 06-05-2003: Dimond sound dosn't play multiple instences; known for a while
+
+14-02-2003: Enviroment lighting will need to be looked at
+
+
+
+Possibly fixed:
+11-05-2003: Can not kill monster via pushing rock from side
+11-05-2003: Error when two Monsters are active (1st to release was top, 2nd was bottom of map; order of which monster is released first may be dependable on different errors. 
 30-04-2003: Rocks fall incorrectly, in wrong order
 22-03-2003: Monster dosn't die when rock (free) falls on top - rock terminates and monster continues
-14-02-2003: Enviroment lighting will need to be looked at
 13-02-2003: Bomb incorrectly detects that all diamonds have been collected; ~70 were still rememining, and
                  bomb was able to defuse
 
@@ -23,11 +30,10 @@ Reported    Detail
 To Do (for BETA):
 
  Programming:
+  Load episode and new level file layouts
   Debugging
-  Bomb Timer
   Menu System 
   Play MP3
-  Repton Internal Animation control
   Visual FX Class
 
  Art:
@@ -35,13 +41,12 @@ To Do (for BETA):
   Repton Animation (Upper body walking, digging, being idle, pushing rock, pushing non-movable piece)
   Repton Texture
   Intro Scene
-  2nd Walls
   Spirits
   Bomb
 
  Sounds:
   Another dimond sound(s); so to recectify 06-05-2003 bug
-  
+  Many others  
   
 
 ----------------------------------------------------------------------------
@@ -57,6 +62,40 @@ Start:            23-08-2000
 ----------------------------------------------------------------------------
 Development history detail:
 
+30-05-2003: (~7:00)
+	    + Messages appear at desinated triggers; still need to delete messages, and other tweeks
+	    * Fixed 'Monsters hold rocks until they move down, then get squished' bug (today)
+	    ! Skull disappear when walking into them
+	    * Fixed 'Transporters do not get overwritten' bug (today)
+	    * Fixed 'Rocks still not falling correctly' bug (today)
+	    * Fixed 'Problems with ground textures' bug (today)
+	    ! Monsters hold rocks until they move down, then get squished
+	    ! Can push rock onto 'breaking', 'hatching' egg
+	    ! Transporters do not get overwritten
+	    ! Rocks still not falling correctly
+	    ! Problems with ground textures
+	    * Varible tweeks, such as MapSizeX/Y and strEpisodeName
+	    + Loads '.rre' episode files (v1.0)
+	    + Loads '.rrl' level files (v1.1)
+	    ! Ex-Perspective cann't show translusent textured meshes
+	    + Message board art and animation
+
+29-05-2003: (~4:30)
+	    + In game pauseing functionallity - inc stopping time-bomb
+	    + Time-bomb functionallity
+	    * Monsters now die via funguses (untested)
+	    * Monsters now die; bugs 11-05-2003 and 22-03-2003 
+	    + FPS counter
+            + Research; do monsters die via funguses? answer, yes
+	    * Possibly have fixed bug 30-04-2003; now applies rock fall FX-Repton algorithm
+
+26-05-2003: (~0:35)
+	    * Implemented a timed pause when transporting
+	    * Timed paused
+            ! Rocks can be pused in free fall when Repton releases a rock and then moves
+		down then push the free falling rock
+	    + On/Off pausing
+	
 11-05-2003: (~0:20 hours)
 	    * Some test/confirmation of bugs on rock falls
 	    + Animation walk is only animated when walking

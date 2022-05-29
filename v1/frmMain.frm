@@ -1,19 +1,38 @@
 VERSION 5.00
 Begin VB.Form frmMain 
    Caption         =   "Repton Returns v1.00   :  Ex-D Software Development(TM)"
-   ClientHeight    =   10080
+   ClientHeight    =   10200
    ClientLeft      =   165
    ClientTop       =   480
-   ClientWidth     =   14085
+   ClientWidth     =   13785
    Icon            =   "frmMain.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   10080
-   ScaleWidth      =   14085
+   ScaleHeight     =   680
+   ScaleMode       =   3  'Pixel
+   ScaleWidth      =   919
    StartUpPosition =   3  'Windows Default
-   Begin VB.Label lblRef 
+   Begin VB.Label lblMsgRef 
       BackStyle       =   0  'Transparent
       BeginProperty Font 
          Name            =   "Arial"
+         Size            =   18
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H0000FF00&
+      Height          =   375
+      Left            =   1320
+      TabIndex        =   1
+      Top             =   360
+      Width           =   615
+   End
+   Begin VB.Label lblGUIRef 
+      BackStyle       =   0  'Transparent
+      BeginProperty Font 
+         Name            =   "Ex-D Software Development"
          Size            =   26.25
          Charset         =   0
          Weight          =   700
@@ -59,14 +78,12 @@ Private Sub Form_Load()
     rrGame.Init
     
     ' GUI inits
-    txt2D.InitText "REPTON RETURNS", lblRef.Font
-    txt2D.Position 200, 50
-    txt2D.Colour &HFF00A000
+    ExTxtGUI.InitText "", lblGUIRef.Font
     
-    txtScore2D.InitText "Dimonds left: " & rrMap.intTotDimonds - rrRepton.intDimondsCollected, lblRef.Font
-    txtScore2D.Position 300, 10
-    txtScore2D.Colour &HFF00A000
-    
+    ExTxtGUI.Colour &HFF00A000
+
+    ExTxtMsg.InitText "", lblMsgRef.Font
+    ExTxtMsg.Colour &HFFFFFF00
     
     Me.Show
 
@@ -105,4 +122,12 @@ Sub Form_Unload(Cancel As Integer)
     
     End
     
+End Sub
+
+Private Sub lblRef_Click()
+
+End Sub
+
+Private Sub Label1_Click()
+
 End Sub

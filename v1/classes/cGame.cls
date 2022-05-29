@@ -18,11 +18,19 @@ Attribute VB_Exposed = False
 Option Explicit
 
 
+Public sEpisodeDir As String
+Public iCurGameLevel As Integer
+
+Public strEpisodeName As String
+Public intGamePlayType               As Integer
+Dim strLevelOrder()               As String
+Public strVisualTheme As String
 
 
 Private Type type_Pause
     timPauseContol As New exTools_Timer     ' See 'Pause' function for detail
     sngDelay       As Single                '  " . . .
+    bPaused        As Boolean
 End Type
 Dim tPause As type_Pause
 
@@ -31,16 +39,103 @@ Function Init()
     ' Init Pause functionality
     Pause -1
     
-    ' Load the Repton Level
-    rrMap.ThemeDir = "Repton 3"
-    rrMap.CurGameLevel = 1
-    rrMap.GameLevelsDir = "Repton 3"
-    rrMap.LoadLevelData App.Path & "\data\episode\" & "tests\test_level.rr"   '"Repton 3\1.rr"
+    
+    sEpisodeDir = "C:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\v1\data\episode\Tutorial\"
+    strEpisodeName = "Tutorial"
+    
+    OpenFileEpisode sEpisodeDir
+    
+    iCurGameLevel = 1
+    rrMap.LoadFileLevel
+    
+    
+    SetupLevel
 
 End Function
 
+Function OpenFileEpisode(strFile As String) As Boolean
+' Return = True when all is ok
+
+    Dim n As Integer
+    Dim iLevel As Integer
+    Dim sTemp As String
+    
+
+    OpenFileEpisode = False
+    
+    
+    ' Episode info::
+    
+    'On Error GoTo open_file_err
+
+    Open strFile + strEpisodeName + ".rre" For Input As #1
+        
+        ' RR file version
+        Input #1, sTemp
+        If Mid(sTemp, 1, 20) = "ReptonReturnsEpisode" Then
+            If Val(Mid(sTemp, 21, 3)) > 1 Then
+                MsgBox "The Repton Returns level file requieres a newer version of Repton Returns game, check the website for updates", , "Repton Returns"
+                
+                Exit Function
+            End If
+        Else
+            MsgBox "The selected file is not a compatable Repton Returns episode file", , "Repton Returns"
+            
+            Exit Function
+        End If
+        
+        ' Episode name
+        Input #1, strEpisodeName
+        
+        ' Game play type
+        Input #1, sTemp
+        intGamePlayType = Int(sTemp)
+        
+        ' Visual Theme name
+        Input #1, strVisualTheme
+        
+        ' Level order (using levelID)
+        n = 1
+        Do
+            ReDim Preserve strLevelOrder(n)
+            Input #1, strLevelOrder(n)
+            
+            n = n + 1
+        Loop Until EOF(1)
+        
+        
+        
+        OpenFileEpisode = True
+        
+ '       Resume
+        
+    Close #1
+
+open_file_err:
+
+End Function
+
+
+
+Function LevelOrder(iLevel As Integer, Optional sIn As String = "!return!") As String
+    If sIn = "!return!" Then
+        LevelOrder = strLevelOrder(iLevel)
+    Else
+        If sIn = "!redim!" Then
+            ReDim Preserve strLevelOrder(iLevel)
+        Else
+            strLevelOrder(iLevel) = sIn
+        End If
+    End If
+End Function
+
+
+
+
+
+
 Function LevelCompleted()
-    MsgBox "You have cleared all dimonds from level " & Str(rrMap.CurGameLevel) & "!!!"
+    MsgBox "You have cleared all dimonds from level " & Str(rrGame.iCurGameLevel) & "!!!"
 End Function
 
 Function Pause(sngTimed As Single) As Boolean
@@ -51,33 +146,37 @@ Function Pause(sngTimed As Single) As Boolean
 
     Select Case sngTimed
         Case 0              ' Pause
-            tPause.timPauseContol.Stop_
-            tPause.timPauseContol.ReSet
+            tPause.bPaused = True
+            tPause.sngDelay = 0     ' Flag that timer should be ignored
+            rrMap.TimeBombControl 0
             
         Case -1             ' Unpause
-            tPause.timPauseContol.Stop_
-            tPause.timPauseContol.ReSet
-            tPause.timPauseContol.Increment -1
+            tPause.bPaused = False
+            rrMap.TimeBombControl 1
+            FungusNewTime               ' Reset fungus time so that a fungus dosn't grow instently
             
         Case -2             ' Return pause status
             ' Update timer (if needed, also see if delay has expired)
-            If tPause.timPauseContol.LocalTime > tPause.sngDelay Then
-                ' Stop the timer and say that we are now not paused
-                Pause -1
+            If tPause.sngDelay <> 0 And tPause.timPauseContol.LocalTime > tPause.sngDelay Then
+                
+                rrMap.TimeBombControl 0
                 Pause = False
-            Else
-                If tPause.timPauseContol.LocalTime = 0 Then
-                    Pause = True
-                Else
-                    Pause = False
-                End If
+                tPause.bPaused = False
+                tPause.sngDelay = 1
+                FungusNewTime               ' Reset fungus time so that a fungus dosn't grow instently
+                
             End If
         
+            Pause = tPause.bPaused
+            
         Case Else           ' Start delayed pause
             ' Start timer and set delay time
-            tPause.timPauseContol.Start
+            tPause.timPauseContol.ReSet
             tPause.sngDelay = sngTimed
-    
+            
+            tPause.bPaused = True
+            rrMap.TimeBombControl 0
+            
     End Select
 
 End Function

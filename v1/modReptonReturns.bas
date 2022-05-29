@@ -17,18 +17,23 @@ End Type
 
 Public rrMap             As New cMap        ' The loaded level
 Public rrRepton          As New cPlayer     ' A human player (Repton)
-Public rrPieces(30, 27)  As New cPiece      ' A piece on the level
+Public rrPieces()        As New cPiece      ' A piece on the level
 Public rrRocksOrEggs(50) As New cRockOrEgg  ' A rock or egg; moveable piece
 Public rrMonster(4)      As New cMonster
 Public rrSpirit(8)       As New cSpirt
 
-Public tTransporters(8)  As type_Transporter
+Public tTransporters()  As type_Transporter
 
 
 Dim intWallAround_LOOKUP(1, 1, 1, 1) As Integer       ' (2,4,6,8) - wall is there(1) or not(0) for each
                                                       '  Down [2], Left [4], Right [6], Up [8]  (KeyPad)
                                                       '  Used in 'GetWallAroundInfo'
 
+Dim iFPScount As Integer
+Dim iFPSval As Integer
+Dim sLastTime As Single
+
+Dim intLastKeyPress As exInputKeys
 
 Public Enum enmPieceType
     Space = 0
@@ -58,6 +63,13 @@ Public Enum enmPieceType
     Monster
     Transporter
     TimeCapsule
+    FilledWall
+    FilledWall7
+    FilledWall9
+    FilledWall1
+    FilledWall3
+    NavigationalMap
+    
 End Enum
 
 
@@ -68,7 +80,6 @@ Function DrawFrame()
     
     Dim intX As Integer
     Dim intY As Integer
-    
     
     ' Start of Rendering process
     ExPrj.Render
@@ -107,17 +118,36 @@ Function DrawFrame()
     rrRepton.UpDate
     
     
+    ExMsgBoard.Render
+    
     ' Render GUI
-    txt2D.Render
     
-    txtScore2D.Position 10, 10
-    txtScore2D.Text "Dimonds left: " & rrMap.intTotDimonds - rrRepton.intDimondsCollected
-    txtScore2D.Render
+    ExTxtGUI.Position 10, 10
+    ExTxtGUI.Text "DIAMONDS: " & rrMap.intTotDimonds - rrRepton.intDimondsCollected
+    ExTxtGUI.Render
     
-    txtScore2D.Position 600, 10
-    txtScore2D.Text "Lives: " & Str(rrRepton.intLives)
-    txtScore2D.Render
+    ExTxtGUI.Position 600, 10
+    ExTxtGUI.Text "LIVES: " & Str(rrRepton.intLives)
+    ExTxtGUI.Render
     
+    ' Time remaining
+    ExTxtGUI.Position 600, 40
+    ExTxtGUI.Text "TIME: " & FormatNumber(rrMap.sngTimeLeft)    ' FormatNumber(rrMap.sngTimeBombOut - rrMap.timTimeBomb.LocalTime, 2)
+    ExTxtGUI.Render
+    
+    iFPScount = iFPScount + 1
+    If rrMap.timTimeBomb.LocalTime - sLastTime >= 1 Then
+        iFPSval = iFPScount
+        iFPScount = 0
+        sLastTime = rrMap.timTimeBomb.LocalTime
+    End If
+    ExTxtGUI.Position 10, 600
+    ExTxtGUI.Text "FPS: " & Str(iFPSval) & "    MONSTERS: " & Str(rrMap.intTotMonstersAlive)
+    ExTxtGUI.Render
+    
+    
+    ' Draw any In-Game Messages
+    rrMap.MessageUpdate
     
     ' Finally flip the buffers, completing the rendering process.
     ExPrj.Sync
@@ -130,11 +160,27 @@ End Function
 Function UserInteraction()
 
     
-    ' Check for inputs
-    If ExInp.exInput(ex_Right_arrow) Then rrRepton.Move Right
-    If ExInp.exInput(ex_Left_arrow) Then rrRepton.Move Left
-    If ExInp.exInput(ex_Down_arrow) Then rrRepton.Move Down
-    If ExInp.exInput(ex_Up_arrow) Then rrRepton.Move Up
+    ' Check movement inputs
+    ' If game is not paused then allow movment
+    If rrGame.Pause(-2) = False Then
+        If ExInp.exInput(ex_Right_arrow) Then rrRepton.Move Right
+        If ExInp.exInput(ex_Left_arrow) Then rrRepton.Move Left
+        If ExInp.exInput(ex_Down_arrow) Then rrRepton.Move Down
+        If ExInp.exInput(ex_Up_arrow) Then rrRepton.Move Up
+    End If
+    
+    If ExInp.exInput(ex_p) Then
+        If intLastKeyPress <> ex_p Then
+           If rrGame.Pause(-2) = True Then
+                rrGame.Pause -1
+            Else
+                rrGame.Pause 0
+            End If
+            intLastKeyPress = ex_p
+        End If
+    Else
+        intLastKeyPress = 0
+    End If
     
     'If ExInp.exInput(ex_a) Then msgbox(str(Ex3DP(
     
@@ -142,6 +188,8 @@ Function UserInteraction()
     
     
     If ExInp.exInput(ex_ESCAPE) Then frmMain.Form_Unload 0
+    
+    
     
 End Function
 
@@ -229,8 +277,12 @@ Function SetupLevel() As Integer
     ExSnds(0).InitSound strThemeDir & "\sounds\m_dimond.wav"
     
     
+    ExMsgBoard.InitXFile App.Path & "\data\gui\msg_board.x", App.Path & "\data\gui\msg_boar.bmp"
+    
+    
     rrMap.intTotRocksOrEggs = 0
     rrMap.intTotEggs = 0
+    rrMap.intTotMonstersAlive = 0
     rrMap.intTotMonsters = 0
     rrMap.intTotSpirits = 0
     rrMap.intTotDimonds = 0
@@ -238,8 +290,8 @@ Function SetupLevel() As Integer
     rrMap.intTotTransporters = 0
     
     
-   For intY = 1 To 27
-      For intX = 1 To 30
+   For intY = 1 To rrMap.intMapSizeY
+      For intX = 1 To rrMap.intMapSizeY
         
          rrPieces(intX, intY).intRockOrEggID = -1
          rrPieces(intX, intY).intMonsterID = -1
@@ -277,6 +329,8 @@ Function SetupLevel() As Integer
 '            Case "k"   'Key
 
             Case "g"   'Egg
+                rrMap.intTotEggs = rrMap.intTotEggs + 1
+            
                 rrRocksOrEggs(rrMap.intTotRocksOrEggs).Init Egg, intX, intY
                 rrRocksOrEggs(rrMap.intTotRocksOrEggs).intMyRockOrEggID = rrMap.intTotRocksOrEggs
                 rrPieces(intX, intY).intRockOrEggID = rrMap.intTotRocksOrEggs
@@ -284,10 +338,9 @@ Function SetupLevel() As Integer
                 
                 
                 ' Init a monster for this egg
-                rrMonster(rrMap.intTotEggs).Init 1, 1
-                rrMonster(rrMap.intTotEggs).intMyID = rrMap.intTotEggs
-                
-                rrMap.intTotEggs = rrMap.intTotEggs + 1
+                rrMap.intTotMonsters = rrMap.intTotMonsters + 1
+                rrMonster(rrMap.intTotMonsters).Init intX, intY
+                rrMonster(rrMap.intTotMonsters).intMyID = rrMap.intTotMonsters
                 
             
             Case "i"   'Repton stating point
@@ -336,6 +389,10 @@ Function SetupLevel() As Integer
         
       Next intX
    Next intY
+   
+   ' Start time-bomb
+   rrMap.sngTimeBombOut = 30
+   rrMap.timTimeBomb.ReSet
 
 End Function
 
@@ -354,7 +411,7 @@ Function GetPlayerOffsetPiece(intX As Integer, intY As Integer) As Integer
     ' Check if this is a piece off the edge of the map...
     '  Left, Top, Right, Bottom
  
-    If iX < 1 Or iY < 1 Or iX > 30 Or iY > 26 Then
+    If iX < 1 Or iY < 1 Or iX > rrMap.intMapSizeX Or iY > rrMap.intMapSizeY Then
        
             ' Flat wall
             GetPlayerOffsetPiece = -1  'enmPieceType.Wall
@@ -381,16 +438,16 @@ Sub SetupWallAroundInfo_LookUpTable()
     intWallAround_LOOKUP(0, 1, 0, 0) = 4
     intWallAround_LOOKUP(0, 1, 0, 1) = 7
     intWallAround_LOOKUP(0, 1, 1, 0) = 10
-    intWallAround_LOOKUP(0, 1, 1, 1) = 12
+    intWallAround_LOOKUP(0, 1, 1, 1) = 14
     
     intWallAround_LOOKUP(1, 0, 0, 0) = 2
     intWallAround_LOOKUP(1, 0, 0, 1) = 11
     intWallAround_LOOKUP(1, 0, 1, 0) = 3
-    intWallAround_LOOKUP(1, 0, 1, 1) = 13
+    intWallAround_LOOKUP(1, 0, 1, 1) = 15
     
     intWallAround_LOOKUP(1, 1, 0, 0) = 1
-    intWallAround_LOOKUP(1, 1, 0, 1) = 15
-    intWallAround_LOOKUP(1, 1, 1, 0) = 14
+    intWallAround_LOOKUP(1, 1, 0, 1) = 13
+    intWallAround_LOOKUP(1, 1, 1, 0) = 12
     intWallAround_LOOKUP(1, 1, 1, 1) = 0
     
 End Sub
@@ -418,8 +475,8 @@ End Function
 
 Function DataInt2Str(intIn As enmPieceType) As String
 
-' Used charicters:   abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ%*)^$(&£!|\`¬¦@;:,.<>#~=+-_
-'  (underlined)      ------- - - -- - ----    -----------
+' Used charicters:   abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ%*)^$(&£!|\`¬¦@;:.<>#~=+-_
+'  (underlined)      ------- - - -- - ----  - -----------                          -    ----
 
    If intIn = 0 Then DataInt2Str = "0"    'Space...
    If intIn = 1 Then DataInt2Str = "5"
@@ -449,11 +506,21 @@ Function DataInt2Str(intIn As enmPieceType) As String
    If intIn = 25 Then DataInt2Str = "n"   'Transporter
    If intIn = 26 Then DataInt2Str = "z"   'TimeCapsule
    
+   If intIn = enmPieceType.FilledWall Then DataInt2Str = "%"
+   If intIn = enmPieceType.FilledWall7 Then DataInt2Str = "&"
+   If intIn = enmPieceType.FilledWall9 Then DataInt2Str = "("
+   If intIn = enmPieceType.FilledWall1 Then DataInt2Str = "!"
+   If intIn = enmPieceType.FilledWall3 Then DataInt2Str = "£"
+   
+   If intIn = enmPieceType.NavigationalMap Then DataInt2Str = "x"
+   
 End Function
 
 
 Function DataStr2Int(strIn As String) As Integer
 
+   DataStr2Int = 0
+   
    If strIn = "0" Then DataStr2Int = 0
    If strIn = "5" Then DataStr2Int = 1
    If strIn = "d" Then DataStr2Int = 2
@@ -482,13 +549,14 @@ Function DataStr2Int(strIn As String) As Integer
    If strIn = "n" Then DataStr2Int = 25
    If strIn = "z" Then DataStr2Int = 26
    
-'   if strIn = "%" then DataStr2Int =
-'   if strIn = "*" then DataStr2Int =
-'   if strIn = ")" then DataStr2Int =
-'   if strIn = "^" then DataStr2Int =
-'   if strIn = "$" then DataStr2Int =
-'   if strIn = "(" then DataStr2Int =
-'   if strIn = "&" then DataStr2Int =
-'   if strIn = "£" then DataStr2Int =
-'   if strIn = "!" then DataStr2Int =
+   If strIn = "%" Then DataStr2Int = enmPieceType.FilledWall
+   If strIn = "&" Then DataStr2Int = enmPieceType.FilledWall7
+   If strIn = "(" Then DataStr2Int = enmPieceType.FilledWall9
+   If strIn = "!" Then DataStr2Int = enmPieceType.FilledWall1
+   If strIn = "£" Then DataStr2Int = enmPieceType.FilledWall3
+   
+   If strIn = "x" Then DataStr2Int = enmPieceType.NavigationalMap
+      
 End Function
+
+

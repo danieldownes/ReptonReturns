@@ -2800,7 +2800,7 @@ Function LoadFileLevel() As Boolean
                 
                 Input #1, sTemp
                 Do While sTemp <> "</game-message>"
-                    tInGameMessages(n).strMessage = tInGameMessages(n).strMessage + sTemp
+                    tInGameMessages(n).strMessage = tInGameMessages(n).strMessage + vbCrLf + sTemp
                     Input #1, sTemp
                 Loop
             
