@@ -240,7 +240,7 @@ Begin VB.Form frmMain
             MaskColor       =   12632256
             _Version        =   393216
             BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628} 
-               NumListImages   =   33
+               NumListImages   =   34
                BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628} 
                   Picture         =   "frmMain.frx":0153
                   Key             =   ""
@@ -373,6 +373,10 @@ Begin VB.Form frmMain
                   Picture         =   "frmMain.frx":2393
                   Key             =   ""
                EndProperty
+               BeginProperty ListImage34 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+                  Picture         =   "frmMain.frx":24A5
+                  Key             =   ""
+               EndProperty
             EndProperty
          End
          Begin VB.Line Line1 
@@ -437,7 +441,7 @@ Begin VB.Form frmMain
             MultiLine       =   -1  'True
             ScrollBars      =   2  'Vertical
             TabIndex        =   38
-            Text            =   "frmMain.frx":24A5
+            Text            =   "frmMain.frx":25B7
             Top             =   840
             Width           =   2415
          End
@@ -643,9 +647,9 @@ Begin VB.Form frmMain
          End
          Begin VB.ComboBox cmbGameTypes 
             Height          =   315
-            ItemData        =   "frmMain.frx":24B0
+            ItemData        =   "frmMain.frx":25C2
             Left            =   615
-            List            =   "frmMain.frx":24B2
+            List            =   "frmMain.frx":25C4
             Style           =   2  'Dropdown List
             TabIndex        =   13
             Top             =   615
@@ -808,6 +812,11 @@ Private Type SceneryInfo_T
     bIsMovableTo   As Boolean
 End Type
 
+Private Type LevelTrans_T
+    tPos        As Corrds2D_T
+    sLocalFile  As String
+End Type
+
 ' File data::
 Dim strEpisodeName                As String
 Dim intGamePlayType               As Integer
@@ -819,6 +828,7 @@ Dim sLogicalMap()                 As String * 1
 Dim tMapSize                      As Corrds2D_T
 Dim sngMapTime                    As Single
 Dim tTransporterCorrds()          As Corrds2D_T
+Dim tLevelTrans()                 As LevelTrans_T
 Dim tInGameMessages()             As GameMessages_T
 Dim SceneryPieces()               As SceneryInfo_T
 Dim bNavMapFromStart              As Boolean
@@ -877,7 +887,7 @@ Public Enum enmPieceType
     FilledWall1
     FilledWall3
     NavigationalMap
-    
+    LevelTransport
 End Enum
 
 
@@ -1311,7 +1321,7 @@ Private Sub mnuHelpAbout_Click()
 End Sub
 
 Private Sub mnuHelpContents_Click()
-    ShellExecute Me.hwnd, "open", App.Path + "\help.chm", vbNullString, vbNullString, 3 'SW_NORMAL
+    ShellExecute Me.hwnd, "open", App.Path & "\help.chm", vbNullString, vbNullString, 3 'SW_NORMAL
 End Sub
 
 Private Sub mnuImportReptonFX_Click()
@@ -1690,7 +1700,7 @@ Function LoadAvilablePieceTypes()
     For intY = 1 To 4
         For intX = 1 To 9
             
-            If intN < 34 Then
+            If intN < 35 Then
                 
                 If intVisualMapPieceTypesLoaded < intN Then
                 
@@ -2216,7 +2226,7 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
                 Select Case (intSelectedPieceType - 1)
                     
                     Case enmPieceType.Transporter
-                        MsgBox "Now select destiation"
+                        MsgBox "Now select destiation", "Repton Returns Editor v1"
                         
                         ' Get transporter number
                         b = 0
@@ -2225,6 +2235,24 @@ Private Sub picPiece_MouseDown(Index As Integer, Button As Integer, Shift As Int
                         Next n
                         intNewestTransporterNo = b
                         intMapPreAddType = 1
+                        
+                    Case enmPieceType.LevelTransport
+                                                                        
+                        CommonDialog.DialogTitle = "Select a saved Epsiode or Level filename"
+                        CommonDialog.Filter = "*.rre; *.rrl"
+                        CommonDialog.ShowOpen
+                        sTemp = CommonDialog.FileName
+
+                        If FileExists(sTemp) Then
+                            ReDim Preserve tLevelTrans(UBound(tLevelTrans) + 1)
+                            
+                            
+                            
+                            tLevelTrans(UBound(tLevelTrans)).sLocalFile = sTemp
+                            tLevelTrans(UBound(tLevelTrans)).tPos = Convert1Dto2Dcoords(Index)
+                        Else
+                            picPiece(Index).Picture = picPieceType(1).Picture
+                        End If
                         
                 End Select
                 
@@ -2671,7 +2699,10 @@ Function SaveFileLevel() As Boolean
                     Next x
                 End If
                 
-                Print #1, tInGameMessages(n).strMessage
+                sTemp = tInGameMessages(n).strMessage
+                
+                Print #1, sTemp
+                Replace sTemp, ",", "<comma>"
                 
                 Print #1, "</game-message>"
             Next n
@@ -2803,7 +2834,7 @@ Function LoadFileLevel() As Boolean
                     tInGameMessages(n).strMessage = tInGameMessages(n).strMessage + vbCrLf + sTemp
                     Input #1, sTemp
                 Loop
-            
+                Replace tInGameMessages(n).strMessage, "<comma>", ","
             Next n
             intSelMsgNo = 1
         End If

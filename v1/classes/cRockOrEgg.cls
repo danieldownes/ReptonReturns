@@ -33,28 +33,39 @@ Dim int3DLastDir   As enmDirection              ' Last direction we rolled
 Public blnFalling   As Boolean
 Public blnFreeFall  As Boolean
 
-Private ExLog3D As New exMesh               ' Logical 3D (so that transformations are preserved; no mesh data)
+Private ExLog3D As New exMesh
 
-Const cintTimeToMove = 0.15          ' Number of seconds it take for rock/egg to move from one
+
+
+Const cintTimeToMove = 0.27          ' Number of seconds it take for rock/egg to move from one
                                      '  map piece to another.
 
 
 Function Init(intType As enmPieceType, intX As Integer, intY As Integer)
 ' intType should only be Rock OR Egg
 
+    Dim strThemeDir As String
+    strThemeDir = rrGame.strVisualTheme
+
     intPieceType = intType
     
     intCurX = intX
     intCurY = intY
     
-    ExLog3D.Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
     
     If intType = Rock Then
+        
+        ExLog3D.InitXFile strThemeDir & "\meshes\rock.x", strThemeDir & "\textures\ROCK.BMP"
+        
         ' Random post rotation?
-        'ExLog3D.InitXFile ""
-        ExLog3D.Rotate 0, Rnd() * 360, 0, True
-        'ExLog3D.ResetMatrix
+        ExLog3D.RotateVecs Rnd() * 360, Rnd() * 360, 0
+        
+    Else
+        ' Egg
+        ExLog3D.InitXFile strThemeDir & "\meshes\egg.x", strThemeDir & "\textures\egg.bmp"
     End If
+
+    ExLog3D.position Ret3DPos(intCurX), Ret3DPos(intCurY), -200, True
     
     blnFalling = False
 
@@ -63,14 +74,8 @@ End Function
 
 Function Render()
 
-    ExLog3D.Render '' Simply to update animation
+    ExLog3D.Render
     
-    Ex3DP(intPieceType).Rotate ExLog3D.Rotate.x, ExLog3D.Rotate.y, ExLog3D.Rotate.Z, True
-    Ex3DP(intPieceType).Position ExLog3D.Position.x, ExLog3D.Position.y, ExLog3D.Position.Z, True
-    
-    
-    Ex3DP(intPieceType).Render
-
 End Function
 
 
@@ -79,9 +84,18 @@ Public Function Move(intDir As enmDirection)
     Dim intOldX As Integer
     Dim intOldY As Integer
     Dim n       As Integer
+    
+    Dim bDiagRot As Boolean
 
     intOldX = intCurX
     intOldY = intCurY
+    
+    If ExLog3D.AnimatedTransform.active(Rotation3D) = True Then
+        ' Must be going down already, flag to say to rotate diagonally
+        bDiagRot = True
+    Else
+        bDiagRot = False
+    End If
     
     Select Case intDir
         Case Up
@@ -90,16 +104,41 @@ Public Function Move(intDir As enmDirection)
             
         Case Down
             intCurY = intCurY + 1
-            int3DDirection = Down
+                        
+
+                
+            If ExLog3D.AnimatedTransform.active(Rotation3D) <> True Then
+'                If int3DDirection = Right Then
+'                    ExLog3D.RotateVecs 90, -90, 0
+'                    ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0.00001, 0.00001, 0), ExPrj.exReturn3DVec(-90, 90, 0), cintTimeToMove
+'                Else
+'                    ExLog3D.RotateVecs 90, 90, 0
+'                    ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0.00001, 0.00001, 0), ExPrj.exReturn3DVec(-90, -90, 0), cintTimeToMove
+'                End If
+'            Else
+                ExLog3D.RotateVecs 90, 0, 0
+                ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0.00001, 0, 0), ExPrj.exReturn3DVec(-90, 0, 0), cintTimeToMove
+            End If
             
-        Case Left
-            intCurX = intCurX - 1
-            int3DDirection = Left
+            int3DDirection = Down
             
         Case Right
             intCurX = intCurX + 1
             int3DDirection = Right
+    
+            ExLog3D.RotateVecs 0, -90, 0
             
+            ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, 90, 0), cintTimeToMove
+                        
+        Case Left
+            intCurX = intCurX - 1
+            int3DDirection = Left
+            
+            ExLog3D.RotateVecs 0, 90, 0
+            
+
+            ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, -90, 0), cintTimeToMove
+               
     End Select
     
     
@@ -124,13 +163,13 @@ Public Function Move(intDir As enmDirection)
     rrPieces(intOldX, intOldY).intRockOrEggID = -1
     
     
-    Move3D          ' Direction and/or position may have changed
+    Move3D
     
 End Function
 
 Function Move3D()
     
-    ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), -240), ExLog3D.Position, 0.15  'cintTimeToMove
+    ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove
     'ExLog3D.Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
     
 End Function
@@ -146,10 +185,8 @@ Function CheckIfFall()
     bWasFalling = False
     
     
-    
-    
     ' Have we stoped falling?
-    If blnFalling = True And ExLog3D.AnimatedTransform.Active(Translation3D) = False Then
+    If blnFalling = True And ExLog3D.AnimatedTransform.active(Translation3D) = False Then
         blnFalling = False
         bWasFalling = True
     End If
@@ -292,6 +329,7 @@ Function CheckIfFall()
                     blnFalling = True
                     Me.Move Right
                     Me.Move Down
+                    
                     
                 End If
             End If

@@ -18,7 +18,7 @@ End Type
 Public rrMap             As New cMap        ' The loaded level
 Public rrRepton          As New cPlayer     ' A human player (Repton)
 Public rrPieces()        As New cPiece      ' A piece on the level
-Public rrRocksOrEggs(50) As New cRockOrEgg  ' A rock or egg; moveable piece
+Public rrRocksOrEggs()   As New cRockOrEgg  ' A rock or egg; moveable piece
 Public rrMonster(4)      As New cMonster
 Public rrSpirit(8)       As New cSpirt
 
@@ -93,7 +93,7 @@ Function DrawFrame()
                 rrPieces(rrRepton.GetXPos + intX, rrRepton.GetYPos + intY).Render
             Else
                 ' Default to a wall (this is outside the defined map)
-                Ex3DP(1).Position Ret3DPos(rrRepton.GetXPos + intX), Ret3DPos(rrRepton.GetYPos + intY), -240, True
+                Ex3DP(1).position Ret3DPos(rrRepton.GetXPos + intX), Ret3DPos(rrRepton.GetYPos + intY), -240, True
                 Ex3DP(1).Render
             End If
 
@@ -118,21 +118,28 @@ Function DrawFrame()
     rrRepton.UpDate
     
     
-    ExMsgBoard.Render
+    rrMap.RenderSceneryPieces
+    
+    
+    If rrMap.intShowingMsg <> -1 Or ExMsgBoard.AnimatedTransform.active(Translation3D) = True Then ExMsgBoard.Render
     
     ' Render GUI
     
-    ExTxtGUI.Position 10, 10
+    ExTxtGUI.position 10, 10
     ExTxtGUI.Text "DIAMONDS: " & rrMap.intTotDimonds - rrRepton.intDimondsCollected
     ExTxtGUI.Render
     
-    ExTxtGUI.Position 600, 10
+    ExTxtGUI.position 600, 10
     ExTxtGUI.Text "LIVES: " & Str(rrRepton.intLives)
     ExTxtGUI.Render
     
     ' Time remaining
-    ExTxtGUI.Position 600, 40
-    ExTxtGUI.Text "TIME: " & FormatNumber(rrMap.sngTimeLeft)    ' FormatNumber(rrMap.sngTimeBombOut - rrMap.timTimeBomb.LocalTime, 2)
+    ExTxtGUI.position 600, 40
+    If rrMap.sngTimeBombOut <> -1 Then
+        ExTxtGUI.Text "TIME: " & FormatNumber(rrMap.sngTimeLeft)    ' FormatNumber(rrMap.sngTimeBombOut - rrMap.timTimeBomb.LocalTime, 2)
+    Else
+        ExTxtGUI.Text "NO TIMER"
+    End If
     ExTxtGUI.Render
     
     iFPScount = iFPScount + 1
@@ -141,7 +148,7 @@ Function DrawFrame()
         iFPScount = 0
         sLastTime = rrMap.timTimeBomb.LocalTime
     End If
-    ExTxtGUI.Position 10, 600
+    ExTxtGUI.position 10, 600
     ExTxtGUI.Text "FPS: " & Str(iFPSval) & "    MONSTERS: " & Str(rrMap.intTotMonstersAlive)
     ExTxtGUI.Render
     
@@ -157,7 +164,7 @@ Function DrawFrame()
 End Function
 
 
-Function UserInteraction()
+Function UserInteraction() As Boolean
 
     
     ' Check movement inputs
@@ -187,7 +194,7 @@ Function UserInteraction()
     ' If ExInp.exInput(ex_f2) Then prj.ChangeRenderDevice
     
     
-    If ExInp.exInput(ex_ESCAPE) Then frmMain.Form_Unload 0
+    If ExInp.exInput(ex_ESCAPE) Then UserInteraction = True
     
     
     
@@ -208,8 +215,8 @@ Function SetupLevel() As Integer
     Randomize
     
     ' Get Full Dir Path of theme
-     strThemeDir = App.Path & "\data\themes"     ' rrMap.ThemeDir
-    
+    rrGame.strVisualTheme = App.Path & "\data\themes\origonal"
+     strThemeDir = App.Path & "\data\themes\origonal"
     
    
     
@@ -221,33 +228,47 @@ Function SetupLevel() As Integer
     
     Ex3DP(enmPieceType.Dimond).InitXFile strThemeDir & "\meshes\dimond.x"  ', strThemeDir & "\dimond.bmp"
     
-    Ex3DP(enmPieceType.Wall).InitXFile strThemeDir & "\meshes\std_wall\w5.x", strThemeDir & "\wall.bmp"
-    Ex3DP(enmPieceType.Wall8).InitXFile strThemeDir & "\meshes\std_wall\w8.x", strThemeDir & "\wall8.bmp"
-    Ex3DP(enmPieceType.Wall2).InitXFile strThemeDir & "\meshes\std_wall\w2.x", strThemeDir & "\wall2.bmp"
-    Ex3DP(enmPieceType.Wall4).InitXFile strThemeDir & "\meshes\std_wall\w6.x", strThemeDir & "\wall6.bmp"
-    Ex3DP(enmPieceType.Wall6).InitXFile strThemeDir & "\meshes\std_wall\w4.x", strThemeDir & "\wall4.bmp"
-    Ex3DP(enmPieceType.Wall9).InitXFile strThemeDir & "\meshes\std_wall\w7.x", strThemeDir & "\wall7.bmp"
-    Ex3DP(enmPieceType.Wall7).InitXFile strThemeDir & "\meshes\std_wall\w9.x", strThemeDir & "\wall9.bmp"
-    Ex3DP(enmPieceType.Wall3).InitXFile strThemeDir & "\meshes\std_wall\w1.x", strThemeDir & "\wall1.bmp"
-    Ex3DP(enmPieceType.Wall1).InitXFile strThemeDir & "\meshes\std_wall\w3.x", strThemeDir & "\wall3.bmp"
+    Ex3DP(enmPieceType.Wall).InitXFile strThemeDir & "\meshes\std_wall\w5.x", strThemeDir & "\textures\wall.bmp"
+    Ex3DP(enmPieceType.Wall8).InitXFile strThemeDir & "\meshes\std_wall\w8.x", strThemeDir & "\textures\wall8.bmp"
+    Ex3DP(enmPieceType.Wall2).InitXFile strThemeDir & "\meshes\std_wall\w2.x", strThemeDir & "\textures\wall2.bmp"
+    Ex3DP(enmPieceType.Wall4).InitXFile strThemeDir & "\meshes\std_wall\w6.x", strThemeDir & "\textures\wall6.bmp"
+    Ex3DP(enmPieceType.Wall6).InitXFile strThemeDir & "\meshes\std_wall\w4.x", strThemeDir & "\textures\wall4.bmp"
+    Ex3DP(enmPieceType.Wall9).InitXFile strThemeDir & "\meshes\std_wall\w7.x", strThemeDir & "\textures\wall7.bmp"
+    Ex3DP(enmPieceType.Wall7).InitXFile strThemeDir & "\meshes\std_wall\w9.x", strThemeDir & "\textures\wall9.bmp"
+    Ex3DP(enmPieceType.Wall3).InitXFile strThemeDir & "\meshes\std_wall\w1.x", strThemeDir & "\textures\wall1.bmp"
+    Ex3DP(enmPieceType.Wall1).InitXFile strThemeDir & "\meshes\std_wall\w3.x", strThemeDir & "\textures\wall3.bmp"
 
     Ex3DP(11).InitXFile strThemeDir & "\meshes\earth\0.x", strThemeDir & "\earth.bmp"
     Ex3DP(11).Rotate 90, 0, 0, True
     
-    Ex3DP(12).InitXFile strThemeDir & "\meshes\rock.x", strThemeDir & "\textures\ROCK.BMP"
-    Ex3DP(13).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\safe.bmp"
-    Ex3DP(14).InitXFile strThemeDir & "\meshes\key.x"   ', strThemeDir & "\key.bmp"
-    Ex3DP(15).InitXFile strThemeDir & "\meshes\egg.x", strThemeDir & "\textures\egg.bmp"
+
+    Ex3DP(13).InitXFile strThemeDir & "\meshes\safe.x"
+    Ex3DP(14).InitXFile strThemeDir & "\meshes\key.x"
     Ex3DP(16).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\repton.bmp"
-    Ex3DP(17).InitXFile strThemeDir & "\meshes\crown.x"      'strThemeDir & "\crown.bmp"
-    Ex3DP(18).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\cage.bmp"
-    Ex3DP(19).InitXFile strThemeDir & "\meshes\rock.x", strThemeDir & "\spirit.bmp"
-    Ex3DP(20).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\bomb.bmp"
+    Ex3DP(17).InitXFile strThemeDir & "\meshes\crown.x"
+    Ex3DP(18).InitXFile strThemeDir & "\meshes\cage.x"
+    Ex3DP(19).InitXFile strThemeDir & "\meshes\spirit.x", strThemeDir & "\textures\spirit.bmp"
+    Ex3DP(20).InitXFile strThemeDir & "\meshes\time-bomb.x", strThemeDir & "\textures\time-bomb.bmp"
+    Ex3DP(20).Rotate 90, 0, 0, True
     Ex3DP(21).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\fungus.bmp"
-    Ex3DP(22).InitXFile strThemeDir & "\meshes\skull.x"   ', strThemeDir & "\skull.bmp"
-    Ex3DP(23).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\barrier.bmp"
+    Ex3DP(22).InitXFile strThemeDir & "\meshes\skull.x"
+    Ex3DP(23).InitXFile strThemeDir & "\meshes\barrier.x"
     Ex3DP(24).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\repton.bmp"
-    Ex3DP(25).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\textures\egg.bmp"
+    Ex3DP(25).InitXFile strThemeDir & "\meshes\transporter.x", strThemeDir & "\textures\transporter.bmp"
+    Ex3DP(25).Rotate 90, 0, 0, True
+    Ex3DP(26).InitXFile strThemeDir & "\meshes\time-capsule.x"
+    Ex3DP(26).Rotate 90, 0, 0, True
+
+    
+    
+    Ex3DP(27).InitXFile strThemeDir & "\meshes\stags\5.x", strThemeDir & "\textures\stags.bmp"
+    Ex3DP(28).InitXFile strThemeDir & "\meshes\stags\7.x", strThemeDir & "\textures\stags.bmp"
+    Ex3DP(29).InitXFile strThemeDir & "\meshes\stags\9.x", strThemeDir & "\textures\stags.bmp"
+    Ex3DP(30).InitXFile strThemeDir & "\meshes\stags\1.x", strThemeDir & "\textures\stags.bmp"
+    Ex3DP(31).InitXFile strThemeDir & "\meshes\stags\3.x", strThemeDir & "\textures\stags.bmp"
+    For intX = 27 To 31
+        Ex3DP(intX).Rotate 90, 0, 0, True
+    Next intX
     
     
     ' Ground meshes
@@ -266,6 +287,10 @@ Function SetupLevel() As Integer
     Ex3DWallSides(1).Rotate 90, 180, 0, True
     Ex3DWallSides(2).Rotate 90, 180, 0, True
     Ex3DWallSides(3).Rotate 90, 180, 0, True
+    
+    
+    ' Scenery pieces
+    rrMap.LoadSceneryPieces
     
     
     rrRepton.Init
@@ -291,7 +316,7 @@ Function SetupLevel() As Integer
     
     
    For intY = 1 To rrMap.intMapSizeY
-      For intX = 1 To rrMap.intMapSizeY
+      For intX = 1 To rrMap.intMapSizeX
         
          rrPieces(intX, intY).intRockOrEggID = -1
          rrPieces(intX, intY).intMonsterID = -1
@@ -316,6 +341,7 @@ Function SetupLevel() As Integer
 '            Case "1"
 '            Case "e"   'Earth
             Case "r"   'Rock
+                ReDim Preserve rrRocksOrEggs(rrMap.intTotRocksOrEggs)
                 rrRocksOrEggs(rrMap.intTotRocksOrEggs).Init Rock, intX, intY
                 rrRocksOrEggs(rrMap.intTotRocksOrEggs).intMyRockOrEggID = rrMap.intTotRocksOrEggs
                 rrPieces(intX, intY).intRockOrEggID = rrMap.intTotRocksOrEggs
@@ -330,7 +356,8 @@ Function SetupLevel() As Integer
 
             Case "g"   'Egg
                 rrMap.intTotEggs = rrMap.intTotEggs + 1
-            
+                
+                ReDim Preserve rrRocksOrEggs(rrMap.intTotRocksOrEggs)
                 rrRocksOrEggs(rrMap.intTotRocksOrEggs).Init Egg, intX, intY
                 rrRocksOrEggs(rrMap.intTotRocksOrEggs).intMyRockOrEggID = rrMap.intTotRocksOrEggs
                 rrPieces(intX, intY).intRockOrEggID = rrMap.intTotRocksOrEggs
@@ -347,7 +374,7 @@ Function SetupLevel() As Integer
                
                 ' Set starting position of objects...
                 rrRepton.SetPosition intX, intY
-                ExCam.Position -((rrRepton.GetXPos - 1) * 95.5), -((rrRepton.GetYPos - 1) * 95.5) - 200, 700, True
+                ExCam.position -((rrRepton.GetXPos - 1) * 95.5), -((rrRepton.GetYPos - 1) * 95.5) - 200, 700, True
                 ExCam.LookAt -((rrRepton.GetXPos - 1) * 95.5), -((rrRepton.GetYPos - 1) * 95.5), 0
 
                 
@@ -391,7 +418,6 @@ Function SetupLevel() As Integer
    Next intY
    
    ' Start time-bomb
-   rrMap.sngTimeBombOut = 30
    rrMap.timTimeBomb.ReSet
 
 End Function

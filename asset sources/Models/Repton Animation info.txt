@@ -1,0 +1,7 @@
+frames:
+
+  1 to 55   ::  starting to walk
+
+  56 to 99  ::  walkng
+
+  100 to   :: Ideal

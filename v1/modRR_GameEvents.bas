@@ -21,8 +21,6 @@ Function GameEvents()
         
             rrSpirit(n).CheckIfMove
                 
-           
-            'Does this spirit walk into a cage
             
         Next n
         

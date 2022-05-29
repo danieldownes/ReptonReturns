@@ -65,12 +65,14 @@ Private Type SceneryInfo_T
 End Type
 
 Dim tInGameMessages()             As GameMessages_T
-Dim intShowingMsg As Integer
+Public intShowingMsg As Integer
 Dim intCurMsgLine As Integer
 
 Dim SceneryPieces()               As SceneryInfo_T
 Dim bNavMapFromStart              As Boolean
 
+
+Dim intLastKey As Integer
 
 Function LoadFileLevel() As Boolean
 
@@ -125,7 +127,7 @@ sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
         y = 1
         Do
             
-            If y < intMapSizeY - 1 Then Input #1, sTemp
+            If y <> 1 And y < intMapSizeY Then Input #1, sTemp
                     
             For x = 1 To intMapSizeX
             
@@ -155,9 +157,9 @@ sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
         If UBound(tTransporters) > 0 Then
             For n = 1 To UBound(tTransporters)
                 Input #1, sTemp
-                tTransporters(n).iToX = Int(sTemp)
+                tTransporters(n).iToX = Int(sTemp) + 1
                 Input #1, sTemp
-                tTransporters(n).iToY = Int(sTemp)
+                tTransporters(n).iToY = Int(sTemp) + 1
             Next n
         End If
         
@@ -167,14 +169,14 @@ sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
         If UBound(SceneryPieces) > 0 Then
             For n = 1 To UBound(SceneryPieces)
                 Input #1, sTemp
-                SceneryPieces(n).tSizeTopLeft.x = Int(sTemp)
+                SceneryPieces(n).tSizeTopLeft.x = Int(sTemp) + 1
                 Input #1, sTemp
-                SceneryPieces(n).tSizeTopLeft.y = Int(sTemp)
+                SceneryPieces(n).tSizeTopLeft.y = Int(sTemp) + 1
                 
                 Input #1, sTemp
-                SceneryPieces(n).tSizeBotRight.x = Int(sTemp)
+                SceneryPieces(n).tSizeBotRight.x = Int(sTemp) + 1
                 Input #1, sTemp
-                SceneryPieces(n).tSizeBotRight.y = Int(sTemp)
+                SceneryPieces(n).tSizeBotRight.y = Int(sTemp) + 1
                 
                 Input #1, sTemp
                 SceneryPieces(n).bIsMovableTo = CBool(sTemp)
@@ -198,9 +200,9 @@ sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
                 If tInGameMessages(n).iTotTrigs > 0 Then
                     For x = 1 To tInGameMessages(n).iTotTrigs
                         Input #1, sTemp
-                        tInGameMessages(n).tTriggers(x).x = Int(sTemp)
+                        tInGameMessages(n).tTriggers(x).x = Int(sTemp) + 1
                         Input #1, sTemp
-                        tInGameMessages(n).tTriggers(x).y = Int(sTemp)
+                        tInGameMessages(n).tTriggers(x).y = Int(sTemp) + 1
                     Next x
                 End If
                 
@@ -209,6 +211,7 @@ sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
                     tInGameMessages(n).strMessage = tInGameMessages(n).strMessage + vbCrLf + sTemp
                     Input #1, sTemp
                 Loop
+                Replace tInGameMessages(n).strMessage, "<comma>", ","
             
             Next n
         End If
@@ -221,6 +224,37 @@ sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
         
     Close #1
     
+End Function
+
+Function LoadSceneryPieces()
+    
+    Dim n As Integer
+    Dim sTemp As Integer
+    
+    ReDim ExScenery(UBound(SceneryPieces))
+    
+    For n = 1 To UBound(SceneryPieces)
+    
+        ' Find mesh file
+        
+        If FileExists(rrGame.sEpisodeDir + "scenery\" + SceneryPieces(n).strMeshFile) = True Then
+            ExScenery(n).InitXFile rrGame.sEpisodeDir + "scenery\" + SceneryPieces(n).strMeshFile, rrGame.sEpisodeDir + "scenery\" + SceneryPieces(n).strTexFile
+        Else
+            ExScenery(n).InitXFile App.Path + "\data\common scenery\" + SceneryPieces(n).strMeshFile, App.Path + "\data\common scenery\" + SceneryPieces(n).strTexFile
+        End If
+        
+        ExScenery(n).Rotate 90, 0, 0, True
+        ExScenery(n).position Ret3DPos(SceneryPieces(n).tSizeTopLeft.x) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.x) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.x)) / 2), Ret3DPos(SceneryPieces(n).tSizeTopLeft.y) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.y) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.y)) / 2), -240, True
+
+    Next n
+End Function
+
+Function RenderSceneryPieces()
+    Dim n As Integer
+    For n = 1 To UBound(SceneryPieces)
+        'rrRepton.GetXPos
+        ExScenery(n).Render
+    Next n
 End Function
 
 ' For game saves, or future Repton 2 functionallity
@@ -298,7 +332,9 @@ End Function
 '                    Next x
 '                End If
 '
-'                Print #1, tInGameMessages(n).strMessage
+'                sTemp = tInGameMessages(n).strMessage
+'                Print #1, sTemp
+'                Replace sTemp, ",", "<comma>"
 '
 '                Print #1, "</game-message>"
 '            Next n
@@ -367,16 +403,22 @@ Function TimeBombControl(intCont As Integer)
 ' 0 = Pause
 ' 1 = Unpause
 ' 2 = Update
+' 3 = Reset
 
     Select Case intCont
         Case 0
             sngTimeLeft = sngTimeBombOut - timTimeBomb.LocalTime
             
         Case 1
-            sngTimeBombOut = sngTimeLeft + timTimeBomb.LocalTime
+            If sngTimeBombOut <> -1 Then
+                sngTimeBombOut = sngTimeLeft + timTimeBomb.LocalTime
+            End If
             
         Case 2
             If rrGame.Pause(-2) = False Then sngTimeLeft = sngTimeBombOut - timTimeBomb.LocalTime
+            
+        Case 3
+            timTimeBomb.ReSet
         
     End Select
 
@@ -408,6 +450,7 @@ MsgFound:
     
     intShowingMsg = n
     intCurMsgLine = 1
+    intLastKey = 1
     
     rrGame.Pause 0
 End Function
@@ -430,11 +473,13 @@ Function MessageUpdate()
     If intShowingMsg = -1 Then Exit Function
     
     ' Don't show text if transforming
-    If ExMsgBoard.AnimatedTransform.Active(Rotation3D) = True Then Exit Function
+    If ExMsgBoard.AnimatedTransform.active(Rotation3D) = True Then Exit Function
+    
+    ExTxtMsg.Colour &HFFEEEEFF
     
     ' Show message ...
-    iLines = 0
-    n = 1
+    n = intCurMsgLine
+    If n = 1 Then iLines = 0 Else iLines = 1
     Do
         
         ' Get a line
@@ -477,15 +522,52 @@ Function MessageUpdate()
         Loop
         
         ExTxtMsg.Text sTemp
-        ExTxtMsg.Position frmMain.ScaleWidth / 6, (frmMain.ScaleHeight / 5) + (iLines * 30)
+        ExTxtMsg.position frmMain.ScaleWidth / 6, (frmMain.ScaleHeight / 5) + (iLines * 30)
         ExTxtMsg.Render
         
         iLines = iLines + 1
         
-    Loop While iLines < 20 And n <= Len(tInGameMessages(intShowingMsg).strMessage)
-        
+    Loop While iLines < 11 And n <= Len(tInGameMessages(intShowingMsg).strMessage)
     
-    ' Delete message and exit
-    'intShowingMsg = -1
-    'rrGame.Pause -1
+    ' Show navigation instruction
+    If n < Len(tInGameMessages(intShowingMsg).strMessage) Then
+        ExTxtMsg.Text "[ENTER] for next page"
+        ExTxtMsg.position frmMain.ScaleWidth / 2, (frmMain.ScaleHeight / 5) + 330
+    Else
+        ExTxtMsg.Text "[ENTER] to resume game"
+        ExTxtMsg.position frmMain.ScaleWidth / 2, (frmMain.ScaleHeight / 5) + 330
+    End If
+    ExTxtMsg.Colour &HFFCCCCFF
+    ExTxtMsg.Render
+        
+    If ExInp.exInput(ex_Return) = True Then
+        If intLastKey <> 1 Then
+            
+            
+            If n < Len(tInGameMessages(intShowingMsg).strMessage) Then
+                ' Show next page
+                
+                intCurMsgLine = n
+            Else
+                ' Delete message and exit
+            
+                For n = intShowingMsg To UBound(tInGameMessages) - 1
+                    tInGameMessages(n) = tInGameMessages(n + 1)
+                Next n
+                ReDim Preserve tInGameMessages(UBound(tInGameMessages) - 1)
+        
+                intShowingMsg = -1
+                rrGame.Pause -1
+                intCurMsgLine = 1
+                
+                ExMsgBoard.ResetMatrix
+                ExMsgBoard.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(rrRepton.GetXPos), Ret3DPos(rrRepton.GetYPos), -200), ExPrj.exReturn3DVec(Ret3DPos(rrRepton.GetXPos), Ret3DPos(rrRepton.GetYPos) - 260, 200), 0.5
+                ExMsgBoard.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(-180, 0, 0), ExPrj.exReturn3DVec(211, 0.1, 0.1), 0.5
+            End If
+                        
+        End If
+        intLastKey = 1
+    Else
+        intLastKey = 0
+    End If
 End Function
