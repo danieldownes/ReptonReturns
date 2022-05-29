@@ -41,6 +41,8 @@ Public Const FOF_SIMPLEPROGRESS = &H100
 Public Sub DeleteFile(gFile As String, gAllowUndo As Boolean)
     Dim op As SHFILEOPSTRUCT
 
+Debug.Print gFile
+
     With op
         .wFunc = FO_DELETE
         .pFrom = gFile
@@ -60,7 +62,7 @@ Public Sub CopyFile(gFileSource As String, NewLoc As String)
         .wFunc = FO_COPY
         .pTo = NewLoc
         .pFrom = gFileSource
-        .fFlags = FOF_NOCONFIRMATION  'FOF_ALLOWUNDO '+ FOF_SIMPLEPROGRESS
+        .fFlags = FOF_NOCONFIRMMKDIR + FOF_NOCONFIRMATION     'FOF_ALLOWUNDO '+ FOF_SIMPLEPROGRESS
     End With
     SHFileOperation op
 End Sub
@@ -71,7 +73,7 @@ Public Sub MoveFile(gFileSource As String, NewLoc As String)
         .wFunc = FO_MOVE
         .pTo = NewLoc
         .pFrom = gFileSource
-        .fFlags = FOF_ALLOWUNDO
+        .fFlags = FOF_ALLOWUNDO + FOF_NOCONFIRMATION + FOF_NOCONFIRMMKDIR
     End With
     SHFileOperation op
 End Sub
@@ -102,6 +104,7 @@ Function CreateFolder(strFolderDIR As String)
     Dim fld As Object
     Set fso = CreateObject("Scripting.FileSystemObject")
     
+    On Local Error Resume Next
     Set fld = fso.CreateFolder(strFolderDIR)
 End Function
 
@@ -110,5 +113,7 @@ Function DeleteFolder(strFolderDIR As String)
     Dim fld As Object
     Set fso = CreateObject("Scripting.FileSystemObject")
     
-    Set fld = fso.CreateFolder(strFolderDIR)
+    On Error Resume Next
+    Set fld = fso.DeleteFolder(strFolderDIR, frmMain.hwnd)
+    Resume
 End Function

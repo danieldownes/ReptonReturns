@@ -135,6 +135,9 @@ Function Render()
             
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
             Ex3DP(intPieceType).Render
+            
+        Case monster
+            ' Do nothing
         
         Case Else
             Ex3DP(intPieceType).position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True

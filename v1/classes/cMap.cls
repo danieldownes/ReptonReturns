@@ -34,6 +34,7 @@ Public intTotRocksOrEggs  As Integer
 Public intTotSpirits      As Integer
 Public intTotFunguses     As Integer       ' Needed for fungus growth determination
 Public intTotTransporters As Integer
+Public intTotLevelTrans   As Integer
 
 
 Dim intRTData() As String          ' Real Time map data
@@ -86,10 +87,12 @@ Function LoadFileLevel() As Boolean
     LoadFileLevel = False
 
     ' Individual level info::
-sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
+    sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
     Open rrGame.sEpisodeDir & sTemp & ".rrl" For Input As #1
     
         ReDim tTransporters(0)
+        ReDim tLevelTrans(0)
+        ReDim SceneryPieces(0)
     
         ' RR file version
         Input #1, sTemp   '"ReptonReturnsLevelV1.1"
@@ -143,6 +146,8 @@ sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
                     Select Case rrPieces(x, y).TypeID
                         Case "n"
                             ReDim tTransporters(UBound(tTransporters) + 1)
+                        Case "y"
+                            ReDim tLevelTrans(UBound(tLevelTrans) + 1)
                     End Select
                     
                 End If
@@ -163,29 +168,42 @@ sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
             Next n
         End If
         
+        ' Level-Transporter info (in order as from map)
+        If UBound(tLevelTrans) > 0 Then
+            For n = 1 To UBound(tLevelTrans)
+                Input #1, sTemp
+                'tLevelTrans(n).tPos.x = Int(sTemp)
+                Input #1, sTemp
+                'tLevelTrans(n).tPos.y = Int(sTemp)
+                Input #1, tLevelTrans(n).sLocalFile
+            Next n
+        End If
+        
         ' Sceinary filenames (in order as IDed)
         Input #1, sTemp                              ' How many
-        ReDim SceneryPieces(Int(sTemp))
-        If UBound(SceneryPieces) > 0 Then
-            For n = 1 To UBound(SceneryPieces)
-                Input #1, sTemp
-                SceneryPieces(n).tSizeTopLeft.x = Int(sTemp) + 1
-                Input #1, sTemp
-                SceneryPieces(n).tSizeTopLeft.y = Int(sTemp) + 1
-                
-                Input #1, sTemp
-                SceneryPieces(n).tSizeBotRight.x = Int(sTemp) + 1
-                Input #1, sTemp
-                SceneryPieces(n).tSizeBotRight.y = Int(sTemp) + 1
-                
-                Input #1, sTemp
-                SceneryPieces(n).bIsMovableTo = CBool(sTemp)
-                
-                Input #1, SceneryPieces(n).strMeshFile
-                Input #1, SceneryPieces(n).strTexFile
-                
-            Next n
-
+        If Int(Val(sTemp)) > 0 Then
+            ReDim SceneryPieces(Int(sTemp))
+            If UBound(SceneryPieces) > 0 Then
+                For n = 1 To UBound(SceneryPieces)
+                    Input #1, sTemp
+                    SceneryPieces(n).tSizeTopLeft.x = Int(sTemp) + 1
+                    Input #1, sTemp
+                    SceneryPieces(n).tSizeTopLeft.y = Int(sTemp) + 1
+                    
+                    Input #1, sTemp
+                    SceneryPieces(n).tSizeBotRight.x = Int(sTemp) + 1
+                    Input #1, sTemp
+                    SceneryPieces(n).tSizeBotRight.y = Int(sTemp) + 1
+                    
+                    Input #1, sTemp
+                    SceneryPieces(n).bIsMovableTo = CBool(sTemp)
+                    
+                    Input #1, SceneryPieces(n).strMeshFile
+                    Input #1, SceneryPieces(n).strTexFile
+                    
+                Next n
+    
+            End If
         End If
         
         ' In-game messages data (in order as IDed)
@@ -231,22 +249,34 @@ Function LoadSceneryPieces()
     Dim n As Integer
     Dim sTemp As Integer
     
-    ReDim ExScenery(UBound(SceneryPieces))
-    
-    For n = 1 To UBound(SceneryPieces)
-    
-        ' Find mesh file
+    If UBound(SceneryPieces) > 0 Then
         
-        If FileExists(rrGame.sEpisodeDir + "scenery\" + SceneryPieces(n).strMeshFile) = True Then
-            ExScenery(n).InitXFile rrGame.sEpisodeDir + "scenery\" + SceneryPieces(n).strMeshFile, rrGame.sEpisodeDir + "scenery\" + SceneryPieces(n).strTexFile
-        Else
-            ExScenery(n).InitXFile App.Path + "\data\common scenery\" + SceneryPieces(n).strMeshFile, App.Path + "\data\common scenery\" + SceneryPieces(n).strTexFile
-        End If
+        ReDim ExScenery(UBound(SceneryPieces))
         
-        ExScenery(n).Rotate 90, 0, 0, True
-        ExScenery(n).position Ret3DPos(SceneryPieces(n).tSizeTopLeft.x) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.x) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.x)) / 2), Ret3DPos(SceneryPieces(n).tSizeTopLeft.y) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.y) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.y)) / 2), -240, True
+        For n = 1 To UBound(SceneryPieces)
+        
+            ' Find mesh file
+            
+            If FileExists(rrGame.sEpisodeDir + "scenery\" + SceneryPieces(n).strMeshFile) = True Then
+                ExScenery(n).InitXFile rrGame.sEpisodeDir + "scenery\" + SceneryPieces(n).strMeshFile, rrGame.sEpisodeDir + "scenery\" + SceneryPieces(n).strTexFile
+            Else
+                ExScenery(n).InitXFile App.Path + "\data\common scenery\" + SceneryPieces(n).strMeshFile, App.Path + "\data\common scenery\" + SceneryPieces(n).strTexFile
+            End If
+            
+            ExScenery(n).Rotate 90, 0, 0, True
+            ExScenery(n).position Ret3DPos(SceneryPieces(n).tSizeTopLeft.x) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.x) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.x)) / 2), Ret3DPos(SceneryPieces(n).tSizeTopLeft.y) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.y) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.y)) / 2), -240, True
+    
+        Next n
+    End If
+End Function
 
-    Next n
+Function DeinitScenery()
+    Dim n As Integer
+    If UBound(SceneryPieces) > 0 Then
+        For n = 1 To UBound(ExScenery)
+            Set ExScenery(n) = Nothing
+        Next n
+    End If
 End Function
 
 Function RenderSceneryPieces()
@@ -257,105 +287,122 @@ Function RenderSceneryPieces()
     Next n
 End Function
 
-' For game saves, or future Repton 2 functionallity
-'Function SaveFileLevel() As Boolean
-'
-'    Dim n As Integer
-'    Dim x As Integer
-'    Dim y As Integer
-'    Dim sTemp As String
-'
-'    SaveFileLevel = False
-'
-'    ' Individual level info::
-'
-'    Open App.Path + "\temp\" + strLevelOrder(intCurSelLevel) + ".rrl" For Output As #1
-'
-'        ' RR file version
-'        Print #1, "ReptonReturnsLevelV1.1"
-'
-'        ' Level Name
-'        Print #1, strLevelOrder(intCurSelLevel)
-'
-'        ' Time allowed
-'        Print #1, Trim(Str(sngMapTime))
-'
-'        ' Map Size
-'        Print #1, Trim(Str(tMapSize.x)) + "," + Trim(Str(tMapSize.y))
-'
-'        ' Map data
-'        n = 1
-'        For y = 1 To tMapSize.y
-'            sTemp = ""
-'            For x = 1 To tMapSize.x
-'                If sLogicalMap(n) = "" Or sLogicalMap(n) = " " Then sLogicalMap(n) = "0"
-'                sTemp = sTemp + sLogicalMap(n)
-'
-'                n = n + 1
-'            Next x
-'            Print #1, sTemp
-'        Next y
-'
-'        ' Transporter info (in order as from map)
-'        If UBound(tTransporterCorrds) > 0 Then
-'            For n = 1 To UBound(tTransporterCorrds)
-'                Print #1, Trim(Str(tTransporterCorrds(n).x)) + "," + Trim(Str(tTransporterCorrds(n).y))
-'            Next n
-'        End If
-'
-'        ' Sceinary filenames (in order as IDed)
-'        Print #1, Trim(Str(UBound(SceneryPieces)))              ' How many
-'        If UBound(SceneryPieces) > 0 Then
-'            For n = 1 To UBound(SceneryPieces)
-'                Print #1, Trim(Str(SceneryPieces(n).tSizeTopLeft.x)) + "," + Trim(Str(SceneryPieces(n).tSizeTopLeft.y))
-'
-'                Print #1, Trim(Str(SceneryPieces(n).tSizeBotRight.x)) + "," + Trim(Str(SceneryPieces(n).tSizeBotRight.y))
-'
-'                Print #1, CStr(SceneryPieces(n).bIsMovableTo)
-'
-'                Print #1, SceneryPieces(n).strMeshFile
-'                Print #1, SceneryPieces(n).strTexFile
-'            Next n
-'
-'        End If
-'
-'        ' In-game messages data (in order as IDed)
-'        Print #1, Trim(Str(UBound(tInGameMessages)))                  ' How many
-'        If UBound(tInGameMessages) > 0 Then
-'
-'            For n = 1 To UBound(tInGameMessages)
-'
-'                Print #1, Trim(Str(tInGameMessages(n).iTotTrigs))
-'                If tInGameMessages(n).iTotTrigs > 0 Then
-'                    For x = 1 To tInGameMessages(n).iTotTrigs
-'                        Print #1, Trim(Str(tInGameMessages(n).tTriggers(x).x)) + "," + Trim(Str(tInGameMessages(n).tTriggers(x).y))
-'                    Next x
-'                End If
-'
-'                sTemp = tInGameMessages(n).strMessage
-'                Print #1, sTemp
-'                Replace sTemp, ",", "<comma>"
-'
-'                Print #1, "</game-message>"
-'            Next n
-'        End If
-'
-'        ' Navigation map is present from start
-'        Print #1, CStr(bNavMapFromStart)
-'
-'        SaveFileLevel = True
-'
-'    Close #1
-'
-'End Function
+Function SaveFileLevel(strFile As String) As Boolean
+
+    Dim n As Integer
+    Dim x As Integer
+    Dim y As Integer
+    Dim sTemp As String
+
+    SaveFileLevel = False
+
+    ' Individual level info::
+
+    Open strFile For Output As #1
+    
+        ' RR file version
+        Print #1, "ReptonReturnsLevelV1.1"
+        
+        ' Level Name
+        Print #1, rrGame.LevelOrder(rrGame.iCurGameLevel)
+        
+        ' Time allowed
+        Print #1, rrMap.sngTimeBombOut
+        
+        ' Map Size
+        Print #1, Trim(Str(intMapSizeX - 2)) + "," + Trim(Str(intMapSizeY - 2))
+       
+        ' Map data
+        For y = 2 To intMapSizeY - 1
+            sTemp = ""
+            For x = 2 To intMapSizeX - 1
+                For n = 0 To UBound(rrSpirit)
+                    If rrSpirit(n).intOrgX = x And rrSpirit(n).intOrgY = y And n < (rrMap.intTotSpirits - 1) Then
+                        n = 10
+                    End If
+                Next n
+                
+                If n = 11 Then
+                    sTemp = sTemp + "p"
+                Else
+                    sTemp = sTemp + rrMap.GetData(x, y)
+                End If
+            Next x
+            Print #1, sTemp
+        Next y
+        
+        ' Transporter info (in order as from map)
+        If UBound(tTransporters) > 0 Then
+            For n = 1 To UBound(tTransporters)
+                Print #1, Trim(Str(tTransporters(n).iToX - 1)) + "," + Trim(Str(tTransporters(n).iToY - 1))
+            Next n
+        End If
+        
+        ' Level-transorters
+        If UBound(tLevelTrans) > 0 Then
+            For n = 1 To UBound(tLevelTrans)
+                If tLevelTrans(n).sLocalFile <> "!deleted!" Then
+                    Print #1, "0,0"
+                    Print #1, tLevelTrans(n).sLocalFile
+                End If
+            Next n
+        End If
+        
+        
+        ' Sceinary filenames (in order as IDed)
+        Print #1, Trim(Str(UBound(SceneryPieces)))              ' How many
+        If UBound(SceneryPieces) > 0 Then
+            For n = 1 To UBound(SceneryPieces)
+                Print #1, Trim(Str(SceneryPieces(n).tSizeTopLeft.x - 1)) + "," + Trim(Str(SceneryPieces(n).tSizeTopLeft.y - 1))
+               
+                Print #1, Trim(Str(SceneryPieces(n).tSizeBotRight.x - 1)) + "," + Trim(Str(SceneryPieces(n).tSizeBotRight.y - 1))
+                
+                Print #1, CStr(SceneryPieces(n).bIsMovableTo)
+                
+                Print #1, SceneryPieces(n).strMeshFile
+                Print #1, SceneryPieces(n).strTexFile
+            Next n
+
+        End If
+        
+        ' In-game messages data (in order as IDed)
+        Print #1, Trim(Str(UBound(tInGameMessages)))                  ' How many
+        If UBound(tInGameMessages) > 0 Then
+        
+            For n = 1 To UBound(tInGameMessages)
+                
+                Print #1, Trim(Str(tInGameMessages(n).iTotTrigs))
+                If tInGameMessages(n).iTotTrigs > 0 Then
+                    For x = 1 To tInGameMessages(n).iTotTrigs
+                        Print #1, Trim(Str(tInGameMessages(n).tTriggers(x).x)) + "," + Trim(Str(tInGameMessages(n).tTriggers(x).y))
+                    Next x
+                End If
+                
+                sTemp = tInGameMessages(n).strMessage
+                
+                Print #1, sTemp
+                Replace sTemp, ",", "<comma>"
+                
+                Print #1, "</game-message>"
+            Next n
+        End If
+        
+        ' Navigation map is present from start
+        Print #1, CStr(bNavMapFromStart)
+        
+        SaveFileLevel = True
+
+    Close #1
+    
+End Function
 
 
 Public Function OpenSafes()
     Dim intX As Integer
     Dim intY As Integer
     
-    For intY = 1 To rrMap.intMapSizeX
-        For intX = 1 To rrMap.intMapSizeY
+    For intY = 1 To rrMap.intMapSizeY
+        For intX = 1 To rrMap.intMapSizeX
         
             If intRTData(intX, intY) = "s" Then
                 intRTData(intX, intY) = "d"
@@ -396,6 +443,7 @@ Function SetData(intX As Integer, intY As Integer, intData As enmPieceType)
         
         ' Update rrPieces
         rrPieces(intX, intY).TypeID = DataInt2Str(intData)
+                
     End If
 End Function
 

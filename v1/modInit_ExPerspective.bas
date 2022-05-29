@@ -13,7 +13,9 @@ Public ExPrj As New exD3Dprj
 Public ExCam As New exCamera
 Public ExInp As New exInput
 
-Public Ex3DP(32) As New exMesh
+Public ExFader          As New exMesh
+
+Public Ex3DP(33) As New exMesh
 
 Public Ex3DGround(15) As New exMesh      ' Visual Ground
                                          '  10 = 4-6
@@ -26,8 +28,23 @@ Public Ex3DGround(15) As New exMesh      ' Visual Ground
 
 Public Ex3DWallSides(3) As New exMesh    ' Visual Wall sides (large stones)
 
-Public ExSnds(5) As New exSound
-
+Public ExSnds(15) As New exSound
+' 0 - Dimond1
+' 1 - Dimond2
+' 2 - Dimond3
+' 3 - Dimond4
+' 4 - Rock Falling
+' 5 - Rock Crash
+' 6 - Crown collected
+' 7 - egg_cracking
+' 8 - egg_crunch
+' 9 - spirit caught
+'10 - spirit near
+'11 - time_cap
+'12 - transporter
+'13 - level-trans
+'14 - key
+'15 -
 
 Public ExMsgBoard As New exMesh
 
@@ -39,6 +56,10 @@ Public ExTxtGUI As New ex2DText
 Public ExTxtMsg As New ex2DText
 
 ''Public ExSnd As exSound
+
+
+Dim TimFaderCont    As New exTools_Timer
+Dim sngFadeTime     As Single
 
 Function InitExperspectiveObjects()
     ExPrj.Init frmMain.hwnd, "timeomatic"
@@ -53,8 +74,40 @@ Function InitExperspectiveObjects()
     ExTxtMsg.InitText "", frmMain.lblMsgRef.Font
     ExTxtMsg.Colour &HFF00A000
     
+    ExFader.InitXFile App.Path & "\data\gui\fader.x"
+    
 End Function
 
+Function StartFader(sngTime As Single)
+    TimFaderCont.ReSet
+    sngFadeTime = sngTime
+End Function
+
+Function RenderFader(Optional bIn As Boolean = False)
+    Dim n As Integer
+    
+    If bIn Then
+        ' Fade in
+        If sngFadeTime > 0 Then
+            For n = 1 To Int((25 / sngFadeTime) * (sngFadeTime - TimFaderCont.LocalTime))
+                ExFader.Render
+            Next n
+        End If
+    Else
+        ' Fade out
+        If sngFadeTime > 0 Then
+            For n = 1 To Int((25 / sngFadeTime) * TimFaderCont.LocalTime)
+                ExFader.Render
+            Next n
+        ElseIf sngFadeTime = -1 Then
+            For n = 1 To 25
+                ExFader.Render
+            Next n
+        End If
+    End If
+    
+    If TimFaderCont.LocalTime > sngFadeTime Then sngFadeTime = -1
+End Function
 
 Function Ret3DPos(intMapPos As Integer) As Single
     Ret3DPos = -((intMapPos - 1) * 95.5)

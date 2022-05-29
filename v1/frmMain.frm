@@ -89,6 +89,10 @@ Private Sub Form_Load()
     
     Dim iSel As Integer
     
+    Dim n As Integer
+    Dim sFileToRead As String
+    Dim sTemp As String
+    
     
     iXsize = Me.ScaleWidth
     iYsize = Me.ScaleHeight
@@ -98,8 +102,8 @@ Private Sub Form_Load()
     InitExperspectiveObjects
     
     
-    InitFMOD
-    OpenFMOD "C:\Documents and Settings\Dan.DAN-NEWCOMP\My Documents\Ex-D\Software Development\Projects\Games\Repton Returns\_no use\Music\thunderus intro - v good\older\Repton Returns - Thunderus Intro (pre-release).mp3"
+    'InitFMOD
+    'OpenFMOD App.Path & "\data\music\The Thunderous Intro for Repton Returns.mp3"
     
     
     
@@ -120,9 +124,9 @@ Private Sub Form_Load()
     
     rrGameMenu.Init
     
-    rrGameMenu.ExDlogoLoop
-    PlayFMOD
-    rrGameMenu.ReptonReturnsIntroLoop
+    'rrGameMenu.ExDlogoLoop
+    
+    'rrGameMenu.ReptonReturnsIntroLoop
     
     Do
     
@@ -133,7 +137,7 @@ Private Sub Form_Load()
             Case 1              ' Player selection menu.
             
                 Do
-                
+                    
                     iSel = rrGameMenu.SelectPlayerMenu
                     
                     Select Case iSel
@@ -147,27 +151,74 @@ Private Sub Form_Load()
                         
                             'rrGameMenu.Deinit
                             
-                            ' Show loading screen
                             
-                        
+                            ' Read names from file
+                            If FileExists(App.Path & "\data\players\names.dat") Then
+                                Open App.Path & "\data\players\names.dat" For Input As #1
+                                    n = 0
+                                    Do While Not EOF(1) And iSel <> n
+                                        n = n + 1
+                                        Input #1, sTemp
+                                        sPrimPlayerName = sTemp
+                                    Loop
+                                Close #1
+                            Else
+                                
+                            End If
+    
+                            ' Read settings from file for selected player
+                            sFileToRead = App.Path & "\data\players\" & sPrimPlayerName & "\options.dat"
+                            If Not (FileExists(sFileToRead)) Then
+                                sFileToRead = App.Path & "\data\players\new\options.dat"
+                            End If
+                            ' Read file
+                            Open sFileToRead For Input As #1
+                                ' game speed(0.25 - 5#)
+                                Input #1, sTemp
+                                rrGame.sngGameSpeed = Val(sTemp)
+                                ' Sound volume / off
+                                Input #1, sTemp
+                                rrGame.sngSfxVol = Val(sTemp)
+                                ' music volume / off
+                                Input #1, sTemp
+                                rrGame.sngMusicVol = Val(sTemp)
+                            Close #1
+                            
+                            ' Update stats
+                            Open App.Path & "\data\players\" & sPrimPlayerName & "\stats.dat" For Input As #1
+                                Open App.Path & "\data\players\" & sPrimPlayerName & "\stats.tmp" For Output As #2
+                                    Input #1, sTemp
+                                    sTemp = Trim(Str(Val(sTemp) + 1))
+                                    Print #2, sTemp
+                                Close #2
+                            Close #1
+                            MoveFile App.Path & "\data\players\" & sPrimPlayerName & "\stats.tmp", App.Path & "\data\players\" & sPrimPlayerName & "\stats.dat"
+                                
+                            
+                            rrGame.sEpisodeDir = App.Path & "\data\players\" & sPrimPlayerName & "\Home\"
+                            
                             ' Start Game
+                            If sTemp = "1" Then
+                                If MsgBox("Do you wish to play a quick tutorial that will introduce the game of Repton Returns?", vbYesNo, "Repton Returns") = vbYes Then
+                                    rrGame.sEpisodeDir = App.Path & "\data\episode\Tutorial\"
+                                End If
+                            End If
+                            
+                            
                             rrGame.Init
                             
                         
+                            Do
+                            Loop While rrGame.MainLoop
+                                                        
                             
-                            ' The main loop. Each cycle represents one frame.
-                            Do While Not (UserInteraction)                     ' {  Input
-                                
-                                ' Allow events in this game to accour          ' /
-                                GameEvents                                     ' |
-                                                                               '-   Process
-                                ' Allow other events to process.               ' |
-                                DoEvents                                       ' \
-                                
-                                
-                                DrawFrame                                      ' {  Output
-                                        
-                            Loop
+                            rrGame.DeInit
+                            
+                            ' UnLoad sounds...
+                            For n = 0 To UBound(ExSnds)
+                                Set ExSnds(0) = Nothing
+                            Next n
+
                         
                             iSel = -1           ' After playing, go beck to main menu
                     

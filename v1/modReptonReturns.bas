@@ -15,6 +15,12 @@ Public Type type_Transporter
     iToY As Integer
 End Type
 
+Public Type type_LevelTrans
+    'tPos        As Corrds2D_T
+    sLocalFile  As String
+End Type
+
+
 Public rrMap             As New cMap        ' The loaded level
 Public rrRepton          As New cPlayer     ' A human player (Repton)
 Public rrPieces()        As New cPiece      ' A piece on the level
@@ -22,8 +28,10 @@ Public rrRocksOrEggs()   As New cRockOrEgg  ' A rock or egg; moveable piece
 Public rrMonster(4)      As New cMonster
 Public rrSpirit(8)       As New cSpirt
 
-Public tTransporters()  As type_Transporter
+Public tTransporters()   As type_Transporter
+Public tLevelTrans()     As type_LevelTrans
 
+Public sPrimPlayerName   As String
 
 Dim intWallAround_LOOKUP(1, 1, 1, 1) As Integer       ' (2,4,6,8) - wall is there(1) or not(0) for each
                                                       '  Down [2], Left [4], Right [6], Up [8]  (KeyPad)
@@ -61,7 +69,7 @@ Public Enum enmPieceType
     skull
     Barrier
     Monster
-    Transporter
+    transporter
     TimeCapsule
     FilledWall
     FilledWall7
@@ -69,7 +77,7 @@ Public Enum enmPieceType
     FilledWall1
     FilledWall3
     NavigationalMap
-    
+    LevelTransport
 End Enum
 
 
@@ -81,12 +89,16 @@ Function DrawFrame()
     Dim intX As Integer
     Dim intY As Integer
     
+    Dim x As Integer
+    Dim y As Integer
+    Dim sT As String
+    
     ' Start of Rendering process
     ExPrj.Render
     
     
     ' Only render the pieces that are in view
-    For intY = -4 To 4
+    For intY = -4 To 5
         For intX = -6 To 6
 
             If GetPlayerOffsetPiece(intX, intY) <> -1 Then
@@ -126,6 +138,10 @@ Function DrawFrame()
     ' Render GUI
     
     ExTxtGUI.position 10, 10
+    ExTxtGUI.Text "LEVEL: " & rrGame.strEpisodeName & " > " & rrGame.LevelOrder(rrGame.iCurGameLevel)
+    ExTxtGUI.Render
+    
+    ExTxtGUI.position 10, 40
     ExTxtGUI.Text "DIAMONDS: " & rrMap.intTotDimonds - rrRepton.intDimondsCollected
     ExTxtGUI.Render
     
@@ -149,8 +165,19 @@ Function DrawFrame()
         sLastTime = rrMap.timTimeBomb.LocalTime
     End If
     ExTxtGUI.position 10, 600
-    ExTxtGUI.Text "FPS: " & Str(iFPSval) & "    MONSTERS: " & Str(rrMap.intTotMonstersAlive)
+    ExTxtGUI.Text "NAME: " & rrRepton.strName & "                 MONSTERS: " & Str(rrMap.intTotMonstersAlive)
     ExTxtGUI.Render
+    
+'    ' Debug helper
+'    For y = rrMap.intMapSizeY To 1 Step -1
+'        sT = ""
+'        For x = rrMap.intMapSizeX To 1 Step -1
+'            sT = sT & rrMap.GetData(x, y)
+'        Next x
+'        ExTxtMsg.Text sT
+'        ExTxtMsg.position 200, 40 + (20 * y)
+'        ExTxtMsg.Render
+'    Next y
     
     
     ' Draw any In-Game Messages
@@ -203,7 +230,7 @@ End Function
 
 
 
-Function SetupLevel() As Integer
+Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
 ' 0 = Okay
 ' 1 = Error while processing map
 
@@ -216,12 +243,12 @@ Function SetupLevel() As Integer
     
     ' Get Full Dir Path of theme
     rrGame.strVisualTheme = App.Path & "\data\themes\origonal"
-     strThemeDir = App.Path & "\data\themes\origonal"
+    strThemeDir = App.Path & "\data\themes\origonal"
     
    
     
     ' Load meshes...   (note that Ex-Perspective horizontaliy flips the screen output and that the
-    '                    actual file data does not respect this; n.b. walls will use their opposit
+    '                    actual file data does not respect this; NB: walls will use their opposit
     '                    equivalent; e.g wall4 = the image that would normally show wall6)
     
     'Ex3DP(enmPieceType.Space).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\space.bmp"
@@ -244,16 +271,17 @@ Function SetupLevel() As Integer
 
     Ex3DP(13).InitXFile strThemeDir & "\meshes\safe.x"
     Ex3DP(14).InitXFile strThemeDir & "\meshes\key.x"
-    Ex3DP(16).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\repton.bmp"
+    
     Ex3DP(17).InitXFile strThemeDir & "\meshes\crown.x"
     Ex3DP(18).InitXFile strThemeDir & "\meshes\cage.x"
     Ex3DP(19).InitXFile strThemeDir & "\meshes\spirit.x", strThemeDir & "\textures\spirit.bmp"
     Ex3DP(20).InitXFile strThemeDir & "\meshes\time-bomb.x", strThemeDir & "\textures\time-bomb.bmp"
     Ex3DP(20).Rotate 90, 0, 0, True
-    Ex3DP(21).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\fungus.bmp"
+    Ex3DP(21).InitXFile strThemeDir & "\meshes\fungus.x", strThemeDir & "\textures\fungus.bmp"
     Ex3DP(22).InitXFile strThemeDir & "\meshes\skull.x"
     Ex3DP(23).InitXFile strThemeDir & "\meshes\barrier.x"
-    Ex3DP(24).InitXFile App.Path & "\_debug\3.x", strThemeDir & "\repton.bmp"
+    Ex3DP(24).InitXFile strThemeDir & "\meshes\monster.x", strThemeDir & "\textures\monster.bmp"
+    Ex3DP(24).Rotate 90, 0, 0, True
     Ex3DP(25).InitXFile strThemeDir & "\meshes\transporter.x", strThemeDir & "\textures\transporter.bmp"
     Ex3DP(25).Rotate 90, 0, 0, True
     Ex3DP(26).InitXFile strThemeDir & "\meshes\time-capsule.x"
@@ -270,6 +298,9 @@ Function SetupLevel() As Integer
         Ex3DP(intX).Rotate 90, 0, 0, True
     Next intX
     
+    'Ex3DP(32).InitXFile strThemeDir & "\meshes\nav-map.x", strThemeDir & "\textures\nav-map.bmp"
+    
+    Ex3DP(33).InitXFile strThemeDir & "\meshes\transporter.x", strThemeDir & "\textures\transporter.bmp"
     
     ' Ground meshes
     For intX = 0 To 15
@@ -300,7 +331,21 @@ Function SetupLevel() As Integer
     
     ' Load sounds...
     ExSnds(0).InitSound strThemeDir & "\sounds\m_dimond.wav"
-    
+    ExSnds(1).InitSound strThemeDir & "\sounds\m_dimond.wav"
+    ExSnds(2).InitSound strThemeDir & "\sounds\m_dimond.wav"
+    ExSnds(3).InitSound strThemeDir & "\sounds\m_dimond.wav"
+    ExSnds(4).InitSound strThemeDir & "\sounds\rock_fall.wav"
+    ExSnds(5).InitSound strThemeDir & "\sounds\rock_crash.wav"
+    ExSnds(6).InitSound strThemeDir & "\sounds\crown.wav"
+    ExSnds(7).InitSound strThemeDir & "\sounds\egg_cracking.wav"
+    ExSnds(8).InitSound strThemeDir & "\sounds\egg_crunch.wav"
+    ExSnds(9).InitSound strThemeDir & "\sounds\spirit_caught.wav"
+    ExSnds(10).InitSound strThemeDir & "\sounds\spirit_near.wav"
+    ExSnds(11).InitSound strThemeDir & "\sounds\time_cap.wav"
+    ExSnds(12).InitSound strThemeDir & "\sounds\transporter.wav"
+    If Not (bTransporting) Then ExSnds(13).InitSound strThemeDir & "\sounds\level-trans.wav"
+    ExSnds(14).InitSound strThemeDir & "\sounds\key.wav"
+    ExSnds(15).InitSound strThemeDir & "\sounds\fungus.wav"
     
     ExMsgBoard.InitXFile App.Path & "\data\gui\msg_board.x", App.Path & "\data\gui\msg_boar.bmp"
     
@@ -313,6 +358,7 @@ Function SetupLevel() As Integer
     rrMap.intTotDimonds = 0
     rrMap.intTotFunguses = 0
     rrMap.intTotTransporters = 0
+    rrMap.intTotLevelTrans = 0
     
     
    For intY = 1 To rrMap.intMapSizeY
@@ -407,6 +453,10 @@ Function SetupLevel() As Integer
             Case "n"    ' Transport
                 rrMap.intTotTransporters = rrMap.intTotTransporters + 1
                 rrPieces(intX, intY).intTransporterID = rrMap.intTotTransporters
+                
+            Case "y"    ' Level-Transport
+                rrMap.intTotLevelTrans = rrMap.intTotLevelTrans + 1
+                rrPieces(intX, intY).intTransporterID = rrMap.intTotLevelTrans
             
             Case Else 'Error!
                 
@@ -421,6 +471,57 @@ Function SetupLevel() As Integer
    rrMap.timTimeBomb.ReSet
 
 End Function
+
+
+Function DeinitLevel() As Integer
+' 0 = Okay
+' 1 = Error while processing map
+
+    'Dim intX As Integer
+    'Dim intY As Integer
+    
+    Dim n As Integer
+    
+    'Dim strThemeDir As String
+    
+    'Randomize
+    
+    ' Get Full Dir Path of theme
+    'rrGame.strVisualTheme = App.Path & "\data\themes\origonal"
+     'strThemeDir = App.Path & "\data\themes\origonal"
+    
+    For n = 1 To UBound(Ex3DP)
+        Set Ex3DP(n) = Nothing
+    Next n
+        
+    For n = 0 To 15
+        Set Ex3DGround(n) = Nothing
+    Next n
+    
+    For n = 0 To 3
+        Set Ex3DWallSides(n) = Nothing
+    Next n
+     
+    
+    
+    ' Scenery pieces
+    rrMap.DeinitScenery
+    
+    Set rrMap = Nothing
+    
+    Set rrRepton = Nothing
+    
+    ReDim rrSpirits(0)
+    Set rrSpirits(0) = Nothing
+    
+    ReDim rrRockOrEggs(0)
+    Set rrRockOrEggs(0) = Nothing
+        
+    Set ExMsgBoard = Nothing
+
+End Function
+
+
 
 
 Function GetPlayerOffsetPiece(intX As Integer, intY As Integer) As Integer
@@ -502,7 +603,7 @@ End Function
 Function DataInt2Str(intIn As enmPieceType) As String
 
 ' Used charicters:   abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ%*)^$(&£!|\`¬¦@;:.<>#~=+-_
-'  (underlined)      ------- - - -- - ----  - -----------                          -    ----
+'  (underlined)      ------- - - -- - ----  -------------                          -    ----
 
    If intIn = 0 Then DataInt2Str = "0"    'Space...
    If intIn = 1 Then DataInt2Str = "5"
@@ -540,7 +641,10 @@ Function DataInt2Str(intIn As enmPieceType) As String
    
    If intIn = enmPieceType.NavigationalMap Then DataInt2Str = "x"
    
+   If intIn = enmPieceType.LevelTransport Then DataInt2Str = "y"
+   
 End Function
+
 
 
 Function DataStr2Int(strIn As String) As Integer
@@ -582,6 +686,8 @@ Function DataStr2Int(strIn As String) As Integer
    If strIn = "£" Then DataStr2Int = enmPieceType.FilledWall3
    
    If strIn = "x" Then DataStr2Int = enmPieceType.NavigationalMap
+   
+   If strIn = "y" Then DataStr2Int = enmPieceType.LevelTransport
       
 End Function
 
