@@ -28,7 +28,7 @@ Public Ex3DGround(0) As New exMesh      ' Visual Ground
 
 Public Ex3DWallSides(3) As New exMesh    ' Visual Wall sides (large stones)
 
-Public Ex3DParticles(0) As New exMesh    ' Load the different types of particle
+Public Ex3DParticles(9) As New exMesh    ' Load the different types of particle
     
 Public ExSnds(20) As New exSound
 ' 0 - Dimond1

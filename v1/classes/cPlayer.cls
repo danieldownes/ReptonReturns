@@ -449,6 +449,7 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
         
         Case enmPieceType.Earth
             ExSnds(16).PlaySound False
+            StartParticleFountian intX, intY, "dig" & Trim(intDirection)
         
             
     End Select
@@ -465,22 +466,18 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
             If intDirection = Left Then
                 If rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Space) Then
                     rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Left
+                ElseIf rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Monster) Then
+                    rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Left
                 Else
                     MoveableTo = False
-                End If
-                
-                If rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Monster) Then
-                    rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Left
                 End If
             Else
                 If rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Space) Then
                     rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
+                ElseIf rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Monster) Then
+                    rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
                 Else
                     MoveableTo = False
-                End If
-                
-                If rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Monster) Then
-                    rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
                 End If
             End If
         End If
@@ -526,14 +523,14 @@ Private Function Render()
     
     If bVisFocus = True Then
         
-        ExCam.position exPlayer_logic.position.x, exPlayer_logic.position.y - 350, 350, True
+        ExCam.position exPlayer_logic.position.X, exPlayer_logic.position.Y - 350, 350, True
         'ExCam.position exPlayer_logic.position.x, exPlayer_logic.position.y - 650, 50, True        ' debug cam
         
-        ExCam.LookAt exPlayer_logic.position.x, exPlayer_logic.position.y, ex3DPlayer.position.z
+        ExCam.LookAt exPlayer_logic.position.X, exPlayer_logic.position.Y, ex3DPlayer.position.z
     
     End If
 
-    ex3DPlayer.position exPlayer_logic.position.x, exPlayer_logic.position.y, exPlayer_logic.position.z, True
+    ex3DPlayer.position exPlayer_logic.position.X, exPlayer_logic.position.Y, exPlayer_logic.position.z, True
     
     ' Control Animation
     If intAniN > intAniMax Or intAniN < intAniMin Then intAniN = intAniMin

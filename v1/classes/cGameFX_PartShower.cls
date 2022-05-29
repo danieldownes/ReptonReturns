@@ -38,7 +38,12 @@ Private Type FXinstence_T
     m_gy As Single
     m_gz As Single
     
-    m_type As Integer
+    ' Rotation
+    m_rx As Single
+    m_ry As Single
+    m_rz As Single
+    
+    m_type As String
     
     m_marker As Single                 ' = 0 when instence not in use  / stop-time for emitter instence
     
@@ -51,9 +56,19 @@ Private iPartsAlive As Integer
 'private iLastPartToDie as Integer   ' Stores the last particle that died so that when creating a new par
 
 ' Emitter properties
-Private fHz                 As Single
-Private fHzRandomRadius     As Single
+'TODO: Private fHzParts                 As Single   ' Frequency of particle generation (particles per second)
+'TODO: Private fHzPartsRandomOffset     As Single   ' Particles per second randomisity (+/- randomness of number of particales per second)
+Public fEmitBoundBoxRadiusX   As Single      ' The radius of the upper and lower plains perpendicular to the X axis
+Public fEmitBoundBoxRadiusY   As Single      ' The radius of the upper and lower plains perpendicular to the Y axis
+Public fEmitBoundBoxRadiusZ   As Single      ' The radius of the upper and lower plains perpendicular to the Z axis
 
+' Partile behaviour
+Public fHzRevsX As Single          ' Particle full (360) rotations per second on X axis
+Public fHzRevsY As Single          ' Particle full (360) rotations per second on Y axis
+Public fHzRevsZ As Single          ' Particle full (360) rotations per second on Z axis
+Public fHzRevsXoffset As Single          ' Random rotations per second (upto fHzRevsXoffset) on X axis offsetted to fHzRevsX
+Public fHzRevsYoffset As Single          ' Random rotations per second (upto fHzRevsXoffset) on Y axis offsetted to fHzRevsY
+Public fHzRevsZoffset As Single          ' Random rotations per second (upto fHzRevsXoffset) on Z axis offsetted to fHzRevsZ
 
 'Private sngAniSpeed As Single
 'Private Const sngAniLen = 100#
@@ -69,7 +84,7 @@ Private sType As String
 Public bIsAlive As Boolean
 
 
-Public Function Init(x As Single, y As Single, z As Single, vx As Single, vy As Single, vz As Single, gx As Single, gy As Single, gz As Single, endtime As Single)
+Public Function Init(X As Single, Y As Single, z As Single, vx As Single, vy As Single, vz As Single, gx As Single, gy As Single, gz As Single, endtime As Single)
 
     Dim n As Integer
 
@@ -78,17 +93,24 @@ Public Function Init(x As Single, y As Single, z As Single, vx As Single, vy As 
     u_emit.m_timer.ReSet
     u_emit.m_marker = endtime
     
-    u_emit.m_x = x
-    u_emit.m_y = y
+    ' Position
+    u_emit.m_x = X
+    u_emit.m_y = Y
     u_emit.m_z = z
    
+    ' Velocity
     u_emit.m_vx = vx
     u_emit.m_vy = vy
     u_emit.m_vz = vz
     
+    ' Force (gravity)
     u_emit.m_gx = gx
     u_emit.m_gy = gy
     u_emit.m_gz = gz
+    
+    ' Current rotation amount
+    
+    ' Rotation speed
     
     StartParticle 0
     
@@ -118,7 +140,10 @@ Public Function RenderInstences()
 
             ' Update locations
             ddPysVelocityUpdate n, 0
-'Ex3D.ResetMatrix
+            
+            ' Render
+            Ex3DParticles(u_par(n).m_type).ResetMatrix
+            Ex3DParticles(u_par(n).m_type).Rotate u_par(n).m_rx, u_par(n).m_ry, u_par(n).m_rz, True
             Ex3DParticles(u_par(n).m_type).position u_par(n).m_x, u_par(n).m_y, u_par(n).m_z, True
             Ex3DParticles(u_par(n).m_type).Render
             
@@ -138,14 +163,15 @@ Public Function RenderInstences()
     
     ' Activate a new particle?
     If u_emit.m_timer.LocalTime < u_emit.m_marker Then  ' Only if emitter is alive
-        StartParticle 0
+        
+        StartParticle GetRandomPartType(u_emit.m_type)
     End If
     
 End Function
 
 
 
-Private Function StartParticle(iParticleType As Integer) As Integer
+Private Function StartParticle(sParticleType As String) As Integer
 ' Returns: -1 if there are no free particles
 
     ' Find free particle
@@ -156,10 +182,10 @@ Private Function StartParticle(iParticleType As Integer) As Integer
     Loop While u_par(StartParticle).m_marker <> 0
 
     
-    ' Set starting position             (dev: randon starting position within a set radius)
-    u_par(StartParticle).m_x = u_emit.m_x
-    u_par(StartParticle).m_y = u_emit.m_y
-    u_par(StartParticle).m_z = u_emit.m_z
+    ' Set starting position
+    u_par(StartParticle).m_x = u_emit.m_x + ((Rnd() * (fEmitBoundBoxRadiusX * 2)) - fEmitBoundBoxRadiusX)
+    u_par(StartParticle).m_y = u_emit.m_y + ((Rnd() * (fEmitBoundBoxRadiusY * 2)) - fEmitBoundBoxRadiusY)
+    u_par(StartParticle).m_z = u_emit.m_z + ((Rnd() * (fEmitBoundBoxRadiusZ * 2)) - fEmitBoundBoxRadiusZ)
     
     ' Gravity (* particle mass)
     u_par(StartParticle).m_gx = u_emit.m_gx
@@ -167,18 +193,30 @@ Private Function StartParticle(iParticleType As Integer) As Integer
     u_par(StartParticle).m_gz = u_emit.m_gz  '* Rnd(Timer())
     
     ' Set random velocaty
-    u_par(StartParticle).m_vx = u_emit.m_vx + ((Rnd(Timer()) * 10) - 5)
-    u_par(StartParticle).m_vy = u_emit.m_vy + ((Rnd(Timer()) * 10) - 5)
-    u_par(StartParticle).m_vz = u_emit.m_vz + ((Rnd(Timer()) * 0.5) - 0.5)
+    u_par(StartParticle).m_vx = u_emit.m_vx + ((Rnd() * 10) - 5)
+    u_par(StartParticle).m_vy = u_emit.m_vy + ((Rnd() * 10) - 5)
+    u_par(StartParticle).m_vz = u_emit.m_vz + ((Rnd() * 0.5) - 0.5)
+    
+    ' Set random rotation (only if particle rotation values have been set up)
+    If fHzRevsX = 0 And fHzRevsY = 0 And fHzRevsZ = 0 Then
+        fHzRevsX = fHzRevsX + ((Rnd() * (fHzRevsXoffset * 2)) - fHzRevsXoffset)
+        fHzRevsY = fHzRevsY + ((Rnd() * (fHzRevsYoffset * 2)) - fHzRevsYoffset)
+        fHzRevsZ = fHzRevsX + ((Rnd() * (fHzRevsZoffset * 2)) - fHzRevsZoffset)
+    End If
+    
+
  
     u_par(StartParticle).m_marker = 1
     u_par(StartParticle).m_timer.ReSet
-    u_par(StartParticle).m_type = iParticleType
+    u_par(StartParticle).m_type = sParticleType
     
     iPartsAlive = iPartsAlive + 1
     
 End Function
 
+Private Function GetRandomPartType(fountain_type As String) As String
+
+End Function
 
 Private Sub ddPysVelocityUpdate(i As Integer, fTime As Single)
 
@@ -191,6 +229,11 @@ Private Sub ddPysVelocityUpdate(i As Integer, fTime As Single)
     u_par(i).m_x = u_par(i).m_x + u_par(i).m_vx
     u_par(i).m_y = u_par(i).m_y + u_par(i).m_vy
     u_par(i).m_z = u_par(i).m_z + u_par(i).m_vz
+    
+    ' Update rotaion
+    u_par(i).m_rx = u_par(i).m_rx + fHzRevsX
+    u_par(i).m_ry = u_par(i).m_ry + fHzRevsY
+    u_par(i).m_rz = u_par(i).m_rz + fHzRevsZ
 
 End Sub
 

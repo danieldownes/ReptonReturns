@@ -47,12 +47,13 @@ Public fxParticles(15)   As New cGameFxParticle
                                                       '  Down [2], Left [4], Right [6], Up [8]  (KeyPad)
                                                       '  Used in 'GetWallAroundInfo'
 
-Dim timRockSndPlaying As New exTools_Timer
-Public bRockSndPlaying As Boolean
+'Dim timRockSndPlaying As New exTools_Timer
+'Public bRockSndPlaying As Boolean
 
 Dim iFPScount As Integer
 Dim iFPSval As Integer
 Dim sLastTime As Single
+Dim sngTemp As Single
 
 Dim intLastKeyPress As exInputKeys
 
@@ -102,8 +103,8 @@ Function DrawFrame()
     Dim intX As Integer
     Dim intY As Integer
     
-    Dim x As Integer
-    Dim y As Integer
+    Dim X As Integer
+    Dim Y As Integer
     Dim sT As String
     
     ' Start of Rendering process
@@ -157,7 +158,7 @@ Function DrawFrame()
     ' Render GUI
     
     ExTxtGUI.position 10, 10
-    ExTxtGUI.Text "LEVEL: " & rrGame.strEpisodeName & " > " & rrGame.LevelOrder(rrGame.iCurGameLevel)
+    ExTxtGUI.Text "LEVEL: " & UCase(rrGame.strEpisodeName & " > " & rrGame.LevelOrder(rrGame.iCurGameLevel))
     ExTxtGUI.Render
     
     ExTxtGUI.position 10, 40
@@ -168,7 +169,7 @@ Function DrawFrame()
     If intPlayerLives < 200 Then
         ExTxtGUI.Text "LIVES: " & Str(intPlayerLives)
     Else
-        ExTxtGUI.Text "LIVES: Unlimited"
+        ExTxtGUI.Text "LIVES: UNLIMITED"
     End If
     ExTxtGUI.Render
     
@@ -181,14 +182,29 @@ Function DrawFrame()
     End If
     ExTxtGUI.Render
     
-    iFPScount = iFPScount + 1
-    If rrMap.timTimeBomb.LocalTime - sLastTime >= 1 Then
-        iFPSval = iFPScount
-        iFPScount = 0
-        sLastTime = rrMap.timTimeBomb.LocalTime
-    End If
+    
     ExTxtGUI.position 10, 600
-    ExTxtGUI.Text "NAME: " & rrRepton.strName & "                 MONSTERS: " & Str(rrMap.intTotMonstersAlive)
+    
+    If ExInp.exInput(ex_f) Then
+        iFPScount = iFPScount + 1
+        
+'        ' Force frame limit (screen refresh limiter)
+'        Do      ' This is totally wrong:
+'            sngTemp = (rrMap.timTimeBomb.LocalTime - sLastTime)
+'        Loop Until sngTemp >= (0.5)
+        
+        
+        If rrMap.timTimeBomb.LocalTime - sLastTime >= 1 Then
+            On Error Resume Next
+              iFPSval = iFPScount / (rrMap.timTimeBomb.LocalTime - sLastTime)
+            Resume
+            iFPScount = 0
+            sLastTime = rrMap.timTimeBomb.LocalTime
+        End If
+        ExTxtGUI.Text "FPS: " & Str(iFPSval)
+    Else
+        ExTxtGUI.Text "NAME: " & rrRepton.strName & "                 MONSTERS: " & Str(rrMap.intTotMonstersAlive)
+    End If
     ExTxtGUI.Render
     
 '    ' Debug helper
@@ -252,7 +268,7 @@ Function UserInteraction() As Boolean
 End Function
 
 ' This may be out of place
-Function StartParticleFountian(x As Integer, y As Integer, sType As String) As Integer
+Function StartParticleFountian(X As Integer, Y As Integer, sType As String) As Integer
     Dim n As Integer
     
     ' Find an availible emitter
@@ -264,55 +280,67 @@ Function StartParticleFountian(x As Integer, y As Integer, sType As String) As I
 
     Select Case sType
         Case "repton_walk8"     ' Up
-            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
-                                0, 0, 1.5, _
-                                0, -0.4, -1, _
-                                0.25 / rrGame.sngGameSpeed
+            fxParticles(StartParticleFountian).Init Ret3DPos(X), Ret3DPos(Y), -220, _
+                                0, 0, 6.5, _
+                                0, -0.2, -0.2, _
+                                3 / rrGame.sngGameSpeed
+                                            
                                 
         Case "repton_walk2"     ' Down
-            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+            fxParticles(StartParticleFountian).Init Ret3DPos(X), Ret3DPos(Y), -220, _
                                 0, 0, 1.5, _
                                 0, 0.4, -1, _
                                 0.25 / rrGame.sngGameSpeed
                             
         Case "repton_walk4"     ' Left
-            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+            fxParticles(StartParticleFountian).Init Ret3DPos(X), Ret3DPos(Y), -220, _
                                 0, 0, 1.5, _
                                 -0.4, 0, -1, _
                                 0.25 / rrGame.sngGameSpeed
                                 
         Case "repton_walk6"     ' Right
-            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+            fxParticles(StartParticleFountian).Init Ret3DPos(X), Ret3DPos(Y), -220, _
                                 0, 0, 1.5, _
                                 0.4, 0, -1, _
                                 0.25 / rrGame.sngGameSpeed
                                 
         Case "dig8"     ' Up
-            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+            fxParticles(StartParticleFountian).Init Ret3DPos(X), Ret3DPos(Y), -220, _
                                 0, 0, 1.5, _
                                 0, -0.4, -1, _
                                 0.25 / rrGame.sngGameSpeed
                                 
         Case "dig2"     ' Down
-            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+            fxParticles(StartParticleFountian).Init Ret3DPos(X), Ret3DPos(Y), -220, _
                                 0, 0, 1.5, _
                                 0, 0.4, -1, _
                                 0.25 / rrGame.sngGameSpeed
                             
         Case "dig4"     ' Left
-            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+            fxParticles(StartParticleFountian).Init Ret3DPos(X), Ret3DPos(Y), -220, _
                                 0, 0, 1.5, _
                                 -0.4, 0, -1, _
                                 0.25 / rrGame.sngGameSpeed
                                 
         Case "dig6"     ' Right
-            fxParticles(StartParticleFountian).Init Ret3DPos(x), Ret3DPos(y), -220, _
+            fxParticles(StartParticleFountian).Init Ret3DPos(X), Ret3DPos(Y), -220, _
                                 0, 0, 1.5, _
                                 0.4, 0, -1, _
                                 0.25 / rrGame.sngGameSpeed
         
         
     End Select
+    
+    'test
+    fxParticles(StartParticleFountian).fHzRevsX = 4
+    fxParticles(StartParticleFountian).fHzRevsY = 6
+    fxParticles(StartParticleFountian).fHzRevsZ = 12
+    fxParticles(StartParticleFountian).fHzRevsXoffset = 15
+    fxParticles(StartParticleFountian).fHzRevsYoffset = 15
+    fxParticles(StartParticleFountian).fHzRevsZoffset = 15
+    fxParticles(StartParticleFountian).fEmitBoundBoxRadiusX = 45
+    fxParticles(StartParticleFountian).fEmitBoundBoxRadiusY = 45
+    fxParticles(StartParticleFountian).fEmitBoundBoxRadiusZ = 45
 End Function
 
 
@@ -424,26 +452,36 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     Ex3DWallSides(2).Rotate 90, 180, 0, True
     Ex3DWallSides(3).Rotate 90, 180, 0, True
     
+  DisplayLoadingScr 10, 17 + rrMap.intMapSizeY
     
-    Ex3DParticles(0).InitXFile App.Path & "\part_rubble1.x", pckOrigThemeFiles.GetPackedFile("grounds.bmp")
-'    Ex3DParticles(0).InitXFile App.Path & "\part.x", App.Path & "\green_part.bmp"
-'    Ex3DParticles(0).InitXFile App.Path & "\part.x", App.Path & "\green_part.bmp"
+    ' Load Particle fragments
+'    Ex3DParticles(0).InitXFile App.Path & "\part1.x", App.Path & "\green_part.bmp"
+'    Ex3DParticles(1).InitXFile App.Path & "\part2.x", App.Path & "\green_part.bmp"
+'    Ex3DParticles(2).InitXFile App.Path & "\part3.x", App.Path & "\green_part.bmp"
+'    Ex3DParticles(3).InitXFile App.Path & "\part_rubble1.x", pckOrigThemeFiles.GetPackedFile("grounds.bmp")
+'    Ex3DParticles(4).InitXFile App.Path & "\part_rubble2.x", pckOrigThemeFiles.GetPackedFile("grounds.bmp")
+'    Ex3DParticles(5).InitXFile App.Path & "\part_rubble3.x", pckOrigThemeFiles.GetPackedFile("grounds.bmp")
+
+    ' Egg fragments
+    Ex3DParticles(0).InitXFile App.Path & "\part_egg1.x", pckOrigThemeFiles.GetPackedFile("egg.bmp")
+    Ex3DParticles(1).InitXFile App.Path & "\part_egg2.x", pckOrigThemeFiles.GetPackedFile("egg.bmp")
+    Ex3DParticles(2).InitXFile App.Path & "\part_egg3.x", pckOrigThemeFiles.GetPackedFile("egg.bmp")
 
     
   
-  DisplayLoadingScr 10, 17 + rrMap.intMapSizeY
+  DisplayLoadingScr 11, 17 + rrMap.intMapSizeY
     
     ' Scenery pieces
     rrMap.LoadSceneryPieces
 
-  DisplayLoadingScr 11, 17 + rrMap.intMapSizeY
+  DisplayLoadingScr 12, 17 + rrMap.intMapSizeY
     
     rrRepton.Init
     rrRepton.bVisFocus = True
     
     modRR_GameEvents.FungusNewTime
     
-  DisplayLoadingScr 12, 17 + rrMap.intMapSizeY
+  DisplayLoadingScr 13, 17 + rrMap.intMapSizeY
     
     ' Load sounds...
     ExSnds(0).InitSound pckOrigThemeFiles.GetPackedFile("m_dimond.wav")
@@ -453,20 +491,20 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     ExSnds(4).InitSound pckOrigThemeFiles.GetPackedFile("rock_fall.wav")
     ExSnds(5).InitSound pckOrigThemeFiles.GetPackedFile("rock_crash.wav")
     ExSnds(6).InitSound pckOrigThemeFiles.GetPackedFile("crown.wav")
-  DisplayLoadingScr 13, 17 + rrMap.intMapSizeY
+  DisplayLoadingScr 14, 17 + rrMap.intMapSizeY
     ExSnds(7).InitSound pckOrigThemeFiles.GetPackedFile("egg_cracking.wav")
     ExSnds(8).InitSound pckOrigThemeFiles.GetPackedFile("egg_crunch.wav")
     ExSnds(9).InitSound pckOrigThemeFiles.GetPackedFile("spirit_caught.wav")
     ExSnds(10).InitSound pckOrigThemeFiles.GetPackedFile("spirit_near.wav")
     ExSnds(11).InitSound pckOrigThemeFiles.GetPackedFile("time_cap.wav")
     ExSnds(12).InitSound pckOrigThemeFiles.GetPackedFile("transporter.wav")
-  DisplayLoadingScr 14, 17 + rrMap.intMapSizeY
+  DisplayLoadingScr 15, 17 + rrMap.intMapSizeY
     If Not (bTransporting) Then ExSnds(13).InitSound pckOrigThemeFiles.GetPackedFile("level-trans.wav")
     ExSnds(14).InitSound pckOrigThemeFiles.GetPackedFile("key.wav")
     ExSnds(15).InitSound pckOrigThemeFiles.GetPackedFile("fungus.wav")
     ExSnds(16).InitSound pckOrigThemeFiles.GetPackedFile("dig.wav")
     ExSnds(17).InitSound pckOrigThemeFiles.GetPackedFile("monster_awake.wav")
-  DisplayLoadingScr 15, 17 + rrMap.intMapSizeY
+  DisplayLoadingScr 16, 17 + rrMap.intMapSizeY
     ExSnds(18).InitSound pckOrigThemeFiles.GetPackedFile("monster_die.wav")
     ExSnds(19).InitSound pckOrigThemeFiles.GetPackedFile("rep_die.wav")
     ExSnds(20).InitSound pckOrigThemeFiles.GetPackedFile("bomb_explosion.wav")
@@ -491,7 +529,7 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     rrMap.intTotLevelTrans = 0
     
     
-    timRockSndPlaying.ReSet
+'    timRockSndPlaying.ReSet
     
    For intY = 1 To rrMap.intMapSizeY
   
@@ -628,6 +666,10 @@ Function DeinitLevel() As Integer
     'rrGame.strVisualTheme = App.Path & "\data\themes\origonal"
      'strThemeDir = App.Path & "\data\themes\origonal"
     
+    For n = 0 To UBound(rrRocksOrEggs)      ' This is near top because rock- falling-sound needs to be shut off ASAP
+        rrRocksOrEggs(n).DeInit
+        Set rrRocksOrEggs(n) = Nothing
+    Next n
     
     For n = 1 To UBound(Ex3DP)
         Set Ex3DP(n) = Nothing
@@ -650,11 +692,11 @@ Function DeinitLevel() As Integer
     Set rrMap = Nothing
     Set rrRepton = Nothing
     
-    ReDim rrSpirits(0)
-    Set rrSpirits(0) = Nothing
+    For n = 0 To UBound(rrSpirit)
+        Set rrSpirit(n) = Nothing
+    Next n
     
-    ReDim rrRockOrEggs(0)
-    Set rrRockOrEggs(0) = Nothing
+    
     Set ExMsgBoard = Nothing
 
 End Function
@@ -830,14 +872,14 @@ Function DataStr2Int(strIn As String) As Integer
 End Function
 
 
-Sub PlayFallingSnd()
-    'Debug.Print timRockSndPlaying.LocalTime
-    If bRockSndPlaying = False Or timRockSndPlaying.LocalTime > 3.911 Then
-        ExSnds(4).PlaySound True
-        bRockSndPlaying = True
-        timRockSndPlaying.ReSet
-    End If
-End Sub
+'Sub PlayFallingSnd()
+'    'Debug.Print timRockSndPlaying.LocalTime
+'    If bRockSndPlaying = False Or timRockSndPlaying.LocalTime > 3.911 Then
+'        ExSnds(4).PlaySound True
+'        bRockSndPlaying = True
+'        timRockSndPlaying.ReSet
+'    End If
+'End Sub
 
 Function DisplayLoadingScr(iCur As Integer, iMax As Integer)
     

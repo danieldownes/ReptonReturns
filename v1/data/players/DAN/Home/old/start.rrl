@@ -3,11 +3,11 @@ Start
 -1 
 41,22
 raaaaarr155222225500000555555555500000000
-raddddarr460ydyk4500005555555555555550000
-aad0ndarr46y55555550555eeydd4555555550000
-aaddddarr46dy1555555555y55504555rr5555000
-aaaaaaaaa459dd455555555d53004555rr5555500
-975559raa1559i4555555edy60004555rrd555555
+raddddarr460idyk4500005555555555555550000
+aad0ndarr46055555550555eeydd4555555550000
+aaddddarr46001555555555y55504555rr5555000
+aaaaaaaaa45900455555555d53004555rr5555500
+975559raa155904555555edy60004555rrd555555
 552225889r1560455555ey75300d4555rdd555555
 53dee1226rr460455555y55600d75555dddd55555
 6eeee000488560000055y55588855555ddddd5555
@@ -27,15 +27,9 @@ aaaaaaaaa459dd455555555d53004555rr5555500
 32,11
 4,3
 0,0
-Repton 3\Prelude\Ration.rrl
-0,0
 Repton 3\Prelude\Tobacco.rrl
 0,0
-Repton 3\Prelude\Lawless.rrl
-0,0
 Repton 3\Toccata\Reserve.rrl
-0,0
-Repton 3\Prelude\Fritter.rrl
 0,0
 Repton 3\Toccata\Foresee.rrl
 0,0
@@ -69,7 +63,11 @@ Repton 3\Finale\Average.rrl
 0
 8
 1
-8,17
+12,21
+
+
+
+
 
 
 
@@ -77,11 +75,15 @@ Repton 3\Finale\Average.rrl
 Walking into the skull on the 'Home' level will delete the currently active Repton Returns account; including saved game positions and settings for this account.
 </game-message>
 5
-21,15
-20,16
-21,16
-20,17
-21,17
+25,19
+24,20
+25,20
+24,21
+25,21
+
+
+
+
 
 
 
@@ -89,7 +91,11 @@ Walking into the skull on the 'Home' level will delete the currently active Rept
 You are now entering into the 'Toccata' set of levels from the original Repton 3.
 </game-message>
 1
-23,14
+27,18
+
+
+
+
 
 
 
@@ -97,7 +103,11 @@ You are now entering into the 'Toccata' set of levels from the original Repton 3
 You'll need to complete the 'Prelude' levels before the 'Finale' levels are unlocked.
 </game-message>
 1
-31,18
+35,22
+
+
+
+
 
 
 
@@ -105,8 +115,12 @@ You'll need to complete the 'Prelude' levels before the 'Finale' levels are unlo
 Welcome to the 'Finale' levels.
 </game-message>
 2
-36,12
-37,11
+40,16
+41,15
+
+
+
+
 
 
 
@@ -114,7 +128,11 @@ Welcome to the 'Finale' levels.
 Careful!!!
 </game-message>
 1
-26,24
+30,28
+
+
+
+
 
 
 
@@ -122,7 +140,11 @@ Careful!!!
 Almost there. Only the worst level of the lot stands in the way!
 </game-message>
 1
-14,24
+18,28
+
+
+
+
 
 
 
@@ -136,6 +158,10 @@ For updates and the chance to help build levels and graphics for future versions
 Hope you enjoyed.
 </game-message>
 0
+
+
+
+
 
 
 
