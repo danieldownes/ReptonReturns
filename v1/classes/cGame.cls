@@ -19,13 +19,14 @@ Option Explicit
 
 Public bGameCompleted As Boolean
 
-Public sEpisodeDir As String
+Public pckLevelFiles As New cFilePackage
 Public iCurGameLevel As Integer
 Public iTotGameLevels As Integer
 Public bEpisodeCompeted As Boolean
 Public iLevelCompeted As Integer
 
 Public strEpisodeName As String
+Public sEpisodeDir As String
 Public intGamePlayType               As Integer
 Dim strLevelOrder()               As String
 Public strVisualTheme As String
@@ -51,6 +52,8 @@ Private tMusicControl As type_MusicControl
 
 Function Init(Optional bTransporting As Boolean = False)
 
+    Dim sTemp As String
+    
     ' Init Pause functionality
     Pause -1
     
@@ -68,6 +71,13 @@ Function Init(Optional bTransporting As Boolean = False)
     End If
     strEpisodeName = Mid(sEpisodeDir, 1, Len(sEpisodeDir) - 1)
     strEpisodeName = Mid(strEpisodeName, InStrRev(strEpisodeName, "\") + 1, Len(strEpisodeName) - InStrRev(strEpisodeName, "\") + 1)
+    
+    sTemp = Mid(sEpisodeDir, 1, InStr(sEpisodeDir, "\") - 1)
+    
+    If sTemp = "Repton 3" Then
+        sEpisodeDir = pckLevelsFiles.GetPackedFile(strEpisodeName & ".rre")
+    End If
+    
     
     OpenFileEpisode sEpisodeDir
     
@@ -118,6 +128,12 @@ Function MainLoop() As Boolean
                 
     Loop
     
+    If intPlayerLives < 0 Then
+        ' All lives are gone
+        MainLoop = False
+        Exit Function
+    End If
+    
     If iLevelCompeted = 1 Then
     
         If rrGame.strEpisodeName = "Home" Then
@@ -155,7 +171,16 @@ Function MainLoop() As Boolean
 End Function
 
 Function DeInit()
+
+    If rrGame.sEpisodeDir = App.Path & "\data\episode\Tutorial\" Then
+        ' Reset lives
+        intPlayerLives = 4
+
+        rrRepton.Die False         ' Will write to file
+    End If
+    
     DeinitLevel
+    
 End Function
 
 Function OpenFileEpisode(strFile As String) As Boolean
@@ -172,8 +197,14 @@ Function OpenFileEpisode(strFile As String) As Boolean
     ' Episode info::
     
     'On Error GoTo open_file_err
-
-    Open strFile + strEpisodeName + ".rre" For Input As #1
+    
+    If Mid(strFile, Len(strFile) - 3, 4) = ".rre" Then
+        sTemp = strFile
+    Else
+        sTemp = strFile + strEpisodeName + ".rre"
+    End If
+    
+    Open sTemp For Input As #1
         
         ' RR file version
         Input #1, sTemp
@@ -301,8 +332,10 @@ Function ControlMusic()
     If tMusicControl.exMusicControl.LocalTime > tMusicControl.sngMusicLen(tMusicControl.intCurMusicTrack) Then
         tMusicControl.intCurMusicTrack = tMusicControl.intCurMusicTrack + 1
         If tMusicControl.intCurMusicTrack > UBound(tMusicControl.strMusicFiles) Then tMusicControl.intCurMusicTrack = 1
-        OpenFMOD App.Path & "\data\music\" & tMusicControl.strMusicFiles(tMusicControl.intCurMusicTrack)
+'        OpenFMOD pckGenFiles(tMusicControl.strMusicFiles(tMusicControl.intCurMusicTrack))
         PlayFMOD
         tMusicControl.exMusicControl.ReSet
     End If
 End Function
+
+

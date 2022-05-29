@@ -55,8 +55,8 @@ Dim intOrgY As Integer
 
 Dim intCurX As Integer
 Dim intCurY As Integer
-Dim intOldX As Integer
-Dim intOldY As Integer
+Public intOldX As Integer
+Public intOldY As Integer
 
 Dim intClsMeshNum As Integer
 
@@ -154,18 +154,23 @@ Function UpDate()
             
                 ExSnds(12).PlaySound False
             
+                ' Update the realtime map piece of the old position
+                rrMap.SetData intOldX, intOldY, Space
+                rrPieces(intOldX, intOldY).TypeID = "0"
+            
                 ' Remove transporter from map
-                rrMap.SetData intCurX, intCurY, Repton
+                rrMap.SetData intCurX, intCurY, Space
                 rrPieces(intCurX, intCurY).TypeID = "0"
                 
                 intCurY = rrPieces(intCurX, intCurY).intTransporterID
                 
                 intCurX = tTransporters(intCurY).iToX
                 intCurY = tTransporters(intCurY).iToY
-                
+                                               
                 Move3D
-                
+                                               
                 Me.SetPosition intCurX, intCurY
+                rrPieces(intOldX, intOldY).TypeID = "0"
                 
                 ' Start pause
                 rrGame.Pause 2.5
@@ -180,7 +185,7 @@ Function UpDate()
             Case "y"                                            ' Level Transporter
                 
                 ExSnds(13).PlaySound False
-                                
+                                              
                 sTemp = tLevelTrans(rrPieces(intCurX, intCurY).intTransporterID).sLocalFile
                 
                 ' Keep track of deleted level-transporter
@@ -191,10 +196,11 @@ Function UpDate()
         
         ' Set the realtime map visual piece of this position
         rrMap.SetData intCurX, intCurY, Repton
-        rrPieces(intCurX, intCurY).TypeID = "0"
+        rrPieces(intCurX, intCurY).TypeID = "i"
         
         ' Update the realtime map piece of the old position
         rrMap.SetData intOldX, intOldY, Space
+'        rrPieces(intOldX, intOldX).TypeID = "0"
         
         
         GameEvents
@@ -206,13 +212,17 @@ Function UpDate()
                 rrMap.SaveFileLevel App.Path & "\data\players\" & sPrimPlayerName & "\home\start.rrl"          '& rrGame.strEpisodeName  & rrGame.LevelOrder(rrGame.iCurGameLevel)
             End If
             
+            ExPrj.Sync
+            
             ' Start Game
             rrGame.DeInit
-            rrGame.sEpisodeDir = App.Path & "\data\episode\" & sTemp
+            rrGame.sEpisodeDir = sTemp
             rrGame.Init True
             
             intOldX = intCurX
             intOldY = intCurY
+            
+            ExPrj.Render
         End If
         
 
@@ -260,6 +270,22 @@ Function GetYPos() As Integer
     GetYPos = intCurY
 End Function
 
+Function GetPreXPos() As Integer
+    If exTimPlayerCont.LocalTime < cintTimeToMove And enmPlayerState = Walk Then
+        GetPreXPos = intOldX
+    Else
+        GetPreXPos = intCurX
+    End If
+End Function
+Function GetPreYPos() As Integer
+    If exTimPlayerCont.LocalTime < cintTimeToMove And enmPlayerState = Walk Then
+        GetPreYPos = intOldY
+    Else
+        GetPreYPos = intCurY
+    End If
+End Function
+
+
 Function Move(intDirection As enmDirection)
 
     If enmPlayerState = Stoped Or enmPlayerState = PushNoWalk Or enmPlayerState = Board Then
@@ -286,6 +312,8 @@ Function Move(intDirection As enmDirection)
         End Select
         
         If MoveableTo(intCurX, intCurY, intDirection) = True Then
+        
+            StartParticleFountian intOldX, intOldY, "repton_walk" & Trim(Str(intDirection))
             
             If rrMap.GetData(intCurX, intCurY) = "e" Then
                 If enmPlayerState <> DigAndWalk Then
@@ -319,14 +347,14 @@ Function Move(intDirection As enmDirection)
 End Function
 
 
-Function Die() As Integer
+Function Die(Optional bPlaySound As Boolean = True) As Integer
 'Returns number of remening lifes
 
     Dim sTemp As String
     
-    ExSnds(19).PlaySound False
     
-    
+    If bPlaySound Then ExSnds(19).PlaySound False
+        
     
     intPlayerLives = intPlayerLives - 1
       
@@ -350,10 +378,15 @@ Function Die() As Integer
         rrGame.iLevelCompeted = -2
         Exit Function
     End If
-       
+      
     If rrMap.GetData(intCurX, intCurY) <> "u" Then
         rrMap.SetData intCurX, intCurY, Space
         rrPieces(intCurX, intCurY).TypeID = "0"
+    End If
+    
+    If rrMap.GetData(intOldX, intOldY) = "i" Then
+        rrMap.SetData intOldX, intOldY, Space
+        rrPieces(intOldX, intOldY).TypeID = "0"
     End If
        
     ' Reset to starting position
@@ -392,7 +425,9 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
                
                 MoveableTo = False
             End If
-            
+        
+        Case enmPieceType.Monster
+            If rrMonster(rrPieces(intX, intY).intMonsterID).blnEarth Then MoveableTo = False
         
         Case enmPieceType.Cage
             MoveableTo = False
@@ -406,7 +441,12 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
         Case enmPieceType.Barrier
             MoveableTo = False
             
-            
+        Case enmPieceType.Egg
+            If rrPieces(intX, intY).intRockOrEggID = -1 Then
+                MoveableTo = False
+                Exit Function
+            End If
+        
         Case enmPieceType.Earth
             ExSnds(16).PlaySound False
         
@@ -418,7 +458,7 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
     
     ' Movable pieces...
     
-    If intTemp = enmPieceType.Rock Or intTemp = enmPieceType.Egg Then       ' Rocks or eggs
+    If intTemp = enmPieceType.Rock Or (intTemp = enmPieceType.Egg) Then        ' Rocks or eggs
         If intDirection = Up Or intDirection = Down Then
             MoveableTo = False
         Else
@@ -440,11 +480,7 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
                 End If
                 
                 If rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Monster) Then
-                    'If rrMonster(rrPieces(intX + 1, intY).intMonsterID).Killable = True Then
-                        rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
-                    'Else
-                    '    MoveableTo = False
-                    'End If
+                    rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
                 End If
             End If
         End If
@@ -472,7 +508,7 @@ Sub Init()
     int3DDirection = Down
     
     ' Init visual based objects
-    ex3DPlayer.InitXFile rrGame.strVisualTheme & "\meshes\repton.x"
+    ex3DPlayer.InitXFile pckOrigThemeFiles.GetPackedFile("repton.x")
     exPlayer_logic.InitXFile ""                                 ' Blank object so that animations are smooth
     
     exTimPlayerCont.Start
@@ -491,6 +527,7 @@ Private Function Render()
     If bVisFocus = True Then
         
         ExCam.position exPlayer_logic.position.x, exPlayer_logic.position.y - 350, 350, True
+        'ExCam.position exPlayer_logic.position.x, exPlayer_logic.position.y - 650, 50, True        ' debug cam
         
         ExCam.LookAt exPlayer_logic.position.x, exPlayer_logic.position.y, ex3DPlayer.position.z
     
@@ -550,7 +587,7 @@ Private Function Move3D()
             Case Up
                 If int3DLastDirection = Left Then ex3DPlayer.Rotate 0, 0, 90, True
                 ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 180), ex3DPlayer.Rotate, cintTimeToMove * 0.7
-                
+                                
             Case Down
                 ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 360), ex3DPlayer.Rotate, cintTimeToMove * 0.7
                 
@@ -562,7 +599,7 @@ Private Function Move3D()
                 ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 270), ex3DPlayer.Rotate, cintTimeToMove * 0.7
                 
         End Select
-                
+        
     End If
     
     int3DLastDirection = int3DDirection

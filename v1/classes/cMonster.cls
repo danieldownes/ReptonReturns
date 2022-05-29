@@ -56,6 +56,7 @@ Dim intAniSpeed As Integer
 
 Dim intPieceType As enmPieceType
 
+Public blnEarth As Boolean
 
 Public ExLog3D As New exMesh               ' Logical 3D (so that transformations are preserved; no mesh data).
 
@@ -65,10 +66,9 @@ Private cintTimeToMove As Single           ' Number of seconds it take for move 
 
 Function Init(intX As Integer, intY As Integer)
     
-    intCurX = intX
-    intCurY = intY
-    intOldX = intX
-    intOldY = intY
+'    intCurX = intX
+    
+    blnEarth = False
         
     ' Internal ani settings
     intAniN = 0
@@ -86,6 +86,9 @@ Function Init(intX As Integer, intY As Integer)
 
     
     enmMonsterState = StillInEgg
+'    intCurY = intY
+'    intOldX = intX
+'    intOldY = intY
     
     
     ' Playing Speed
@@ -103,8 +106,8 @@ Function Render()
     If enmMonsterState = EggIsCracking Or enmMonsterState = MonsterWaking Or enmMonsterState = SeekingRepton Then
         
         Ex3DP(intPieceType).ResetMatrix
-        Ex3DP(intPieceType).Rotate ExLog3D.Rotate.x, ExLog3D.Rotate.y, ExLog3D.Rotate.z, True
-        Ex3DP(intPieceType).position ExLog3D.position.x, ExLog3D.position.y, ExLog3D.position.z, True
+        Ex3DP(intPieceType).Rotate ExLog3D.Rotate.X, ExLog3D.Rotate.Y, ExLog3D.Rotate.z, True
+        Ex3DP(intPieceType).position ExLog3D.position.X, ExLog3D.position.Y, ExLog3D.position.z, True
         
         
         Ex3DP(intPieceType).Render
@@ -154,11 +157,18 @@ Public Function Move(intDir As enmDirection)
         rrRepton.Die
     End If
     
-    rrMap.SetData intOldX, intOldY, Space
-    rrMap.SetData intCurX, intCurY, intPieceType
-        
+       
+    If blnEarth Then
+        rrMap.SetData intOldX, intOldY, Earth
+    Else
+        rrMap.SetData intOldX, intOldY, Space
+    End If
     rrPieces(intOldX, intOldY).intMonsterID = -1  '-2
     rrPieces(intCurX, intCurY).intMonsterID = intMyID
+    
+    If rrMap.GetData(intCurX, intCurY) = "e" Then blnEarth = True Else blnEarth = False
+    rrMap.SetData intCurX, intCurY, Monster
+    
         
     Move3D          ' Direction and/or position may have changed
     
@@ -205,7 +215,7 @@ Function CheckIfMove()
     ' Control spawn timing sequences ...
     
     If enmMonsterState = EggIsCracking Then
-        If timMonsterSpawnCont.LocalTime > 3 / rrGame.sngGameSpeed Then
+        'If timMonsterSpawnCont.LocalTime > 3 / rrGame.sngGameSpeed Then
             ' Egg has fully cracked
             intPieceType = Monster
             rrPieces(intCurX, intCurY).intMonsterID = intMyID
@@ -216,7 +226,7 @@ Function CheckIfMove()
             
             ExSnds(17).PlaySound False
             
-        End If
+        'End If
         
     ElseIf enmMonsterState = MonsterWaking Then
         If timMonsterSpawnCont.LocalTime > 3 / rrGame.sngGameSpeed Then
@@ -236,29 +246,29 @@ Function CheckIfMove()
             
             ' Simply move toward Repton ...
             
-            If rrRepton.GetXPos <> intCurX Then
+            If rrRepton.GetPreXPos <> intCurX Then
                 If int3DDirection <> Left Then
-                    If rrRepton.GetXPos < intCurX Then
+                    If rrRepton.GetPreXPos < intCurX Then
                         int3DDirection = Left
                         GoTo MoveChosen
                     End If
                 End If
                 If int3DDirection <> Right Then
-                    If rrRepton.GetXPos > intCurX Then
+                    If rrRepton.GetPreXPos > intCurX Then
                         int3DDirection = Right
                         GoTo MoveChosen
                     End If
                 End If
             End If
-            If rrRepton.GetYPos <> intCurY Then
+            If rrRepton.GetPreYPos <> intCurY Then
                 If int3DDirection <> Up Then
-                    If rrRepton.GetYPos < intCurY Then
+                    If rrRepton.GetPreYPos < intCurY Then
                         int3DDirection = Up
                         GoTo MoveChosen
                     End If
                 End If
                 If int3DDirection <> Down Then
-                    If rrRepton.GetYPos > intCurY Then
+                    If rrRepton.GetPreYPos > intCurY Then
                         int3DDirection = Down
                         GoTo MoveChosen
                     End If
@@ -308,10 +318,12 @@ End Function
 Function Spawn(intX As Integer, intY As Integer)
     intCurX = intX
     intCurY = intY
+    intOldX = intX
+    intOldY = intY
     
-    Me.Move3D               ' Update visual moster with these new coords.
+    ExLog3D.position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True             ' Update visual moster with these new coords.
     
-    intPieceType = Egg
+    'intPieceType = Egg
     
     rrMap.SetData intX, intY, intPieceType
     rrPieces(intX, intY).intMonsterID = intMyID
@@ -320,14 +332,13 @@ Function Spawn(intX As Integer, intY As Integer)
     
     enmMonsterState = EggIsCracking
     
-    ExSnds(7).PlaySound False
-    
+       
     timMonsterSpawnCont.ReSet
     
 End Function
 
 Function Die() As Boolean
-    If enmMonsterState = SeekingRepton Or enmMonsterState = MonsterWaking Then
+    If (enmMonsterState = SeekingRepton Or enmMonsterState = MonsterWaking) And blnEarth = False Then
         DieForced
         Die = True
         
@@ -356,10 +367,9 @@ Private Function CanMoveTo(intX As Integer, intY As Integer) As Boolean
     
     sTemp = rrMap.GetData(intX, intY)
     
-    If sTemp = "0" Or sTemp = "i" Then
+    If sTemp = "0" Or sTemp = "i" Or sTemp = "e" Then
         CanMoveTo = True
     Else
         CanMoveTo = False
     End If
 End Function
-

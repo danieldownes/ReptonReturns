@@ -28,6 +28,7 @@ Public intTotDimonds      As Integer       '    \
 Public intTotCrowns       As Integer       '      -  All must = 0 before bomb can be defused
 Public intTotEggs         As Integer       '    /
 Public intTotMonstersAlive As Integer      '   /
+
 Public intTotMonsters     As Integer
 
 Public intTotRocksOrEggs  As Integer
@@ -47,8 +48,8 @@ Public intMapSizeY     As Integer
 
 
 Private Type Corrds2D_T
-    x As Integer
-    y As Integer
+    X As Integer
+    Y As Integer
 End Type
 
 Private Type GameMessages_T
@@ -78,17 +79,38 @@ Dim intLastKey As Integer
 Function LoadFileLevel() As Boolean
 
     Dim n As Integer
-    Dim x As Integer
-    Dim y As Integer
+    Dim X As Integer
+    Dim Y As Integer
     Dim sTemp As String
+    Dim sFile As String
     
     intShowingMsg = -1
     
     LoadFileLevel = False
-
+    
+    
     ' Individual level info::
     sTemp = rrGame.LevelOrder(rrGame.iCurGameLevel)
-    Open rrGame.sEpisodeDir & sTemp & ".rrl" For Input As #1
+
+    
+    ' Make sure sEpisodeDir is correctly formatted
+    If Mid(rrGame.sEpisodeDir, Len(rrGame.sEpisodeDir) - 3, 4) = ".rre" Then
+        rrGame.sEpisodeDir = Mid(rrGame.sEpisodeDir, 1, InStrRev(rrGame.sEpisodeDir, "\"))
+        Select Case UCase(rrGame.strEpisodeName)
+            Case "PRELUDE"
+                sFile = pckLevelsFiles.GetPackedFile(sTemp & ".rrl")
+            Case "FIN"
+        End Select
+        
+    Else
+        ' a 'Home' file is being loaded  -- TEMP code
+        sFile = rrGame.sEpisodeDir & sTemp & ".rrl"
+
+    End If
+    
+       
+    
+    Open sFile For Input As #1
     
         ReDim tTransporters(0)
         ReDim tLevelTrans(0)
@@ -126,24 +148,24 @@ Function LoadFileLevel() As Boolean
         ReDim rrPieces(intMapSizeX, intMapSizeY)
 
         ' Get map layout data
-        x = 1
-        y = 1
+        X = 1
+        Y = 1
         Do
             
-            If y <> 1 And y < intMapSizeY Then Input #1, sTemp
+            If Y <> 1 And Y < intMapSizeY Then Input #1, sTemp
                     
-            For x = 1 To intMapSizeX
+            For X = 1 To intMapSizeX
             
                 ' Put wall boarder around map
-                If x = 1 Or x = intMapSizeX Or y = 1 Or y = intMapSizeY Then
-                    rrPieces(x, y).TypeID = "5"
+                If X = 1 Or X = intMapSizeX Or Y = 1 Or Y = intMapSizeY Then
+                    rrPieces(X, Y).TypeID = "5"
                     
                 ' Else use read in value
                 Else
-                    rrPieces(x, y).TypeID = Mid(sTemp, x - 1, 1)
+                    rrPieces(X, Y).TypeID = Mid(sTemp, X - 1, 1)
                     
                     ' Keep track of piece count
-                    Select Case rrPieces(x, y).TypeID
+                    Select Case rrPieces(X, Y).TypeID
                         Case "n"
                             ReDim tTransporters(UBound(tTransporters) + 1)
                         Case "y"
@@ -151,11 +173,11 @@ Function LoadFileLevel() As Boolean
                     End Select
                     
                 End If
-                intRTData(x, y) = rrPieces(x, y).TypeID
-            Next x
-            y = y + 1
+                intRTData(X, Y) = rrPieces(X, Y).TypeID
+            Next X
+            Y = Y + 1
         
-        Loop While y <= intMapSizeY
+        Loop While Y <= intMapSizeY
 
         
         ' Transporter info (in order as from map)
@@ -186,14 +208,14 @@ Function LoadFileLevel() As Boolean
             If UBound(SceneryPieces) > 0 Then
                 For n = 1 To UBound(SceneryPieces)
                     Input #1, sTemp
-                    SceneryPieces(n).tSizeTopLeft.x = Int(sTemp) + 1
+                    SceneryPieces(n).tSizeTopLeft.X = Int(sTemp) + 1
                     Input #1, sTemp
-                    SceneryPieces(n).tSizeTopLeft.y = Int(sTemp) + 1
+                    SceneryPieces(n).tSizeTopLeft.Y = Int(sTemp) + 1
                     
                     Input #1, sTemp
-                    SceneryPieces(n).tSizeBotRight.x = Int(sTemp) + 1
+                    SceneryPieces(n).tSizeBotRight.X = Int(sTemp) + 1
                     Input #1, sTemp
-                    SceneryPieces(n).tSizeBotRight.y = Int(sTemp) + 1
+                    SceneryPieces(n).tSizeBotRight.Y = Int(sTemp) + 1
                     
                     Input #1, sTemp
                     SceneryPieces(n).bIsMovableTo = CBool(sTemp)
@@ -216,12 +238,12 @@ Function LoadFileLevel() As Boolean
                 tInGameMessages(n).iTotTrigs = Int(sTemp)
                 
                 If tInGameMessages(n).iTotTrigs > 0 Then
-                    For x = 1 To tInGameMessages(n).iTotTrigs
+                    For X = 1 To tInGameMessages(n).iTotTrigs
                         Input #1, sTemp
-                        tInGameMessages(n).tTriggers(x).x = Int(sTemp) + 1
+                        tInGameMessages(n).tTriggers(X).X = Int(sTemp) + 1
                         Input #1, sTemp
-                        tInGameMessages(n).tTriggers(x).y = Int(sTemp) + 1
-                    Next x
+                        tInGameMessages(n).tTriggers(X).Y = Int(sTemp) + 1
+                    Next X
                 End If
                 
                 Input #1, sTemp
@@ -264,7 +286,7 @@ Function LoadSceneryPieces()
             End If
             
             ExScenery(n).Rotate 90, 0, 0, True
-            ExScenery(n).position Ret3DPos(SceneryPieces(n).tSizeTopLeft.x) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.x) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.x)) / 2), Ret3DPos(SceneryPieces(n).tSizeTopLeft.y) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.y) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.y)) / 2), -240, True
+            ExScenery(n).position Ret3DPos(SceneryPieces(n).tSizeTopLeft.X) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.X) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.X)) / 2), Ret3DPos(SceneryPieces(n).tSizeTopLeft.Y) + ((Ret3DPos(SceneryPieces(n).tSizeBotRight.Y) - Ret3DPos(SceneryPieces(n).tSizeTopLeft.Y)) / 2), -240, True
     
         Next n
     End If
@@ -272,11 +294,15 @@ End Function
 
 Function DeinitScenery()
     Dim n As Integer
+    Dim nmax As Integer
+    On Error GoTo DS_exit
     If UBound(SceneryPieces) > 0 Then
-        For n = 1 To UBound(ExScenery)
+        nmax = UBound(ExScenery)
+        For n = 1 To nmax
             Set ExScenery(n) = Nothing
         Next n
     End If
+DS_exit:
 End Function
 
 Function RenderSceneryPieces()
@@ -290,8 +316,8 @@ End Function
 Function SaveFileLevel(strFile As String) As Boolean
 
     Dim n As Integer
-    Dim x As Integer
-    Dim y As Integer
+    Dim X As Integer
+    Dim Y As Integer
     Dim sTemp As String
 
     SaveFileLevel = False
@@ -313,11 +339,11 @@ Function SaveFileLevel(strFile As String) As Boolean
         Print #1, Trim(Str(intMapSizeX - 2)) + "," + Trim(Str(intMapSizeY - 2))
        
         ' Map data
-        For y = 2 To intMapSizeY - 1
+        For Y = 2 To intMapSizeY - 1
             sTemp = ""
-            For x = 2 To intMapSizeX - 1
+            For X = 2 To intMapSizeX - 1
                 For n = 0 To UBound(rrSpirit)
-                    If rrSpirit(n).intOrgX = x And rrSpirit(n).intOrgY = y And n < (rrMap.intTotSpirits - 1) Then
+                    If rrSpirit(n).intOrgX = X And rrSpirit(n).intOrgY = Y And n < (rrMap.intTotSpirits - 1) Then
                         n = 10
                     End If
                 Next n
@@ -325,11 +351,11 @@ Function SaveFileLevel(strFile As String) As Boolean
                 If n = 11 Then
                     sTemp = sTemp + "p"
                 Else
-                    sTemp = sTemp + rrMap.GetData(x, y)
+                    sTemp = sTemp + rrMap.GetData(X, Y)
                 End If
-            Next x
+            Next X
             Print #1, sTemp
-        Next y
+        Next Y
         
         ' Transporter info (in order as from map)
         If UBound(tTransporters) > 0 Then
@@ -353,9 +379,9 @@ Function SaveFileLevel(strFile As String) As Boolean
         Print #1, Trim(Str(UBound(SceneryPieces)))              ' How many
         If UBound(SceneryPieces) > 0 Then
             For n = 1 To UBound(SceneryPieces)
-                Print #1, Trim(Str(SceneryPieces(n).tSizeTopLeft.x - 1)) + "," + Trim(Str(SceneryPieces(n).tSizeTopLeft.y - 1))
+                Print #1, Trim(Str(SceneryPieces(n).tSizeTopLeft.X - 1)) + "," + Trim(Str(SceneryPieces(n).tSizeTopLeft.Y - 1))
                
-                Print #1, Trim(Str(SceneryPieces(n).tSizeBotRight.x - 1)) + "," + Trim(Str(SceneryPieces(n).tSizeBotRight.y - 1))
+                Print #1, Trim(Str(SceneryPieces(n).tSizeBotRight.X - 1)) + "," + Trim(Str(SceneryPieces(n).tSizeBotRight.Y - 1))
                 
                 Print #1, CStr(SceneryPieces(n).bIsMovableTo)
                 
@@ -373,9 +399,9 @@ Function SaveFileLevel(strFile As String) As Boolean
                 
                 Print #1, Trim(Str(tInGameMessages(n).iTotTrigs))
                 If tInGameMessages(n).iTotTrigs > 0 Then
-                    For x = 1 To tInGameMessages(n).iTotTrigs
-                        Print #1, Trim(Str(tInGameMessages(n).tTriggers(x).x)) + "," + Trim(Str(tInGameMessages(n).tTriggers(x).y))
-                    Next x
+                    For X = 1 To tInGameMessages(n).iTotTrigs
+                        Print #1, Trim(Str(tInGameMessages(n).tTriggers(X).X)) + "," + Trim(Str(tInGameMessages(n).tTriggers(X).Y))
+                    Next X
                 End If
                 
                 sTemp = tInGameMessages(n).strMessage
@@ -463,7 +489,11 @@ Function TimeBombControl(intCont As Integer)
             End If
             
         Case 2
-            If rrGame.Pause(-2) = False Then sngTimeLeft = (sngTimeBombOut - timTimeBomb.LocalTime) * rrGame.sngGameSpeed
+            If rrGame.Pause(-2) = False Then
+                sngTimeLeft = (sngTimeBombOut - timTimeBomb.LocalTime) * rrGame.sngGameSpeed
+            Else
+                sngTimeLeft = 1
+            End If
             
         Case 3
             timTimeBomb.ReSet
@@ -481,7 +511,7 @@ Function MessageCheckAndShow(intX As Integer, intY As Integer)
     ' Is trigger?
     For n = 1 To UBound(tInGameMessages)
         For t = 1 To tInGameMessages(n).iTotTrigs
-            If tInGameMessages(n).tTriggers(t).x = intX And tInGameMessages(n).tTriggers(t).y = intY Then
+            If tInGameMessages(n).tTriggers(t).X = intX And tInGameMessages(n).tTriggers(t).Y = intY Then
                 GoTo MsgFound
             End If
         Next t
@@ -509,7 +539,7 @@ Function MessageUpdate()
 
     Dim n As Integer
     Dim ln As Integer
-    Dim x As Boolean
+    Dim X As Boolean
     Dim sTemp As String
     
     Dim sChar As String * 1
@@ -532,11 +562,11 @@ Function MessageUpdate()
         
         ' Get a line
         sTemp = ""
-        x = False
+        X = False
         ln = 1
         iLastSpace = 0
         iNLastSpace = 0
-        Do While x = False And ln < 51 And n <= Len(tInGameMessages(intShowingMsg).strMessage)
+        Do While X = False And ln < 51 And n <= Len(tInGameMessages(intShowingMsg).strMessage)
         
             sChar = Mid(tInGameMessages(intShowingMsg).strMessage, n, 1)
             
@@ -549,7 +579,7 @@ Function MessageUpdate()
                         sTemp = Mid(sTemp, 1, iLastSpace)
                         n = iNLastSpace
                         
-                        x = True
+                        X = True
                     End If
                 Else
                     If ln < 50 Then
@@ -557,12 +587,12 @@ Function MessageUpdate()
                         iLastSpace = ln
                         iNLastSpace = n
                     Else
-                        x = True
+                        X = True
                     End If
                 End If
             Else
                 n = n + 1   ' Discard the line feed
-                x = True
+                X = True
             End If
             n = n + 1
             ln = ln + 1
@@ -570,7 +600,7 @@ Function MessageUpdate()
         Loop
         
         ExTxtMsg.Text sTemp
-        ExTxtMsg.position frmMain.ScaleWidth / 6, (frmMain.ScaleHeight / 5) + (iLines * 30)
+        ExTxtMsg.position frmMain.iXsize / 6, (frmMain.iYsize / 5) + (iLines * 30)
         ExTxtMsg.Render
         
         iLines = iLines + 1
@@ -580,10 +610,10 @@ Function MessageUpdate()
     ' Show navigation instruction
     If n < Len(tInGameMessages(intShowingMsg).strMessage) Then
         ExTxtMsg.Text "[ENTER] for next page"
-        ExTxtMsg.position frmMain.ScaleWidth / 2, (frmMain.ScaleHeight / 5) + 330
+        ExTxtMsg.position frmMain.iXsize / 2, (frmMain.iYsize / 5) + 330
     Else
         ExTxtMsg.Text "[ENTER] to resume game"
-        ExTxtMsg.position frmMain.ScaleWidth / 2, (frmMain.ScaleHeight / 5) + 330
+        ExTxtMsg.position frmMain.iXsize / 2, (frmMain.iYsize / 5) + 330
     End If
     ExTxtMsg.Colour &HFFCCCCFF
     ExTxtMsg.Render
