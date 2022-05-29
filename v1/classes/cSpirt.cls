@@ -31,9 +31,10 @@ Dim intPieceType As Integer
 
 Dim bFirstMove  As Boolean          ' Helps to make sure the first move of the spirit is the same as origonal version of Repton
 
-Dim bDidNotMoveLast As Boolean             ' If spirit did not move (ie, determined new direct) this is true, stops
-                                           '  spirit from 'waiting' while turning around corners
-                                           '  NOTE: Could caluse formation/syncronisation to be brocken
+Dim intCornTry As Boolean                  ' If spirit did not move (ie, determined new direct) this is > 0, stops
+                                           '  spirit from 'waiting' while turning around corners.
+                                           '  Will try to 'move' spirit upto 4 times per function call to
+                                           '  keep in sync. with other spirts
 
 Public ExLog3D As New exMesh               ' Logical 3D (so that transformations are preserved; no mesh data).
                                            ' Needs to be public becase the timer has to be shared amogst other spirits
@@ -185,7 +186,9 @@ Function CheckIfMove()
     End If
     
     ' Have we stoped moving?
-    If rrSpirit(rrMap.intTotSpirits - 1).ExLog3D.AnimatedTransform.Active(Translation3D) = False Or bDidNotMoveLast = True Then
+    If rrSpirit(rrMap.intTotSpirits - 1).ExLog3D.AnimatedTransform.Active(Translation3D) = False Then
+    
+ReTryCornerSelect:
         
         intOldDir = int3DDirection
         
@@ -259,7 +262,7 @@ Function CheckIfMove()
             
             Me.Move int3DDirection
             
-            bDidNotMoveLast = False
+            intCornTry = 0
             
             sTemp = rrMap.GetData(intCurX, intCurY)
                        
@@ -299,7 +302,10 @@ Function CheckIfMove()
         
             End Select
             
-            bDidNotMoveLast = True
+            intCornTry = intCornTry + 1
+            
+            If intCornTry < 4 Then GoTo ReTryCornerSelect       ' GoTo is effectint and should be used as a
+                                                                '  powerful but dangerus tool in games programming
             
         End If
 

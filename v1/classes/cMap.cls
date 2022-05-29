@@ -26,6 +26,8 @@ Public intTotMonsters     As Integer       '   /
 Public intTotRocksOrEggs  As Integer
 Public intTotSpirits      As Integer
 Public intTotFunguses     As Integer       ' Needed for fungus growth determination
+Public intTotTransporters As Integer
+
 
 Dim intRTData(30, 27) As String          ' Real Time map data
 
@@ -65,11 +67,28 @@ Function LoadLevelData(strFileName As String) As String
             
         Next intX
 
-    Loop Until EOF(1)
+    Loop Until intY >= 27
     
     ' Save Map size
     intMapSizeX = 30
-    intMapSizeY = intY
+    intMapSizeY = 27
+        
+        
+    If EOF(1) = False Then
+
+        ' Get transporter data
+        intX = 1 ' Used as transporter ID
+        Do
+            Input #1, strTemp
+            tTransporters(intX).iToX = Int(strTemp)
+            Input #1, strTemp
+            tTransporters(intX).iToY = Int(strTemp)
+            intX = intX + 1
+        Loop Until EOF(1)
+
+    End If
+    
+    
 
    Close #1
          

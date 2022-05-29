@@ -28,6 +28,9 @@ Public intRockOrEggID As Integer    ' Holds the moveable repersentation ID for t
                                  
 Public intMonsterID As Integer
 
+Public intTransporterID As Integer  ' Holds look up ID for transporter
+                                    '  Note: ID will be relitive to the number of transporters within the MAP
+                                    '         upto the position of this transporter (starting at 1)
 
 
 
@@ -102,6 +105,24 @@ Function Render()
         Case Egg
             If intRockOrEggID <> -1 Then rrRocksOrEggs(intRockOrEggID).Render
             ''' DEBUG:: this check is needed because of some unknown bug
+            
+        Case skull
+            SpinObject intPieceType, 2
+            
+            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).Render
+            
+        Case Dimond
+            SpinObject intPieceType, 1
+            
+            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).Render
+            
+        Case Key
+            SpinObject intPieceType, 1
+            
+            Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
+            Ex3DP(intPieceType).Render
         
         Case Else
             Ex3DP(intPieceType).Position Ret3DPos(intCurX), Ret3DPos(intCurY), -240, True
@@ -130,4 +151,11 @@ Function GetYPos() As Integer
     GetYPos = intCurY
 End Function
 
+
+Private Function SpinObject(intPieceType As Integer, iSpeed As Single)
+    If Ex3DP(intPieceType).AnimatedTransform.Active(Rotation3D) = False Then
+        'Ex3DP(intPieceType).ResetMatrix
+        Ex3DP(intPieceType).AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 360), ExPrj.exReturn3DVec(0, 0, 0), iSpeed
+    End If
+End Function
 

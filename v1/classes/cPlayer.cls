@@ -104,12 +104,20 @@ Function UpDate()
             Case "f"                                            ' Fungus; die
                 Me.Die
                 
+            Case "n"                                            ' Transporter; reposition
+               
+                intCurY = rrPieces(intCurX, intCurY).intTransporterID
+                
+                intCurX = tTransporters(intCurY).iToX
+                intCurY = tTransporters(intCurY).iToY
+                
+                Move3D
+                
+                Me.SetPosition intCurX, intCurY
+                
+                
+                
         End Select
-        
-        
-        
-        
-        ' Die?
         
         
         ' Set the realtime map visual piece of this position
@@ -140,8 +148,8 @@ Function SetPosition(intX As Integer, intY As Integer)
     intCurY = intY
     
     ' Set old pos.
-    intOldX = intCurX
-    intOldY = intCurY
+    intOldX = intX
+    intOldY = intY
     
     ' Update visual player
     ex3DPlayer.Position Ret3DPos(intX), Ret3DPos(intY), -240, True
@@ -319,8 +327,18 @@ Private Function Render()
     
     ' Control Animation
     If intAniN > intAniMax Then intAniN = intAniMin
-    ex3DPlayer.Animate intAniN * 160, 6000 * intAniSpeed
-    intAniN = intAniN + 1
+        Select Case enmPlayerState
+            
+            Case Stoped
+                intAniN = intAniMin
+                ex3DPlayer.Animate intAniN * 160, 6000 * intAniSpeed
+                
+            Case Walk
+                ex3DPlayer.Animate intAniN * 160, 6000 * intAniSpeed
+                intAniN = intAniN + 1
+                
+        End Select
+    
     
     ex3DPlayer.Render
     
@@ -337,6 +355,7 @@ Private Function Move3D()
         'exTimPlayerCont.Stop_
         exTimPlayerCont.ReSet
         'exTimPlayerCont.Start
+        'enmPlayerState = Walk
     End If
     
     ' Direction/Rotation
