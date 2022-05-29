@@ -28,7 +28,7 @@ Public Ex3DGround(15) As New exMesh      ' Visual Ground
 
 Public Ex3DWallSides(3) As New exMesh    ' Visual Wall sides (large stones)
 
-Public ExSnds(15) As New exSound
+Public ExSnds(19) As New exSound
 ' 0 - Dimond1
 ' 1 - Dimond2
 ' 2 - Dimond3
@@ -44,7 +44,11 @@ Public ExSnds(15) As New exSound
 '12 - transporter
 '13 - level-trans
 '14 - key
-'15 -
+'15 - fungus
+'16 - dig
+'17 - monster awake
+'18 - monster die
+'19 - rep die
 
 Public ExMsgBoard As New exMesh
 

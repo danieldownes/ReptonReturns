@@ -457,6 +457,8 @@ Function ReptonReturnsMenu() As Integer
             exMenuItems(ReptonReturnsMenu).ResetMatrix
             exMenuItems(ReptonReturnsMenu).AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -150, -1300), ExPrj.exReturn3DVec(0.1, -420, -500), 0.45
             exMenuItems(ReptonReturnsMenu).AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(-80, 100, 0.01), ExPrj.exReturn3DVec(-80, 0.01, 0.01), 0.45
+            
+            VolumeFMOD 55
 
             blnLoop = False
         End If
@@ -1112,8 +1114,13 @@ Function AboutTitles() As Integer
     
     Dim exTimer As New exTools_Timer
     Dim sTimeToTake As Single
-    
+        
+    Dim exMusicTimer As New exTools_Timer
+        
     sTimeToTake = 100
+        
+    OpenFMOD App.Path & "\data\music\Meed.mp3"
+    VolumeFMOD 80
     
     ' Read lines from file
     'on error reume next
@@ -1133,6 +1140,8 @@ Function AboutTitles() As Integer
         DoEvents
     Loop While ExInp.exInput(ex_ESCAPE) Or ExInp.exInput(ex_Return)
     
+    PlayFMOD
+    exMusicTimer.ReSet
     
     blnLoop = True
     
@@ -1147,6 +1156,11 @@ Function AboutTitles() As Integer
         
         If exTimer.LocalTime > sTimeToTake + 5 Then
             exTimer.ReSet
+        End If
+        
+        If exMusicTimer.LocalTime > 31.5 Then
+            PlayFMOD
+            exMusicTimer.ReSet
         End If
         
     

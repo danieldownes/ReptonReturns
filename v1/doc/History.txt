@@ -51,7 +51,6 @@ Episode/Level selector
 
  Art:
   Repton Animation (Upper body walking, digging, being idle, pushing rock, pushing non-movable piece)
-  Repton Texture  
   level-transporters 
   Earth
   toutch up walls 
@@ -65,10 +64,8 @@ music
    
 sound effects    
 
-   earth dig away 
    bomb explosion 
 
-   monster waking 
    monster moving 
 
    squashed by rock 
@@ -77,6 +74,7 @@ sound effects
    die by fungus 
    die by skull         
    cannt push
+
    completed level
    completed game
    completed episode
@@ -104,8 +102,8 @@ After BETA: VisualFX class and models
 ----------------------------------------------------------------------------
 Development history overview:
 
-v1.00 Final end:  (??-08-2003)
-v1.00 BETA end:   (??-07-2003)
+v1.00 Final end:  (??-09-2003)
+v1.00 BETA end:   (??-08-2003)
 v1.00 start:      13-10-2001
 Prototype end:    12-10-2000
 Start:            23-08-2000 
@@ -113,6 +111,16 @@ Start:            23-08-2000
 
 ----------------------------------------------------------------------------
 Development history detail:
+
+06-08-2003:
+	    + Standard die sound
+	    + Monster sounds
+	    + Dig sound
+
+05-08-2003:
+	    + Finnished 'Meed' music and implemented into the about titles
+	    * More repton animation
+
 03-08-2003:
 	    + Started VisualFX class
 

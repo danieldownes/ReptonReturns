@@ -50,6 +50,8 @@ Dim enmPlayerState As StateEN
 Dim exTimPlayerCont As New exTools_Timer
 
 
+Dim intOrgX As Integer
+Dim intOrgY As Integer
 
 Dim intCurX As Integer
 Dim intCurY As Integer
@@ -70,6 +72,8 @@ Enum enmDirection
 End Enum
 
 
+Dim iDimondSndCont As Integer
+
 Const cintTimeToMove = 0.3           ' Number of seconds it take for player to move from one
                                      '  map piece to another.
 
@@ -88,7 +92,7 @@ Function UpDate()
             
             Case "d"                                            ' Collect a dimond?
                 
-                ExSnds(0).PlaySound False
+                ExSnds(intDimondsCollected Mod 4).PlaySound False
                                                                 ' Keep track of collected dimonds
                 intDimondsCollected = intDimondsCollected + 1
                 
@@ -223,6 +227,10 @@ Function ReSet()
 End Function
 
 Function SetPosition(intX As Integer, intY As Integer)
+' Note: Sets Origan position
+    
+    intOrgX = intX
+    intOrgY = intY
     
     ' Now change the current position
     intCurX = intX
@@ -297,11 +305,19 @@ End Function
 Function Die() As Integer
 'Returns number of remening lifes
     
-    MsgBox "Repton just died!"
+    ExSnds(19).PlaySound False
+    
+    
     
     intLives = intLives - 1
     
     Die = intLives
+    
+    ' Reset to starting position
+    SetPosition intOrgX, intOrgY
+    
+    ' Reset TimeBomb
+    rrMap.TimeBombControl 3
 End Function
 
 
@@ -320,7 +336,7 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
             If rrRepton.intDimondsCollected <> rrMap.intTotDimonds _
                Or rrMap.intTotCrowns <> 0 Or rrMap.intTotEggs <> 0 Or rrMap.intTotMonstersAlive <> 0 Then
                
-                'MoveableTo = False
+                MoveableTo = False
             End If
             
         
@@ -335,6 +351,11 @@ Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As en
             
         Case enmPieceType.Barrier
             MoveableTo = False
+            
+            
+        Case enmPieceType.Earth
+            ExSnds(16).PlaySound False
+        
             
     End Select
     If intTemp >= 3 And intTemp <= 10 Then MoveableTo = False       ' Sides of normal type wall

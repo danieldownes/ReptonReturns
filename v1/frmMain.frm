@@ -10,7 +10,7 @@ Begin VB.Form frmMain
    ScaleHeight     =   680
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   919
-   StartUpPosition =   3  'Windows Default
+   StartUpPosition =   2  'CenterScreen
    Begin VB.TextBox txtName 
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
@@ -102,8 +102,8 @@ Private Sub Form_Load()
     InitExperspectiveObjects
     
     
-    'InitFMOD
-    'OpenFMOD App.Path & "\data\music\The Thunderous Intro for Repton Returns.mp3"
+    InitFMOD
+    OpenFMOD App.Path & "\data\music\The Thunderous Intro for Repton Returns.mp3"
     
     
     
@@ -126,7 +126,7 @@ Private Sub Form_Load()
     
     'rrGameMenu.ExDlogoLoop
     
-    'rrGameMenu.ReptonReturnsIntroLoop
+    rrGameMenu.ReptonReturnsIntroLoop
     
     Do
     
@@ -240,6 +240,9 @@ Private Sub Form_Load()
             Case 0              ' Exit
         
         End Select
+        
+        OpenFMOD App.Path & "\data\music\The Thunderous Intro for Repton Returns.mp3"
+        PlayFMOD
         
     Loop Until iSel = 0
     

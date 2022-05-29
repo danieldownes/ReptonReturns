@@ -196,7 +196,7 @@ Function CheckIfFall()
         bWasFalling = True
         
         ExSnds(4).StopSound
-        ExSnds(5).PlaySound False
+        If intPieceType = Rock Then ExSnds(5).PlaySound (False) Else ExSnds(8).PlaySound (False)
     End If
     
     ' Can only fall if not already falling

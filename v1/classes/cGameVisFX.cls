@@ -20,10 +20,10 @@ Option Explicit
 Private Ex3D As New exMesh
 
 Private Type FXinstence_T
-    Private sngXpos As Single
-    Private sngYpos As Single
-    Private sngAniPos As Single                 ' = -1 when instence not in use
-    Private timAniCont As New exTools_Timer
+    sngXpos As Single
+    sngYpos As Single
+    sngAniPos As Single                 ' = -1 when instence not in use
+    timAniCont As New exTools_Timer
 End Type
 Private usrFXinstence(10) As FXinstence_T
 
@@ -67,7 +67,7 @@ Function Init(strMeshFile As String, strTexFile As String, Optional sAniSpeed As
     sngAniSpeed = sAniSpeed
 End Function
 
-Function Deinit()
+Function DeInit()
     Set Ex3D = Nothing
 End Function
 

@@ -98,7 +98,7 @@ Function DrawFrame()
     
     
     ' Only render the pieces that are in view
-    For intY = -4 To 5
+    For intY = -5 To 4
         For intX = -6 To 6
 
             If GetPlayerOffsetPiece(intX, intY) <> -1 Then
@@ -346,6 +346,10 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     If Not (bTransporting) Then ExSnds(13).InitSound strThemeDir & "\sounds\level-trans.wav"
     ExSnds(14).InitSound strThemeDir & "\sounds\key.wav"
     ExSnds(15).InitSound strThemeDir & "\sounds\fungus.wav"
+    ExSnds(16).InitSound strThemeDir & "\sounds\dig.wav"
+    ExSnds(17).InitSound strThemeDir & "\sounds\monster_awake.wav"
+    ExSnds(18).InitSound strThemeDir & "\sounds\monster_die.wav"
+    ExSnds(19).InitSound strThemeDir & "\sounds\rep_die.wav"
     
     ExMsgBoard.InitXFile App.Path & "\data\gui\msg_board.x", App.Path & "\data\gui\msg_boar.bmp"
     
