@@ -1,6 +1,6 @@
 VERSION 5.00
 Begin VB.Form frmMain 
-   Caption         =   "Repton Returns v1.00   :  Ex-D Software Development(TM)"
+   Caption         =   "Repton Returns v1.00 BETA 1  :  Ex-D Software Development(TM)"
    ClientHeight    =   10200
    ClientLeft      =   165
    ClientTop       =   480
@@ -93,6 +93,8 @@ Private Sub Form_Load()
     Dim sFileToRead As String
     Dim sTemp As String
     
+    Dim bFirstGo As Boolean
+    
     
     iXsize = Me.ScaleWidth
     iYsize = Me.ScaleHeight
@@ -124,7 +126,7 @@ Private Sub Form_Load()
     
     rrGameMenu.Init
     
-    'rrGameMenu.ExDlogoLoop
+    rrGameMenu.ExDlogoLoop
     
     rrGameMenu.ReptonReturnsIntroLoop
     
@@ -187,18 +189,40 @@ Private Sub Form_Load()
                             ' Update stats
                             Open App.Path & "\data\players\" & sPrimPlayerName & "\stats.dat" For Input As #1
                                 Open App.Path & "\data\players\" & sPrimPlayerName & "\stats.tmp" For Output As #2
+                                    ' Number of times player selected
                                     Input #1, sTemp
+                                    bFirstGo = Not (CBool(sTemp))
                                     sTemp = Trim(Str(Val(sTemp) + 1))
                                     Print #2, sTemp
+                                    ' Number of lives remaining
+                                    Input #1, sTemp
+                                    If Int(sTemp) < 0 Then
+                                        Print #2, "3"
+                                    Else
+                                        Print #2, sTemp
+                                    End If
                                 Close #2
                             Close #1
                             MoveFile App.Path & "\data\players\" & sPrimPlayerName & "\stats.tmp", App.Path & "\data\players\" & sPrimPlayerName & "\stats.dat"
-                                
                             
-                            rrGame.sEpisodeDir = App.Path & "\data\players\" & sPrimPlayerName & "\Home\"
+                            intPlayerLives = Int(sTemp)
+                            
+                            ' No more lives? must restart.
+                            If Int(sTemp) < 0 Then
+                                CopyFile App.Path & "\data\players\new\Home\" & "Home.rre", App.Path & "\data\players\" & sPrimPlayerName & "\Home\Home.rre"
+                                CopyFile App.Path & "\data\players\new\Home\" & "Home.rre", App.Path & "\data\players\" & sPrimPlayerName & "\Home\old\Home.rre"
+                                
+                                CopyFile App.Path & "\data\players\new\Home\" & "start.rrl", App.Path & "\data\players\" & sPrimPlayerName & "\Home\start.rrl"
+                                CopyFile App.Path & "\data\players\new\Home\" & "start.rrl", App.Path & "\data\players\" & sPrimPlayerName & "\Home\old\start.rrl"
+
+                                intPlayerLives = 3
+                                MsgBox "You have no remaining lives left, your game progress has been reset", , "Repton Returns"
+                            End If
+                                                        
                             
                             ' Start Game
-                            If sTemp = "1" Then
+                            rrGame.sEpisodeDir = App.Path & "\data\players\" & sPrimPlayerName & "\Home\"
+                            If bFirstGo Then
                                 If MsgBox("Do you wish to play a quick tutorial that will introduce the game of Repton Returns?", vbYesNo, "Repton Returns") = vbYes Then
                                     rrGame.sEpisodeDir = App.Path & "\data\episode\Tutorial\"
                                 End If
@@ -232,7 +256,7 @@ Private Sub Form_Load()
                 rrGameMenu.OptionMenu
             
             Case 3              ' Help
-                ShellExecute Me.hwnd, "open", App.Path & "\help.chm", vbNullString, vbNullString, 3 'SW_NORMAL
+                ShellExecute Me.hwnd, "open", App.Path & "\help\help.chm", vbNullString, vbNullString, 3 'SW_NORMAL
                 
             Case 4              ' About
                 rrGameMenu.AboutTitles
@@ -242,6 +266,7 @@ Private Sub Form_Load()
         End Select
         
         OpenFMOD App.Path & "\data\music\The Thunderous Intro for Repton Returns.mp3"
+        rrGame.sngMusicVol = 100
         PlayFMOD
         
     Loop Until iSel = 0

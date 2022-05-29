@@ -84,6 +84,7 @@ Sub NewPlayer()
             ' Check if not already exist
             bExist = False
             sTemp = ""
+            If frmMain.txtName.Text = "NEW" Then bExist = True
             Open App.Path & "\data\players\names.dat" For Input As #1
                 Do While Not (EOF(1)) And Not (bExist)
                     Input #1, sTemp
@@ -110,7 +111,11 @@ Sub NewPlayer()
                      Print #1, frmMain.txtName.Text
                  Close #1
             Else
-                MsgBox "Player with same name already exists", , "Repton Returns"
+                If frmMain.txtName.Text = "NEW" Then
+                    MsgBox "That name can not be used", , "Repton Returns"
+                Else
+                    MsgBox "Player with same name already exists", , "Repton Returns"
+                End If
             End If
             
             frmMain.txtName.Visible = False
@@ -382,8 +387,8 @@ Function ReptonReturnsMenu() As Integer
     
     exRepton.ResetMatrix
     exRepHolder.ResetMatrix
-    exRepton.position 0.001, -200, -309, True
-    exRepHolder.position 0.001, -200, -306, True
+    exRepton.position 0.001, -200, -317, True
+    exRepHolder.position 0.001, -200, -317, True
     exRepton.Rotate -45, 0.1, 0.1, True
     exRepHolder.Rotate -45, 0.1, 0.1, True
     
@@ -396,7 +401,7 @@ Function ReptonReturnsMenu() As Integer
     
     ExTxtMsg.Colour &HFF888888
     ExTxtMsg.position 100, frmMain.iYsize - 50
-    ExTxtMsg.Text "Repton Returns v1.00      ©2003 Ex-D Software Development™."
+    ExTxtMsg.Text "Repton Returns v1.00 BETA 1     ©2003 Ex-D Software Development™."
     
     ReptonReturnsMenu = 0
     iLastMove = 0
@@ -572,6 +577,7 @@ Sub ReptonReturnsIntroLoop()
     
     timControl.ReSet
     
+    rrGame.sngMusicVol = 100
     PlayFMOD
     
     
@@ -648,10 +654,10 @@ Sub ReptonReturnsIntroLoop()
                     ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -150, -1300), ExPrj.exReturn3DVec(0.001, 400, -1000), 3
                     exDummyLookAt.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -0.01, -5), ExPrj.exReturn3DVec(0.0001, -10000, 20000), 1.5
                     
-                    exRepton.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -200, -300), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
+                    exRepton.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -200, -317), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
                     exRepton.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(-45, 0.1, 0.1), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
                     
-                    exRepHolder.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -200, -300), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
+                    exRepHolder.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(0.001, -200, -317), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
                     exRepHolder.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(-45, 0.1, 0.1), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
 
                     exReturns.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(10, -250, -120), ExPrj.exReturn3DVec(0.01, 0.01, 0.01), 3
@@ -760,7 +766,7 @@ Sub ExDlogoLoop()
     Dim blnLoop               As Boolean
           
     'Load sounds
-    sndExDlogo.InitSound App.Path & "\..\ex-d mono.wav"
+    sndExDlogo.InitSound App.Path & "\data\ex-d mono.wav"
 
 
     ' Load the 3D discriptions...
@@ -803,7 +809,7 @@ Sub ExDlogoLoop()
     
     sndExDlogo.PlaySound False
     
-    intN = 1
+    intN = 0
     
     
     ' The main loop. Each loop represents one frame.
@@ -812,6 +818,20 @@ Sub ExDlogoLoop()
         ' Animation Control
         Select Case intN
         
+            Case 0
+                If timControl.LocalTime > 3 Then
+                    ExDlogo_E.ResetMatrix
+                    ExDlogo_x.ResetMatrix
+                    ExDlogo_D.ResetMatrix
+                    ExDlogo_text.ResetMatrix
+                    
+                    ExDlogo_E.Rotate 90, 180, 0, True
+                    ExDlogo_x.Rotate 90, 180, 0, True
+                    ExDlogo_D.Rotate 90, 180, 0, True
+                    ExDlogo_text.Rotate 90, 180, 0, True
+                    intN = 1
+                End If
+                
             Case 1
             
                 If timControl.LocalTime > 5 Then

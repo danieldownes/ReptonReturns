@@ -1,5 +1,5 @@
 frmMain = 44, 48, 734, 679, , 9, 59, 951, 781, C
-modReptonReturns = 181, 4, 871, 801, 
+modReptonReturns = 181, 4, 871, 801, C
 cMap = 168, 29, 841, 718, 
 cPiece = 102, 141, 910, 756, 
 cPlayer = 119, 110, 809, 741, 
@@ -8,8 +8,8 @@ modRR_GameEvents = 0, 0, 690, 631,
 dsGenVarableManip = 0, 0, 745, 573, C
 cMonster = 129, 170, 805, 801, 
 cSpirt = 242, 264, 918, 895, 
-cGame = 187, 130, 877, 761, Z
-cRockOrEgg = 0, 0, 690, 631, 
+cGame = 187, 130, 877, 761, 
+cRockOrEgg = 0, 0, 690, 631, Z
 cGameMenu = 198, 252, 947, 888, 
 modSimpleFileOps = 44, 56, 791, 692, 
 FMod = 220, 280, 959, 916, 

@@ -32,6 +32,7 @@ Public tTransporters()   As type_Transporter
 Public tLevelTrans()     As type_LevelTrans
 
 Public sPrimPlayerName   As String
+Public intPlayerLives    As Integer
 
 Dim intWallAround_LOOKUP(1, 1, 1, 1) As Integer       ' (2,4,6,8) - wall is there(1) or not(0) for each
                                                       '  Down [2], Left [4], Right [6], Up [8]  (KeyPad)
@@ -66,10 +67,10 @@ Public Enum enmPieceType
     Spirit
     Bomb
     Fungus
-    skull
+    Skull
     Barrier
     Monster
-    transporter
+    Transporter
     TimeCapsule
     FilledWall
     FilledWall7
@@ -146,7 +147,7 @@ Function DrawFrame()
     ExTxtGUI.Render
     
     ExTxtGUI.position 600, 10
-    ExTxtGUI.Text "LIVES: " & Str(rrRepton.intLives)
+    ExTxtGUI.Text "LIVES: " & Str(intPlayerLives)
     ExTxtGUI.Render
     
     ' Time remaining
@@ -201,6 +202,7 @@ Function UserInteraction() As Boolean
         If ExInp.exInput(ex_Left_arrow) Then rrRepton.Move Left
         If ExInp.exInput(ex_Down_arrow) Then rrRepton.Move Down
         If ExInp.exInput(ex_Up_arrow) Then rrRepton.Move Up
+        If ExInp.exInput(ex_d) Then rrRepton.Die
     End If
     
     If ExInp.exInput(ex_p) Then
@@ -265,7 +267,7 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     Ex3DP(enmPieceType.Wall3).InitXFile strThemeDir & "\meshes\std_wall\w1.x", strThemeDir & "\textures\wall1.bmp"
     Ex3DP(enmPieceType.Wall1).InitXFile strThemeDir & "\meshes\std_wall\w3.x", strThemeDir & "\textures\wall3.bmp"
 
-    Ex3DP(11).InitXFile strThemeDir & "\meshes\earth\0.x", strThemeDir & "\earth.bmp"
+    Ex3DP(11).InitXFile strThemeDir & "\meshes\earth\0.x", strThemeDir & "\textures\earth.bmp"
     Ex3DP(11).Rotate 90, 0, 0, True
     
 
@@ -278,6 +280,7 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     Ex3DP(20).InitXFile strThemeDir & "\meshes\time-bomb.x", strThemeDir & "\textures\time-bomb.bmp"
     Ex3DP(20).Rotate 90, 0, 0, True
     Ex3DP(21).InitXFile strThemeDir & "\meshes\fungus.x", strThemeDir & "\textures\fungus.bmp"
+    Ex3DP(21).Rotate 90, 180, 0, True
     Ex3DP(22).InitXFile strThemeDir & "\meshes\skull.x"
     Ex3DP(23).InitXFile strThemeDir & "\meshes\barrier.x"
     Ex3DP(24).InitXFile strThemeDir & "\meshes\monster.x", strThemeDir & "\textures\monster.bmp"
@@ -300,7 +303,7 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     
     'Ex3DP(32).InitXFile strThemeDir & "\meshes\nav-map.x", strThemeDir & "\textures\nav-map.bmp"
     
-    Ex3DP(33).InitXFile strThemeDir & "\meshes\transporter.x", strThemeDir & "\textures\transporter.bmp"
+    Ex3DP(33).InitXFile strThemeDir & "\meshes\level-trans.x"
     
     ' Ground meshes
     For intX = 0 To 15
@@ -325,6 +328,7 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     
     
     rrRepton.Init
+    rrRepton.bVisFocus = True
     
     modRR_GameEvents.FungusNewTime
     
@@ -350,6 +354,10 @@ Function SetupLevel(Optional bTransporting As Boolean = False) As Integer
     ExSnds(17).InitSound strThemeDir & "\sounds\monster_awake.wav"
     ExSnds(18).InitSound strThemeDir & "\sounds\monster_die.wav"
     ExSnds(19).InitSound strThemeDir & "\sounds\rep_die.wav"
+    
+    For intX = 0 To UBound(ExSnds)
+        ExSnds(intX).VolumeFadeTo rrGame.sngSfxVol, 0.001
+    Next intX
     
     ExMsgBoard.InitXFile App.Path & "\data\gui\msg_board.x", App.Path & "\data\gui\msg_boar.bmp"
     

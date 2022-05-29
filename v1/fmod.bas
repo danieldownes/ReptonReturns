@@ -811,6 +811,8 @@ Public Function PlayFMOD()
         channel1 = FSOUND_Stream_Play(FSOUND_FREE, stream1)
     End If
     
+    VolumeFMOD rrGame.sngMusicVol
+    
     FSOUND_SetLoopMode channel1, FSOUND_LOOP_NORMAL
 End Function
 

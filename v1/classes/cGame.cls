@@ -81,15 +81,22 @@ Function Init(Optional bTransporting As Boolean = False)
     
     SetupLevel bTransporting
     
+    ' Game over?
+    If intPlayerLives < 0 Then
+        iLevelCompeted = -2
+        Exit Function
+    End If
+    
     ' Music
-    tMusicControl.strMusicFiles(1) = ""
-    tMusicControl.sngMusicLen(1) = 0
+    tMusicControl.sngMusicLen(0) = 0
+    tMusicControl.strMusicFiles(1) = "Ode.mp3"
+    tMusicControl.sngMusicLen(1) = 165
     tMusicControl.strMusicFiles(2) = "Persistence.mp3"
     tMusicControl.sngMusicLen(2) = 159
     tMusicControl.strMusicFiles(3) = ""
     tMusicControl.sngMusicLen(3) = 0
     
-    tMusicControl.intCurMusicTrack = 1
+    tMusicControl.intCurMusicTrack = 0
 
 End Function
 
@@ -99,15 +106,15 @@ Function MainLoop() As Boolean
 '  0 if not
 
     ' The main loop. Each cycle represents one frame.
-    Do While Not (UserInteraction) And iLevelCompeted = 0           ' {  Input
+    Do While Not (UserInteraction) And (iLevelCompeted = 0 Or rrGame.Pause(-2))           ' {  Input
         
-        ' Allow events in this game to accour                       ' /
-        GameEvents                                                  ' |
-                                                                    '-   Process
-        ' Allow other events to process.                            ' |
-        DoEvents                                                    ' \
-        
-        DrawFrame                                                   ' {  Output
+        ' Allow events in this game to accour                                             ' /
+        GameEvents                                                                        ' |
+                                                                                          '-   Process
+        ' Allow other events to process.                                                  ' |
+        DoEvents                                                                          ' \
+          
+        DrawFrame                                                                         ' {  Output
                 
     Loop
     
@@ -122,7 +129,10 @@ Function MainLoop() As Boolean
             CopyFile App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl", App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl"
         End If
         
-    ElseIf iLevelCompeted = 0 Then
+    ElseIf iLevelCompeted = -1 Then
+        ' Player has deleted their account; Do nothing
+        
+    Else
         ' This level was uncompleted, copy 'old/Home' into 'Home'
         DeleteFile App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl", False
         CopyFile App.Path & "\data\players\" & rrRepton.strName & "\Home\old\start.rrl", App.Path & "\data\players\" & rrRepton.strName & "\Home\start.rrl"

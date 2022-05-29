@@ -28,7 +28,7 @@ Public intCurX As Integer
 Public intCurY As Integer
 
 Dim int3DDirection As enmDirection              ' Current direction that we are rolling (if rolling at all)
-Dim int3DLastDir   As enmDirection              ' Last direction we rolled
+'Dim int3DLastDir   As enmDirection              ' Last direction we rolled
 
 Public blnFalling   As Boolean
 Public blnFreeFall  As Boolean
@@ -37,7 +37,7 @@ Private ExLog3D As New exMesh
 
 
 
-Const cintTimeToMove = 0.27          ' Number of seconds it take for rock/egg to move from one
+Private cintTimeToMove As Single     ' Number of seconds it take for rock/egg to move from one
                                      '  map piece to another.
 
 
@@ -65,9 +65,12 @@ Function Init(intType As enmPieceType, intX As Integer, intY As Integer)
         ExLog3D.InitXFile strThemeDir & "\meshes\egg.x", strThemeDir & "\textures\egg.bmp"
     End If
 
+    ExLog3D.ResetMatrix
     ExLog3D.position Ret3DPos(intCurX), Ret3DPos(intCurY), -200, True
     
     blnFalling = False
+    
+    cintTimeToMove = 0.22 / rrGame.sngGameSpeed
 
 End Function
 
@@ -77,7 +80,7 @@ Function Render()
     ExLog3D.Render
     
     If ExLog3D.AnimatedTransform.active(Translation3D) = False Then
-       'ExSnds(4).StopSound
+       If int3DDirection = Left Or int3DDirection = Right Then ExSnds(4).StopSound
     End If
     
 End Function
@@ -125,7 +128,7 @@ Public Function Move(intDir As enmDirection)
     
             ExLog3D.RotateVecs 0, -90, 0
             
-            ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, 90, 0), cintTimeToMove
+            ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, 90, 0), cintTimeToMove * 1.25
             
             PlayFallingSnd True
                         
@@ -136,7 +139,7 @@ Public Function Move(intDir As enmDirection)
             ExLog3D.RotateVecs 0, 90, 0
             
 
-            ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, -90, 0), cintTimeToMove
+            ExLog3D.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0.00001, 0), ExPrj.exReturn3DVec(0, -90, 0), cintTimeToMove * 1.25
             
             PlayFallingSnd True
                
@@ -174,7 +177,12 @@ Function Move3D()
        ' ExSnds(4).PlaySound True
     End If
     
-    ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove
+    ' Movment should be slower if not falling down
+    If int3DDirection = Down Then
+        ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove
+    Else
+        ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove * 1.25
+    End If
     
 End Function
 

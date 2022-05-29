@@ -34,7 +34,7 @@ Private int3DLastDirection As enmDirection      '
 Private intAniN   As Integer
 Private intAniMin As Integer
 Private intAniMax As Integer
-Private intAniSpeed As Integer
+Private intAniSpeed As Single
 
 Enum StateEN
     Stoped = 0
@@ -60,7 +60,9 @@ Dim intOldY As Integer
 
 Dim intClsMeshNum As Integer
 
-Public intLives As Integer
+'Public intLives As Integer
+
+Public bVisFocus As Boolean
 
 Enum enmDirection
 ' (Note: uses keypad arrowkeys
@@ -74,7 +76,7 @@ End Enum
 
 Dim iDimondSndCont As Integer
 
-Const cintTimeToMove = 0.3           ' Number of seconds it take for player to move from one
+Private cintTimeToMove As Single     ' Number of seconds it take for player to move from one
                                      '  map piece to another.
 
 
@@ -87,7 +89,11 @@ Function UpDate()
     If (enmPlayerState = Walk Or enmPlayerState = DigAndWalk) And exTimPlayerCont.LocalTime + 0.01 > cintTimeToMove Then
         
         enmPlayerState = Stoped
+        
+        ' In-games message trigger?
+        rrMap.MessageCheckAndShow intCurX, intCurY
     
+        ' Piece type event
         Select Case rrMap.GetData(intCurX, intCurY)
             
             Case "d"                                            ' Collect a dimond?
@@ -191,13 +197,10 @@ Function UpDate()
         rrMap.SetData intOldX, intOldY, Space
         
         
-        ' In-games message trigger?
-        rrMap.MessageCheckAndShow intCurX, intCurY
-        
-        
         GameEvents
         
         If sTemp <> "" Then           ' Level-transporter?
+                   
             If rrGame.strEpisodeName = "Home" Then
                 ' Save level
                 rrMap.SaveFileLevel App.Path & "\data\players\" & sPrimPlayerName & "\home\start.rrl"          '& rrGame.strEpisodeName  & rrGame.LevelOrder(rrGame.iCurGameLevel)
@@ -223,7 +226,7 @@ End Function
 
 
 Function ReSet()
-    intLives = 3
+    'intLives = 3
 End Function
 
 Function SetPosition(intX As Integer, intY As Integer)
@@ -284,7 +287,21 @@ Function Move(intDirection As enmDirection)
         
         If MoveableTo(intCurX, intCurY, intDirection) = True Then
             
-            enmPlayerState = Walk
+            If rrMap.GetData(intCurX, intCurY) = "e" Then
+                If enmPlayerState <> DigAndWalk Then
+                    enmPlayerState = DigAndWalk
+                    intAniMin = 110
+                    intAniMax = 155
+                    intAniSpeed = 5.2
+                End If
+            Else
+                If enmPlayerState <> Walk Then
+                    enmPlayerState = Walk
+                    intAniMin = 56
+                    intAniMax = 97
+                    intAniSpeed = 4
+                End If
+            End If
             
         Else
         
@@ -304,20 +321,57 @@ End Function
 
 Function Die() As Integer
 'Returns number of remening lifes
+
+    Dim sTemp As String
     
     ExSnds(19).PlaySound False
     
     
     
-    intLives = intLives - 1
-    
-    Die = intLives
-    
+    intPlayerLives = intPlayerLives - 1
+      
+    Die = intPlayerLives
+        
+    ' Write to file
+    Open App.Path & "\data\players\" & sPrimPlayerName & "\stats.dat" For Input As #1
+        Open App.Path & "\data\players\" & sPrimPlayerName & "\stats.tmp" For Output As #2
+            ' Number of times player selected
+            Input #1, sTemp
+            Print #2, sTemp
+            ' Number of lives remaining
+            Input #1, sTemp
+            sTemp = Trim(Str(Val(sTemp) - 1))
+            Print #2, sTemp
+        Close #2
+    Close #1
+    MoveFile App.Path & "\data\players\" & sPrimPlayerName & "\stats.tmp", App.Path & "\data\players\" & sPrimPlayerName & "\stats.dat"
+
+    If intPlayerLives < 0 Then
+        rrGame.iLevelCompeted = -2
+        Exit Function
+    End If
+       
+    If rrMap.GetData(intCurX, intCurY) <> "u" Then
+        rrMap.SetData intCurX, intCurY, Space
+        rrPieces(intCurX, intCurY).TypeID = "0"
+    End If
+       
     ' Reset to starting position
-    SetPosition intOrgX, intOrgY
+    intCurX = intOrgX
+    intCurY = intOrgY
+    int3DDirection = Down
+    Move3D
+    Me.SetPosition intCurX, intCurY
     
     ' Reset TimeBomb
     rrMap.TimeBombControl 3
+    
+    ' Start pause
+    rrGame.Pause 2.5
+    
+    ' Start FX
+    
+    
 End Function
 
 
@@ -407,13 +461,14 @@ Sub Init()
 
     ' Init public varables
     intDimondsCollected = 0
-    intLives = 3
     strName = sPrimPlayerName
     
-    intAniN = 0
-    intAniMin = 56      '56
+    
+    intAniN = 56
+    intAniMin = 56
     intAniMax = 97
     intAniSpeed = 4
+    
     int3DDirection = Down
     
     ' Init visual based objects
@@ -424,6 +479,8 @@ Sub Init()
     
     Move3D
     
+    cintTimeToMove = 0.3 / rrGame.sngGameSpeed
+    
 End Sub
 
 Private Function Render()
@@ -431,39 +488,46 @@ Private Function Render()
     exPlayer_logic.Render       ' Simply updates animation - draws nothing to screen; Ex-Perspective should has
                                 ' 'Update DS animation' as seperate function (currently does this within 'Render'
     
-    'if bFocus = True
+    If bVisFocus = True Then
         
         ExCam.position exPlayer_logic.position.x, exPlayer_logic.position.y - 350, 350, True
         
         ExCam.LookAt exPlayer_logic.position.x, exPlayer_logic.position.y, ex3DPlayer.position.z
-            
-        'ExCam.AniTransform3D.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), 0), ex3DPlayer.Position, cintTimeToMove   'ex3DPlayer.Position.X, ex3DPlayer.Position.Y - 200, 700, True
-        
-        
-       
     
-    'end if
+    End If
 
     ex3DPlayer.position exPlayer_logic.position.x, exPlayer_logic.position.y, exPlayer_logic.position.z, True
     
     ' Control Animation
-    If intAniN > intAniMax Then intAniN = intAniMin
-        Select Case enmPlayerState
-            
-            Case Stoped
-                intAniN = intAniMin
-                ex3DPlayer.Animate intAniN * 160, 6000 * intAniSpeed
-                
-            Case Walk
-                ex3DPlayer.Animate intAniN * 160, 6000 * intAniSpeed
-                intAniN = intAniN + 1
-                
-        End Select
+    If intAniN > intAniMax Or intAniN < intAniMin Then intAniN = intAniMin
     
+    Select Case enmPlayerState
+        
+        Case Stoped
+            intAniN = 56
+            
+        Case Walk
+            intAniN = intAniN + 1
+            
+        Case DigAndWalk
+            intAniN = intAniN + 1
+            
+        Case Board
+            intAniN = intAniN + 1
+            
+    End Select
+
+    ex3DPlayer.Animate intAniN * 160, 6000 * intAniSpeed
     
     ex3DPlayer.Render
     
-
+    ' Is Repton 'board' yet?
+    If exTimPlayerCont.LocalTime > 8 And enmPlayerState = Stoped Then
+        enmPlayerState = Board
+        intAniMin = 170
+        intAniMax = 202
+        intAniSpeed = 0.1
+    End If
     
 End Function
 
@@ -485,17 +549,17 @@ Private Function Move3D()
         
             Case Up
                 If int3DLastDirection = Left Then ex3DPlayer.Rotate 0, 0, 90, True
-                ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 180), ex3DPlayer.Rotate, 0.2
+                ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 180), ex3DPlayer.Rotate, cintTimeToMove * 0.7
                 
             Case Down
-                ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 360), ex3DPlayer.Rotate, 0.2
+                ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 360), ex3DPlayer.Rotate, cintTimeToMove * 0.7
                 
             Case Left
                 If int3DLastDirection = Up Then ex3DPlayer.Rotate 0, 0, 540, True
-                ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 450), ex3DPlayer.Rotate, 0.2
+                ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 450), ex3DPlayer.Rotate, cintTimeToMove * 0.7
                                 
             Case Right
-                ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 270), ex3DPlayer.Rotate, 0.2
+                ex3DPlayer.AnimatedTransform.TransformTo Rotation3D, ExPrj.exReturn3DVec(0, 0, 270), ex3DPlayer.Rotate, cintTimeToMove * 0.7
                 
         End Select
                 

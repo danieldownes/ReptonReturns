@@ -8,24 +8,23 @@ All rights reserved.
 To Debug:
 
 Reported    Detail
+
+
+
+Possibly fixed:
+
 28-07-2003: After loading a sub-level, the first rock is not inited correctly (position)
 10-07-2003: Player dosn't init correctly when transporting to new level (reason for 06-07-03 bug)
 06-07-2003: A rock in prelude falls incorrectly
 19-06-2003: Still problems with monster killing
 26-05-2003: Rocks can be pused in free fall when Repton releases a rock and then moves
 		down then push the free falling rock
-
 06-05-2003: Dimond sound dosn't play multiple instences; known for a while
-
-14-02-2003: Enviroment lighting will need to be looked at
-
-
-
-Possibly fixed:
 11-05-2003: Can not kill monster via pushing rock from side
 11-05-2003: Error when two Monsters are active (1st to release was top, 2nd was bottom of map; order of which monster is released first may be dependable on different errors. 
 30-04-2003: Rocks fall incorrectly, in wrong order
 22-03-2003: Monster dosn't die when rock (free) falls on top - rock terminates and monster continues
+14-02-2003: Enviroment lighting will need to be looked at
 13-02-2003: Bomb incorrectly detects that all diamonds have been collected; ~70 were still rememining, and
                  bomb was able to defuse
 
@@ -103,7 +102,7 @@ After BETA: VisualFX class and models
 Development history overview:
 
 v1.00 Final end:  (??-09-2003)
-v1.00 BETA end:   (??-08-2003)
+v1.00 BETA 1 end:   (17-08-2003)
 v1.00 start:      13-10-2001
 Prototype end:    12-10-2000
 Start:            23-08-2000 
@@ -111,6 +110,23 @@ Start:            23-08-2000
 
 ----------------------------------------------------------------------------
 Development history detail:
+
+17-08-2003:
+	    * Fixed error; After Repton dies, the location were he died was not reset to a 'Space'
+	    * Other last minuete tweeks b4 BETA release
+	    + Player lives managment
+
+16-08-2003:
+	    * Corrected colour for Repton's legs
+
+15-08-2003:
+	    + Put messages into 'home' level, acting as completed level screen (for beta at least)
+	    * Should now not be posible to illegally move falling rock (see 26-05-03 bug)
+	    * Redid Repton animation in max and implemented
+
+13-08-2003:
+	    * Fixed 28-07-2003 bug
+	    * Improved some graphics
 
 06-08-2003:
 	    + Standard die sound

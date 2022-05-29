@@ -46,7 +46,7 @@ Public ExLog3D As New exMesh               ' Logical 3D (so that transformations
                                            '  are used). The last spirits logical timer is used to chech if each spirit
                                            '  can move.
 
-Const cintTimeToMove As Single = 0.35      ' Number of seconds it take for move from one
+Private cintTimeToMove As Single           ' Number of seconds it take for move from one
                                            '  map piece to another.
 
 
@@ -94,6 +94,9 @@ Function Init(intX As Integer, intY As Integer)
     bFirstMove = True
     
     bDidNotMoveLast = True
+    
+    
+    cintTimeToMove = 0.35 / rrGame.sngGameSpeed
     
 End Function
 
