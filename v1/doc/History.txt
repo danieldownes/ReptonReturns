@@ -1,0 +1,230 @@
+Repton Returns
+Ex-D Software Development(TM)
+All rights reserved.
+
+Start: 23-08-2000 End: ??-??-????
+
+----------------------------------------------------------------------------
+Development history:
+
+14-02-2003: (~5 hours)
+	    ! Enviroment lighting will need to be looked at
+	    * Modified rock meshs so that thire centre is now at the origon
+	    + Standard wall sides meshes + textures (had many technical issues that held-up production)
+
+13-02-2003: (~2 hour)
+	    ! Bomb incorrect detects that all diamonds have been collected; ~70 were still rememining, and
+                 bomb was able to defuse
+	    ! Depending on MAP design, visual walls do not have any backs to them
+	    + Visual 3D standard wall meshes - started
+
+
+###  Started effects & final Visual implentaions                           ###
+###   (+ coding of any other features missed or need that to be debugged)  ###
+
+
+10-02-2003: (~2 hours)
+	    * Monsters movment is now operational, but not exact
+	    * Off-map sections of the screen now correctly how the wall piece (5)
+	    + Monsters can now be killed with rocks/eggs
+
+22-12-2002: (~3 hours)
+	    + Implement Monsters; needs debugging greately
+
+21-12-2002: (~4 hours)
+	    + Funguses can grow; seems very reasonable
+	    + Added fungus, skull and barrier
+	    * It is now not posible for Repton to not get killed if walking in opposit direct of oncomming spirit
+	    + Spirits can now determine which direct they should first be going; this complies with origonal Repton (see tests)
+	    + Research; Made MAPs for Repton 3 (origonal) to determine how spirits work; such as starting determination
+
+20-12-2002:
+	    + Spirits can now be caught in cage
+	    * Spirits now keep formation, only the timer within the last spirit in the array is used
+	    ! Spirits do not keep in formation, ie, the same distence between each other; becase they each have thire own timer
+	    * Mutiple spirits can now pass each other
+
+18-12-2002:
+	    ! It is posible for Repton to not get killed if walking in opposit direct of oncomming spirit
+	    ! Multiple spirits can not pass each other (on the same map piece) - design error
+	    * Spirits now 'hug-wall-left'
+
+09-12-2002:
+	    * Spirits do now not 'eat earth'
+
+02-12-2002:
+	    ! Spirits eat earth	
+	    ! Design error, spirits do not hug-wall-left, they simply look for a wall in front and turn left if there is
+		a wall there
+	    + Spirits are now implemented	
+
+14-11-2002:
+	    + Detection of Repton dieing by falling a rock or egg
+	    + Working on detection of killing Repton (by falling rocks), and detection of cracking egg; both related.
+	    + Rocks can now fall right
+
+08-11-2002:
+	    ! Rocks now fall left, may need additional work and testing
+	    + Rocks now fall left
+	    * Jitter bug (while moveing) has now been totally iradicated
+	    + Rocks and eggs now fall stright down when not supported (not done left or right falling yet)
+	    * Attempted yet again to recreate Repton 3 intro sound in Logic pro audio - much better than other attempts, 
+	       also started to add rythem, but this was lost.
+
+27-10-2002:
+	    + Repton can now push rocks
+
+26-10-2002:
+	    + Rendering of ground; LookUp table for ground type selection ('GetWallAroundInfo', etc)
+	    + Ground Art (still need to do ground types > 9)
+
+25-10-2002:
+	    + 3D Egg and Rock Art
+
+24-10-2002:
+	    * Repton 'animation (engine)' is better - needed to export from MAX at 60 frame res, 
+	       also had to change frame selection (* by 160)
+	    + Repton now turns to direction of movement
+	   */+ Other map graphics to game
+
+23-10-2002:
+	    + Bomb can now be defused after all dimonds are cleared
+	    ! On some frames a white flash occures
+	    + Keys and Safes are now handeled
+	    + GUI Dimond counter
+	    ! Still pauses when continually moveing 
+	    * Made repton movement animation smoother; transition from one to another adjacent place 
+
+18-03-2002:
+	    * Attempted to make movment smoother - not succesful
+
+05-03-2002:
+	    + Detection of stitic map pieces
+	    ! Movment is not very smooth - jitters if continually moving from one piece to another
+	    * Repton and cam now moves around map.
+
+02-03-2002:
+	    * Minor tweeks; such as B/G and Font colours and moving Repton around map
+
+28-02-2002:
+	    + Started work on logical map data
+
+27-02-2002:
+	    * Repton can move around level (not logically) - still needs alot of work
+	    ! No internal animation on Repton mesh
+	    + Displays Repton mesh
+
+09-02-2002:
+	    + The 'Visual' based functions in 'cPlayer' - started
+	    + Testing of the Repton Returns font
+	    * Font file now works in XP, also now includes the Arial Rounded characters
+               where Repton based characters have not been allocated
+
+05-02-2002:
+	    + Skull Mesh (and mesh bones)
+	    + Egg mesh
+	   +/* Animation to Repton - started to walk
+
+03-02-2002:
+	    * General debug for rendering - now scrolls the map + moves cam
+
+14-12-2001:
+	    * Working on rendering (using 'postion and render' method)
+	    - 'intihideandshow' and 'hideandshow' function - not needed because of changed rendering method	
+12-12-2001:
+	    * Reattempted Repton 3 intro sound in Logic pro audio
+
+11-12-2001:
+	    * Now displays a 27by30 matrix of '3.x' models with correct intervals
+
+26-10-2001:
+            + Attempted to recreate Repton 3 intro sound in Cakewalk
+
+15-10-2001:
+	    * Continued work on coverstion.
+
+13-10-2001:
+	    * Started to convert to VB and Ex-Perspective, in (OOP)
+
+-- v1 --  :  VB 6 + Ex-Perspective
+
+
+
+12-10-2000:
+            + Movement core
+            + intihideandshow function
+            + findobno function
+
+11-10-2000:
+            + hideandshow function
+
+06-09-2000:
+            + Load SUB program for Editor
+
+03-09-2000:
+            + User function list
+            * getmapdat funtion, now uses the convertdatstring function
+            + convertdatstring function
+            + convertdat function
+            + givemapdat function
+            + dorocksfall function
+
+01-09-2000:
+            + Save SUB program for Editor.
+
+30-08-2000:
+            + Most of Editor made! inc(Graphics, Core, GUI, MAP engine, etc.)
+
+29-08-2000:
+            * MAP engine is now a set of plains, not a matrix.
+
+25-08-2000:
+            + Most Grapghics.
+            + getmapdata function.
+            + Finished first MAP file in pure ASCII!
+            * MAP file lay design - single charictor for each cell.
+
+24-08-2000:
+            + themap function.
+            + Making first MAP file in pure ASCII!
+            + MAP file layout design.
+            + Created the DBA file.
+
+23-08-2000:
+	    + Research; Scanned all document material; tape covers, instuctions
+	    + Research; Took screen shots from origonal Acorn Election output
+            + Font made!
+
+-- Protype --  :  DB
+
+----------------------------------------------------------------------------
+                                                      |
+                                                      | Key:
+                                                      |  + = added
+                                                      |  - = removed
+                                                      |  * = changed/updated
+                                                      \---------------------
+
+
+From Prototype version (DB)::
+
+User function list, with syntax and description:
+
+Function Name:            Syntax:               Description:
+dorocksfall               ()                     Cheaks if rocks need to fall.
+
+systemsetup               ()                     Sets up system! (Like, derr!)
+
+themap                    (mapfilename$)         Loads images and map array.
+
+getmapdata                (x,y)                  Returns the type of charicter at x,y from arrray.
+givemapdate               (x,y,dat)              Changes map array.
+convertdat                (dat)                  Returns the converted string from the value.
+convertdatstring          (dat$)                 Returns the converted value from the string.
+
+del                       ()                     Unloads images, arrays, etc.
+
+intihideandshow           ()                     Hides titles that are not being displayed.
+hideandshow               (move)                 Shows/Hide new/old tiles when you move.
+
+findobno                  (x,y)                  Returns the object number at x,y.
