@@ -15,6 +15,7 @@ public class Rock : Movable
         base.Init();
 
         Falling = false;
+        CheckIfFall();
     }
 
     private new void Update()

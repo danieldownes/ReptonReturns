@@ -26,13 +26,18 @@ public abstract class Movable : Piece
 
     public T MovableTo<T>(Vector3 vPos, Vector3 vDir)
     {
+        return MovableTo<T>(vPos, vDir, Color.gray);
+    }
+
+    public T MovableTo<T>(Vector3 vPos, Vector3 vDir, Color debug)
+    {
         RaycastHit hit;
-        Physics.Raycast(vPos, vDir, out hit, 1f);
+        Physics.Raycast(vPos, vDir, out hit, vDir.magnitude);
+
+        Debug.DrawRay(vPos, vDir * hit.distance, debug, 3f);
 
         if (hit.collider == null)
             return default;
-
-        Debug.DrawRay(vPos, vDir * hit.distance, Color.red, 3f);
 
         return (T)hit.collider.gameObject.GetComponent<T>();
 

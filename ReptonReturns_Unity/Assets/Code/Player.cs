@@ -132,7 +132,13 @@ public class Player : Movable
         if (PlayerState != State.Stoped && PlayerState != State.PushNoWalk)
             return;
 
-        Piece piece = MovableTo<Piece>(Position, direction);
+        // Walkable floor over intended direction?
+        Piece piece = MovableTo<Piece>(Position + direction, Vector3.down * 2, Color.green);
+        if (piece == null)
+            return;
+
+        // No obstruction in intended direction
+        piece = MovableTo<Piece>(Position, direction);
         if (piece != null)
         {
             if (piece.Traversable == false)
