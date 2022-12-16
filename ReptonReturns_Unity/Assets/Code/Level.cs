@@ -377,8 +377,8 @@ public class Level : MonoBehaviour
                             Moveable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as Moveable;
                             if (oScript)
                             {
-                                oScript.Init(Piece.Rock, vThisPos);
-                                oScript.iId = iObjTot;
+                                //oScript.Init(Piece.Rock, vThisPos);
+                                //oScript.iId = iObjTot;
                                 //oScript.game = game;
                             }
                         }
@@ -388,8 +388,8 @@ public class Level : MonoBehaviour
                             Moveable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as Moveable;
                             if (oScript)
                             {
-                                oScript.Init(Piece.Egg, vThisPos);
-                                oScript.iId = iObjTot;
+                                //oScript.Init(Piece.Egg, vThisPos);
+                                //oScript.iId = iObjTot;
                                 //oScript.game = game;
                             }
                         }
@@ -400,7 +400,7 @@ public class Level : MonoBehaviour
                             if (oScript)
                             {
                                 oScript.Init(vThisPos);
-                                oScript.iId = iObjTot;
+                                //oScript.iId = iObjTot;
                                 //oScript.game = game;
                             }
                         }
@@ -812,7 +812,7 @@ End Function
         {
             Debug.Log("INIT script");
             oScript.Init(vPos);
-            oScript.iId = iMonsters;
+            //oScript.iId = iMonsters;
             oScript.rr2gameObject = game;
         }else
             Debug.Log("INIT script PROBLEM");
@@ -831,7 +831,7 @@ End Function
                 Monster oScript = lM.Value.GetComponent("rr2monster") as Monster;
                 if( oScript)
                 {
-                    Debug.Log("FOUND MONSTER " + oScript.iId);
+                    //Debug.Log("FOUND MONSTER " + oScript.iId);
                     if( oScript.Position == vP || oScript.LastPosition == vP)
                         oScript.Die();
                    

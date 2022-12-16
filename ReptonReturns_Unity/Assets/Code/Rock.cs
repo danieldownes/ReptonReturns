@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Rock : Moveable2
+public class Rock : Moveable
 {
     public bool Falling;
     public bool WasFalling;
@@ -9,48 +9,18 @@ public class Rock : Moveable2
 
     //public bool EggCracking;  //Public bEggCracking As Boolean
 
-    private string sSlantedLeft;        // Pieces that this movable will fall/slide off to the left from when unsupported
-    private string sSlantedRight;       //  "" but for right
 
 
     private void Start()
     {
-        LastTime = 0f;
-        TimeToMove = 0.3f;
+        base.Init();
+
         Falling = false;
-        Position = transform.position;
     }
 
-    private void Update()
+    private new void Update()
     {
-        if (LastTime > 0.00f)
-            LastTime -= Time.deltaTime;
-
-        if ( LastTime <= 0.0f)
-        {
-            //game.loadedLevel.iEggs--;
-
-            // Prevent egg from further prosessing
-            //rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x - 1, (int)-vPosition.z + 1].id = -1;
-
-            // Start particle emitter?
-            //
-
-            // Remove self
-            //game.loadedLevel.ReplacePiece(Position, '0');
-
-
-            // Spawn monster
-            //game.loadedLevel.SpawnMonster(Position);
-
-            // Remove reference that this is an egg
-            iId = -1;
-        }
-        else
-        {
-            Move3D();
-            //CheckIfFall();
-        }
+        base.Update();
 
         // Stop sound?
         if (LastTime <= 0.00f && PlayingSnd)
@@ -60,33 +30,23 @@ public class Rock : Moveable2
         }
     }
 
-    public bool Move(Vector3 vDir)
+    public bool Move(Vector3 direction)
     {
-        Vector3 vNewPos;
-
-        vNewPos = Position + vDir;
-
         // Not currently moving down?
-        if (vDir == Vector3.back && LastTime > 0.01f)
+        if (direction == Vector3.back && LastTime > 0.01f)
             return false;
 
         // Can't move up
-        if (vDir == Vector3.forward)
+        if (direction == Vector3.up)
             return false;
 
-        // Space for the rock to move? -- this check is already being done in rr2player.
-        //if( rr2gameObject.loadedLevel.RrMapDetail[(int)vNewPos.x, (int)-vNewPos.z].TypeID != (char)rr2level.enmPiece.Space 
-        // && rr2gameObject.loadedLevel.RrMapDetail[(int)vNewPos.x, (int)-vNewPos.z].TypeID != (char)rr2level.enmPiece.Monster)
-        //	return false;
+        // Space for the rock to move?
+        if( base.MoveableTo(Position, direction) == false)
+            return false;
 
         // Ok, start the move...
 
-        LastTime = TimeToMove;
-
-        // Update the position
-        LastPosition = Position;
-        vLastPositionAbs = transform.position;
-        Position += vDir;
+        base.Move(direction);
 
         // Play Rock Sound
         if (!PlayingSnd)
@@ -108,23 +68,11 @@ public class Rock : Moveable2
 
 
 
-        //game.loadedLevel.SetMapP(Position, (char)pPieceType, iId);
-        //game.loadedLevel.SetMapP(LastPosition, (char)Level.Piece.Space, -1);
 
         return true;
     }
 
 
-    private void Move3D()
-    {
-        // Interpolate
-        transform.position = Vector3.Lerp(vLastPositionAbs, Position, (TimeToMove - LastTime) / TimeToMove);
-
-
-        // TODO: rotation
-        //if( vDir == Vector3.left)
-        //transform.RotateAround
-    }
 
     /*
     public void CheckIfFall()

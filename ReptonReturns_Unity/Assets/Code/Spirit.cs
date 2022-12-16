@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Spirit : Moveable2
+public class Spirit : Moveable
 {
     public int State;               // 0 = Seek (check direction), 1 = Moving
 
@@ -18,7 +18,7 @@ public class Spirit : Moveable2
 
     public void Init(Vector3 vPos)
     {
-        pPieceType = Level.Piece.Spirit;
+        PieceType = Level.Piece.Spirit;
         TimeToMove = 0.45f;
         OnPiece = '0';
         OnId = -1;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Monster : Moveable2
+public class Monster : Moveable
 {
     public Game rr2gameObject;
 
@@ -25,7 +25,7 @@ public class Monster : Moveable2
 
     public void Init(Vector3 vPos)
     {
-        pPieceType = Level.Piece.Monster;
+        PieceType = Level.Piece.Monster;
 
         TimeToMove = 0.45f;
 
@@ -91,8 +91,8 @@ public class Monster : Moveable2
             //cOnPiece = '0';
         }
 
-        rr2gameObject.loadedLevel.SetMapP(LastPosition, cOnPiece, iOnId);
-        rr2gameObject.loadedLevel.SetMapP(Position, (char)pPieceType, iId);
+        //rr2gameObject.loadedLevel.SetMapP(LastPosition, cOnPiece, iOnId);
+        //rr2gameObject.loadedLevel.SetMapP(Position, (char)PieceType, iId);
     }
 
     public void Move3D()
@@ -213,8 +213,8 @@ public class Monster : Moveable2
 
     void DieForced()
     {
-        Debug.Log("DieForced:" + iId);
-        Destroy(rr2gameObject.loadedLevel.lMonsters[iId]);
+        //Debug.Log("DieForced:" + iId);
+        //Destroy(rr2gameObject.loadedLevel.lMonsters[iId]);
         //lMonsters.Remove(i);
         //Destroy(rr2gameObject.loadedLevel.lMonsters[iId]);
         //rr2gameObject.loadedLevel.lMonsters.Remove(iId);

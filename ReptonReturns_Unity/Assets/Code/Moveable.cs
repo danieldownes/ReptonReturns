@@ -1,231 +1,105 @@
 using UnityEngine;
 
-// Replaces ccRockOrEgg vb6 class
-public class Moveable : Moveable2
+public class Moveable : Piece
 {
-    public bool Falling;
-    public bool WasFalling;
-    public bool FreeFall;
-    public bool PlayingSnd;
+    public Vector3 LastPosition;
+    public Vector3 vLastPositionAbs;    // Last absolute position (repton shuffle + smoother tweens)
 
-    //public bool EggCracking;  //Public bEggCracking As Boolean
+    public Vector3 Direction;
+    public Vector3 LastDirection;
 
-    private string sSlantedLeft;        // Pieces that this movable will fall/slide off to the left from when unsupported
-    private string sSlantedRight;       //  "" but for right
+    public float LastTime;
+    public float TimeToMove;
 
-
-    public void Init(Level.Piece iSetPieceType, Vector3 vSetPos)
+    public void Init()
     {
-        pPieceType = iSetPieceType;
-        Position = vSetPos;
-
-        sSlantedLeft = "d7rkgtb&";
-        sSlantedRight = "d9rkgtb(";  // Can fall to the right if did not fall left
-
-        //EggCracking = false;
-
+        base.Init();
         LastTime = 0f;
         TimeToMove = 0.3f;
-        Falling = false;
     }
 
-    void Update()
+    public void Update()
     {
         if (LastTime > 0.00f)
-            LastTime -= UnityEngine.Time.deltaTime;
-
-        if ( LastTime <= 0.0f)
-        {
-            //game.loadedLevel.iEggs--;
-
-            // Prevent egg from further prosessing
-            //rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x - 1, (int)-vPosition.z + 1].id = -1;
-
-            // Start particle emitter?
-            //
-
-            // Remove self
-            //game.loadedLevel.ReplacePiece(Position, '0');
-
-
-            // Spawn monster
-            //game.loadedLevel.SpawnMonster(Position);
-
-            // Remove reference that this is an egg
-            iId = -1;
-        }
-        else
-        {
-            Move3D();
-            //CheckIfFall();
-        }
-
-        // Stop sound?
-        if (LastTime <= 0.00f && PlayingSnd)
-        {
-            //this.GetComponent<AudioSource>().Stop();
-            PlayingSnd = false;
-        }
+            move();
     }
 
-    public bool Move(Vector3 vDir)
+    public bool MoveableTo(Vector3 vPos, Vector3 vDir)
     {
-        //Vector3 vNewPos;
+        bool moveableTo = true;
+        bool bUpdateMap = true;
 
-        //vNewPos = vPosition + vDir;
+        RaycastHit hit;
+        Physics.Raycast(vPos, vDir, out hit, 1f);
 
-        // Not currently moving down?
-        if (vDir == Vector3.back && LastTime > 0.01f)
-            return false;
+        if (hit.collider == null)
+            return true;
 
-        // Can't move up
-        if (vDir == Vector3.forward)
-            return false;
+        Debug.DrawRay(vPos, vDir * hit.distance, Color.red, 3f);
+        Debug.Log("Did Hit");
 
-        // Space for the rock to move? -- this check is already being done in rr2player.
-        //if( rr2gameObject.loadedLevel.RrMapDetail[(int)vNewPos.x, (int)-vNewPos.z].TypeID != (char)rr2level.enmPiece.Space 
-        // && rr2gameObject.loadedLevel.RrMapDetail[(int)vNewPos.x, (int)-vNewPos.z].TypeID != (char)rr2level.enmPiece.Monster)
-        //	return false;
+        Moveable rock = hit.collider.gameObject.GetComponent<Moveable>();
 
-        // Ok, start the move...
+        if (rock == null)
+            return true;
 
-        LastTime = TimeToMove;
+        //if( rock.MoveableTo(rock.Position + vDir, vDir))
 
-        // Update the position
-        LastPosition = Position;
-        vLastPositionAbs = transform.position;
-        Position += vDir;
+        rock.Move(vDir);
 
-        // Play Rock Sound
-        if (!PlayingSnd)
+        /*
+        // Static pieces...
+        switch (Level.Piece.Space) //(Level.Piece)cPiece.TypeID)
         {
-            this.GetComponent<AudioSource>().Play();
-            PlayingSnd = true;
-        }
+            case Level.Piece.Door:
+                // Has the key to this door?
+                //if (lInventory.Contains("Coloured Key:" + game.loadedLevel.colourKey[cPiece.iRef].ToString()))
+                //{
+                //lInventory.Add("DOOR:" + cPiece.iRef.ToString());
+                //}
+                //else
+                bMoveableTo = false;
 
+                break;
 
-        // Its already been dertimined that its ok to move to the new coords.- so lets update this logically...
+            case Level.Piece.Bomb:
 
-        // Before we do though, are there any monsters in the way? if so they should die..
+                // Only if objectives are completed
+                //if( If rrRepton.intDimondsCollected <> rrMap.intTotDimonds _
+                //Or rrMap.intTotCrowns <> 0 Or rrMap.intTotEggs <> 0 Or rrMap.intTotMonstersAlive <> 0 Then
+                bMoveableTo = false;
+                break;
 
-        // Is monster under rock?
-        //if (game.loadedLevel.GetMapP(Position) == (char)Level.Piece.Monster)
-        //{
-            //game.loadedLevel.KillMonsters(Position);
-        //}
-
-
-
-        //game.loadedLevel.SetMapP(Position, (char)pPieceType, iId);
-        //game.loadedLevel.SetMapP(LastPosition, (char)Level.Piece.Space, -1);
+            case Level.Piece.Monster:
+            case Level.Piece.Skull:
+            case Level.Piece.Fungus:
+                DontReplace = 2;
+                break;
+                */
 
         return true;
     }
 
 
-    private void Move3D()
+    public bool Move(Vector3 direction)
     {
-        // Interpolate
-        transform.position = Vector3.Lerp(vLastPositionAbs, Position, (TimeToMove - LastTime) / TimeToMove);
+        Vector3 vNewPos;
 
-        /*
-		' Movment should be slower if not falling down
-	    If int3DDirection = Down Then
-	        ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove
-	    Else
-	        ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove * 1.25
-	    End If
-		 */
+        vNewPos = Position + direction;
 
-        // TODO: rotation
-        //if( vDir == Vector3.left)
-        //transform.RotateAround
+        LastTime = TimeToMove;
+
+        LastPosition = Position;
+        vLastPositionAbs = transform.position;
+        Position += direction;
+
+        return true;
     }
 
-    /*
-    public void CheckIfFall()
+    private void move()
     {
-        char sTemp;
-        int i;
-        //int n;
-
-        bWasFalling = false;
-
-        // Have we stoped falling?
-        bWasFalling = false;
-
-        if (bFalling && LastTime <= 0.0f)
-        {
-            bFalling = false;
-            bWasFalling = true;
-
-            // TODO: falling stop sound
-            //If bPlayingSnd Then rrGame.PlayRockRumbleSound False
-            //bPlayingSnd = False
-            //If intPieceType = Rock Then ExSnds(5).PlaySound (False) Else ExSnds(8).PlaySound (False)
-
-            if (pPieceType == Level.Piece.Egg)
-            {
-                CrackEgg();
-                return;
-            }
-
-        }
-
-        // Fall stright down?
-        // TODO: Fix
-        sTemp = '5';
-        //sTemp = (char)rr2gameObject.loadedLevel.RrMapDetail[(int)vPosition.x, (int)-vPosition.z + 1].TypeID;
-
-        if (sTemp == (char)Level.Piece.Space)
-        {
-            /*
-            // Is player currently moving under rock?
-            if (game.playerObject.Position != (Position + Vector3.back))
-            {
-                // It is ok to make rock fall
-                bFalling = true;
-                this.Move(Vector3.back);
-            }
-            */
-        // Is a monster currently moving under rock?
-
-        // Is player already under moving rock?
-
-        // Still not falling?
-        //  Try fall to the left..
-        //if (!bFalling)
-
-            // Is left-below rock still falling? If so, don't do anything until that rock is out of the way
-
-            // Is the support currently under rock slanted to the left?
-
-                // Check if room exists to the left (And Repton isn't there)
-                    // Check if room exists to 1 left, 1 down (And Repton isn't there)
-                    //sTemp = rrMap.GetData(intCurX - 1, intCurY + 1)   
-
-                        // This rock should fall to the left
-
-
-        // Still not falling?
-        //  Try fall to the right..
-            // Is left-below rock still falling? If so, don't do anything until that rock is out of the way
-
-            // Is the support currently under rock slanted to the right?
-            
-                // Check if room exists to the right (And Repton isn't there)
-
-                        // This rock should fall to the right
-
-
-        // If rock is in free falling (ie, it has been falling before it was detected that it should fall
-        //  again (directly afterward), then add count (so that it can be detected if it hit repton, or if this is
-        //  an egg, if it should crack).
-        //if (bFalling && bWasFalling)
-        //    bFreeFall = true;
-        //else
-        //    bFreeFall = false;
-
-    //}
+        transform.position = Vector3.Lerp(vLastPositionAbs, Position, (TimeToMove - LastTime) / TimeToMove);
+        LastTime -= UnityEngine.Time.deltaTime;
+    }
 
 }

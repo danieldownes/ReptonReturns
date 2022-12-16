@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class Player : Moveable2
+public class Player : Moveable
 {
     public GameObject ReptonMesh;
 
@@ -45,7 +45,7 @@ public class Player : Moveable2
         Position = transform.position;
     }
         
-    private void Update()
+    private new void Update()
     {
         LastTime -= UnityEngine.Time.deltaTime;
 
@@ -127,34 +127,34 @@ public class Player : Moveable2
         LastPosition = Position = vNewPos;
     }
 
-    public void Move(Vector3 DirectionToMove)
+    public new void Move(Vector3 DirectionToMove)
     {
-        if (PlayerState == State.Stoped || PlayerState == State.PushNoWalk)
+        if (PlayerState != State.Stoped && PlayerState != State.PushNoWalk)
+            return;
+
+        if (MoveableTo(Position, DirectionToMove))
         {
-            if (MoveableTo(Position, DirectionToMove))
-            {
-                LastTime = TimeToMove;
-                LastPosition = Position;
-                //iPlayerState = enmPlayerState.Walk;
+            LastTime = TimeToMove;
+            LastPosition = Position;
+            //iPlayerState = enmPlayerState.Walk;
 
-                LastDirection = Direction;
-                Direction = DirectionToMove;
+            LastDirection = Direction;
+            Direction = DirectionToMove;
 
-                // Add the movement
-                Position += DirectionToMove;
+            // Add the movement
+            Position += DirectionToMove;
 
-                updatedMove = false;
+            updatedMove = false;
 
-                //rr2gameObject.guiObject.sInventory = vDirectionToMove.x.ToString();
-                //Debug.Log("sInventory=" + vDirectionToMove.x.ToString());
+            //rr2gameObject.guiObject.sInventory = vDirectionToMove.x.ToString();
+            //Debug.Log("sInventory=" + vDirectionToMove.x.ToString());
 
 
-                PlayerState = State.Walk;
-            }
-            else
-            {
-                //iPlayerState = enmPlayerState.PushNoWalk;
-            }
+            PlayerState = State.Walk;
+        }
+        else
+        {
+            //iPlayerState = enmPlayerState.PushNoWalk;
         }
     }
 
@@ -189,153 +189,8 @@ public class Player : Moveable2
         }
     }
 
-    public bool MoveableTo(Vector3 vPos, Vector3 vDir)
-    {
-        bool bMoveableTo = true;
-        bool bUpdateMap = true;
-
-        RaycastHit hit;
-        Physics.Raycast(vPos, vDir, out hit, 1f);
-
-        if (hit.collider == null)
-            return true;
-
-        Debug.DrawRay(vPos, vDir * hit.distance, Color.red, 3f);
-        Debug.Log("Did Hit");
-
-        Rock rock = hit.collider.gameObject.GetComponent<Rock>();
-
-        if (rock == null)
-            return true;
-
-        //if( rock.MoveableTo(rock.Position + vDir, vDir))
-
-        rock.Move(vDir);
-
-        /*
-
-        // Static pieces...
-        switch (Level.Piece.Space) //(Level.Piece)cPiece.TypeID)
-        {
-            case Level.Piece.Door:
-                // Has the key to this door?
-                //if (lInventory.Contains("Coloured Key:" + game.loadedLevel.colourKey[cPiece.iRef].ToString()))
-                //{
-                    //lInventory.Add("DOOR:" + cPiece.iRef.ToString());
-                //}
-                //else
-                    bMoveableTo = false;
-
-                break;
-
-            case Level.Piece.Bomb:
-
-                // Only if objectives are completed
-                //if( If rrRepton.intDimondsCollected <> rrMap.intTotDimonds _
-                //Or rrMap.intTotCrowns <> 0 Or rrMap.intTotEggs <> 0 Or rrMap.intTotMonstersAlive <> 0 Then
-                bMoveableTo = false;
-                break;
-
-            case Level.Piece.Monster:
-            case Level.Piece.Skull:
-            case Level.Piece.Fungus:
-                DontReplace = 2;
-                break;
-
-
-            case Level.Piece.Wall:
-            case Level.Piece.Wall1:
-            case Level.Piece.Wall2:
-            case Level.Piece.Wall3:
-            case Level.Piece.Wall4:
-            case Level.Piece.Wall6:
-            case Level.Piece.Wall7:
-            case Level.Piece.Wall8:
-            case Level.Piece.Wall9:
-            case Level.Piece.FilledWall:
-            case Level.Piece.FilledWall1:
-            case Level.Piece.FilledWall3:
-            case Level.Piece.FilledWall7:
-            case Level.Piece.FilledWall9:
-            case Level.Piece.Barrier:
-            case Level.Piece.Cage:
-            case Level.Piece.Safe:
-                bMoveableTo = false;
-                break;
-
-        }
-        */
-
-        /*
-        // Movable pieces...
-        if (cPiece.TypeID == (char)Level.Piece.Rock || cPiece.TypeID == (char)Level.Piece.Egg)
-        {
-
-            // If egg is cracking,
-            //if( (char)cPiece.TypeID == (char)rr2level.enmPiece.Egg && )
-            //If rrPieces(intX, intY).intRockOrEggID = -1 Then
-            //bMoveableTo = false;
-
-            bMoveableTo = false;
-
-            if (vDir == Vector3.left || vDir == Vector3.right)
-            {
-                Level.MapPiece2d cPieceTo = game.loadedLevel.MapDetail[(int)(vPos.x + vDir.x), (int)-vPos.z];
-
-                bMoveableTo = false;
-
-                if (cPieceTo.TypeID == (char)Level.Piece.Space || cPieceTo.TypeID == (char)Level.Piece.Monster)
-                {
-                    Moveable oScript = game.loadedLevel.lObjects3[cPiece.id].GetComponent("rr2moveable") as Moveable;
-                    if (oScript)
-                    {
-                        bMoveableTo = oScript.Move(vDir);
-                    }
-                }
-            }
-        }
-        else if (bUpdateMap && bMoveableTo)
-        {
-            // Remove the graphic
-            //try
-            //{
-            //	int pId = rr2gameObject.loadedLevel.RrMapDetail[(int)vPos.x, (int)-vPos.z].id;
-            //		if( pId != -1)
-            //      	Destroy(rr2gameObject.loadedLevel.lObjects3[pId]);
-            //} catch {}
-        }
-
-        
-        */
-        return bMoveableTo;
-    }
 
     /*
-    Private Function MoveableTo(intX As Integer, intY As Integer, intDirection As enmDirection) As Boolean
-
-        If intTemp = enmPieceType.Rock Or (intTemp = enmPieceType.Egg) Then        ' Rocks or eggs
-            If intDirection = Up Or intDirection = Down Then
-                MoveableTo = False
-            Else
-                If intDirection = Left Then
-                    If rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Space) Then
-                        rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Left
-                    ElseIf rrMap.GetData(intX - 1, intY) = DataInt2Str(enmPieceType.Monster) Then
-                        rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Left
-                    Else
-                        MoveableTo = False
-                    End If
-                Else
-                    If rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Space) Then
-                        rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
-                    ElseIf rrMap.GetData(intX + 1, intY) = DataInt2Str(enmPieceType.Monster) Then
-                        rrRocksOrEggs(rrPieces(intX, intY).intRockOrEggID).Move Right
-                    Else
-                        MoveableTo = False
-                    End If
-                End If
-            End If
-        End If
 
     public void CheckPickup()
     {
