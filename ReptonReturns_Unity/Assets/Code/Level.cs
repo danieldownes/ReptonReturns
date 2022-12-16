@@ -379,7 +379,7 @@ public class Level : MonoBehaviour
                             {
                                 oScript.Init(Piece.Rock, vThisPos);
                                 oScript.iId = iObjTot;
-                                oScript.game = game;
+                                //oScript.game = game;
                             }
                         }
 						
@@ -390,7 +390,7 @@ public class Level : MonoBehaviour
                             {
                                 oScript.Init(Piece.Egg, vThisPos);
                                 oScript.iId = iObjTot;
-                                oScript.game = game;
+                                //oScript.game = game;
                             }
                         }
 						
@@ -401,7 +401,7 @@ public class Level : MonoBehaviour
                             {
                                 oScript.Init(vThisPos);
                                 oScript.iId = iObjTot;
-                                oScript.game = game;
+                                //oScript.game = game;
                             }
                         }
 

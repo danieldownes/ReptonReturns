@@ -3,8 +3,7 @@ using System.Collections.Generic;
 
 public class Player : Moveable2
 {
-    private GameObject playerObject;
-    private GameObject camObject;
+    public GameObject ReptonMesh;
 
     public enum State
     {
@@ -21,32 +20,32 @@ public class Player : Moveable2
     private State OldState;
     private State LastAction;
 
-    public bool bCanMove = true;
+    public bool CanMove = true;
     private bool updatedMove = true;
+
+    public int Lives;
+
+    private bool InterMove;
+    private int WantMoveMe;
+
     // If set, wont replace old map piece with a space (eg monster, fungus, etc..)
-    private int iDontReplace = 0;
-    public int iLives;
+    private int DontReplace = 0;
 
-    bool bStepSoundTog;
-    bool InterMove;
-    int iWantMoveMe;
-
-
-    public List<string> lInventory = new List<string>();
+    public List<string> Inventory = new List<string>();
     public string[] playerVars;
 
-    void Start()
+    private void Start()
     {
-        iLives = 3;
+        Lives = 3;
         PlayerState = State.Stoped;
         LastTime = 0.0f;
         TimeToMove = 0.3f;
-        LastDirection = Vector3.back;
-        Direction = Vector3.forward;
+        LastDirection = Vector3.forward;
+        Direction = Vector3.back;
+        Position = transform.position;
     }
-
-
-    void Update()
+        
+    private void Update()
     {
         LastTime -= UnityEngine.Time.deltaTime;
 
@@ -56,13 +55,13 @@ public class Player : Moveable2
             // Almost finished move (interval-move)? 
             InterMove = false;
 
-            // Probably not continusouly moving?
-            if (iWantMoveMe < 2)
+            // Probably not continuously moving?
+            if (WantMoveMe < 2)
             {
                 //playStepSound();
             }
 
-            // Update movmement of Player on map
+            // Update movement of Player on map
             //updatedMove = true;
         }
 
@@ -115,30 +114,24 @@ public class Player : Moveable2
         if (OldState == State.Push && PlayerState != State.Push)
         {
             // Stop pushing sound
-            camObject.GetComponent<AudioSource>().Stop();
+            //camObject.GetComponent<AudioSource>().Stop();
         }
 
-        if (iWantMoveMe > 0)
-            iWantMoveMe--;
+        if (WantMoveMe > 0)
+            WantMoveMe--;
     }
 
 
     public void MoveToPos(Vector3 vNewPos)
     {
-        if (iDontReplace != 1)
-            game.loadedLevel.SetMapP(LastPosition, (char)Level.Piece.Space);
-        game.loadedLevel.SetMapP(vNewPos, (char)Level.Piece.Repton);
-
         LastPosition = Position = vNewPos;
-
-        //rr2gameObject.guiObject.OnGUI ();
     }
 
     public void Move(Vector3 DirectionToMove)
     {
         if (PlayerState == State.Stoped || PlayerState == State.PushNoWalk)
         {
-            if (MoveableTo(Position + DirectionToMove, DirectionToMove))
+            if (MoveableTo(Position, DirectionToMove))
             {
                 LastTime = TimeToMove;
                 LastPosition = Position;
@@ -175,15 +168,14 @@ public class Player : Moveable2
         Quaternion vRotFrom = Quaternion.LookRotation(Vector3.back);
 
         // Interpolate //
-        transform.position = Vector3.Lerp(AddSlant(LastPosition), AddSlant(Position), (TimeToMove - LastTime) / TimeToMove);
+        transform.position = Vector3.Lerp(LastPosition, Position, (TimeToMove - LastTime) / TimeToMove);
 
         if (LastDirection != Direction)
         {
-
             vRotFrom = Quaternion.LookRotation(LastDirection);
             vRotTo = Quaternion.LookRotation(Direction);
 
-            // Spectial case to ensure repton moves in the right direction
+            // Special case to ensure Repton moves in the right direction
             if (LastDirection == Vector3.left)
                 vRotFrom = Quaternion.LookRotation(vLeft);
 
@@ -191,9 +183,8 @@ public class Player : Moveable2
                 vRotFrom = Quaternion.LookRotation(vRight);
 
             // Apply the rotation
-            GameObject reptonObject = GameObject.Find("ReptonMesh");
-            reptonObject.transform.rotation = Quaternion.identity;
-            reptonObject.transform.rotation = Quaternion.Lerp(vRotFrom, vRotTo, (TimeToMove - LastTime) / TimeToMove);
+            ReptonMesh.transform.rotation = Quaternion.identity;
+            ReptonMesh.transform.rotation = Quaternion.Lerp(vRotFrom, vRotTo, (TimeToMove - LastTime) / TimeToMove);
 
         }
     }
@@ -202,18 +193,37 @@ public class Player : Moveable2
     {
         bool bMoveableTo = true;
         bool bUpdateMap = true;
-        Level.MapPiece2d cPiece = game.loadedLevel.MapDetail[(int)vPos.x, (int)-vPos.z];
+
+        RaycastHit hit;
+        Physics.Raycast(vPos, vDir, out hit, 1f);
+
+        if (hit.collider == null)
+            return true;
+
+        Debug.DrawRay(vPos, vDir * hit.distance, Color.red, 3f);
+        Debug.Log("Did Hit");
+
+        Rock rock = hit.collider.gameObject.GetComponent<Rock>();
+
+        if (rock == null)
+            return true;
+
+        //if( rock.MoveableTo(rock.Position + vDir, vDir))
+
+        rock.Move(vDir);
+
+        /*
 
         // Static pieces...
-        switch ((Level.Piece)cPiece.TypeID)
+        switch (Level.Piece.Space) //(Level.Piece)cPiece.TypeID)
         {
             case Level.Piece.Door:
                 // Has the key to this door?
-                if (lInventory.Contains("Coloured Key:" + game.loadedLevel.colourKey[cPiece.iRef].ToString()))
-                {
+                //if (lInventory.Contains("Coloured Key:" + game.loadedLevel.colourKey[cPiece.iRef].ToString()))
+                //{
                     //lInventory.Add("DOOR:" + cPiece.iRef.ToString());
-                }
-                else
+                //}
+                //else
                     bMoveableTo = false;
 
                 break;
@@ -229,7 +239,7 @@ public class Player : Moveable2
             case Level.Piece.Monster:
             case Level.Piece.Skull:
             case Level.Piece.Fungus:
-                iDontReplace = 2;
+                DontReplace = 2;
                 break;
 
 
@@ -254,8 +264,9 @@ public class Player : Moveable2
                 break;
 
         }
+        */
 
-
+        /*
         // Movable pieces...
         if (cPiece.TypeID == (char)Level.Piece.Rock || cPiece.TypeID == (char)Level.Piece.Egg)
         {
@@ -294,6 +305,8 @@ public class Player : Moveable2
             //} catch {}
         }
 
+        
+        */
         return bMoveableTo;
     }
 
@@ -324,7 +337,6 @@ public class Player : Moveable2
             End If
         End If
 
-    */
     public void CheckPickup()
     {
         bool bUpdateMap = true;
@@ -341,7 +353,7 @@ public class Player : Moveable2
                 break;
 
             case Level.Piece.Key:
-                game.loadedLevel.OpenSafes();
+                //game.loadedLevel.OpenSafes();
                 break;
 
             case Level.Piece.ColourKey:
@@ -357,7 +369,7 @@ public class Player : Moveable2
             case Level.Piece.Monster:
                 //If rrMonster(rrPieces(intX, intY).intMonsterID).blnEarth Then MoveableTo = False
                 bUpdateMap = false;
-                iDontReplace = 2;
+                DontReplace = 2;
                 break;
 
             case Level.Piece.Skull:
@@ -368,9 +380,9 @@ public class Player : Moveable2
                 break;
 
             case Level.Piece.Transporter:
-                game.loadedLevel.MapDetail[(int)LastPosition.x, (int)-LastPosition.z].TypeID = (char)Level.Piece.Space;
+                //game.loadedLevel.MapDetail[(int)LastPosition.x, (int)-LastPosition.z].TypeID = (char)Level.Piece.Space;
                 LastPosition = Position;
-                Position = StartPos = game.loadedLevel.tTransporter[cPiece.iRef];
+                //Position = StartPos = game.loadedLevel.tTransporter[cPiece.iRef];
                 Direction = Vector3.back;
 
                 cPiece.iRef = 0;
@@ -389,25 +401,26 @@ public class Player : Moveable2
         if (bUpdateMap)
         {
             // Remove the graphic
-            game.loadedLevel.RemovePiece(Position);
+            //game.loadedLevel.RemovePiece(Position);
         }
 
         return;
     }
+    */
 
 
     public int Die()
     {
-        iLives--;
+        Lives--;
 
         // Reset to starting position]
-        game.loadedLevel.SetMapP(Position, '0');
+        //game.loadedLevel.SetMapP(Position, '0');
         MoveToPos(StartPos);
         Direction = Vector3.back;
 
         // Reset bomb?
 
-        return iLives;
+        return Lives;
     }
 
 }

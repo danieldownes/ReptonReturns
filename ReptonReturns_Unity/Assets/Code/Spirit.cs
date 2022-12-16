@@ -28,7 +28,7 @@ public class Spirit : Moveable2
         firstMove = true;
         LastDirection = Direction;
     }
-
+    /*
     void Update()
     {
         LastTime -= UnityEngine.Time.deltaTime;
@@ -145,7 +145,7 @@ public class Spirit : Moveable2
             if (bCanMove)
             {
                 Move(Direction);
-                cT = game.loadedLevel.GetMapP(Position);
+                //cT = game.loadedLevel.GetMapP(Position);
 
                 // If we went into a cage, we should turn into a dimond (deactivate and change map)
                 //if (cT == 'c')
@@ -201,5 +201,5 @@ public class Spirit : Moveable2
 
         return vDir;
     }
-
+    */
 }

@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class Moveable2 : MonoBehaviour
 {
-	public Game game;
-	
 	public int iId;
 	
 	public Level.Piece pPieceType;		//Public intPieceType As enmPieceType      ' Should only be Rock OR Egg
@@ -18,8 +16,4 @@ public class Moveable2 : MonoBehaviour
 	public float LastTime;
 	public float TimeToMove;
 	
-	public Vector3 AddSlant(Vector3 v)
-	{
-		return game.loadedLevel.AddSlant(v);
-	}
 }

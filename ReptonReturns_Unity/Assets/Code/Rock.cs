@@ -1,7 +1,6 @@
 using UnityEngine;
 
-// Replaces ccRockOrEgg vb6 class
-public class Moveable : Moveable2
+public class Rock : Moveable2
 {
     public bool Falling;
     public bool WasFalling;
@@ -14,25 +13,18 @@ public class Moveable : Moveable2
     private string sSlantedRight;       //  "" but for right
 
 
-    public void Init(Level.Piece iSetPieceType, Vector3 vSetPos)
+    private void Start()
     {
-        pPieceType = iSetPieceType;
-        Position = vSetPos;
-
-        sSlantedLeft = "d7rkgtb&";
-        sSlantedRight = "d9rkgtb(";  // Can fall to the right if did not fall left
-
-        //EggCracking = false;
-
         LastTime = 0f;
         TimeToMove = 0.3f;
         Falling = false;
+        Position = transform.position;
     }
 
-    void Update()
+    private void Update()
     {
         if (LastTime > 0.00f)
-            LastTime -= UnityEngine.Time.deltaTime;
+            LastTime -= Time.deltaTime;
 
         if ( LastTime <= 0.0f)
         {
@@ -63,16 +55,16 @@ public class Moveable : Moveable2
         // Stop sound?
         if (LastTime <= 0.00f && PlayingSnd)
         {
-            //this.GetComponent<AudioSource>().Stop();
+            this.GetComponent<AudioSource>().Stop();
             PlayingSnd = false;
         }
     }
 
     public bool Move(Vector3 vDir)
     {
-        //Vector3 vNewPos;
+        Vector3 vNewPos;
 
-        //vNewPos = vPosition + vDir;
+        vNewPos = Position + vDir;
 
         // Not currently moving down?
         if (vDir == Vector3.back && LastTime > 0.01f)
@@ -128,14 +120,6 @@ public class Moveable : Moveable2
         // Interpolate
         transform.position = Vector3.Lerp(vLastPositionAbs, Position, (TimeToMove - LastTime) / TimeToMove);
 
-        /*
-		' Movment should be slower if not falling down
-	    If int3DDirection = Down Then
-	        ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove
-	    Else
-	        ExLog3D.AnimatedTransform.TransformTo Translation3D, ExPrj.exReturn3DVec(Ret3DPos(intCurX), Ret3DPos(intCurY), ExLog3D.position.z), ExLog3D.position, cintTimeToMove * 1.25
-	    End If
-		 */
 
         // TODO: rotation
         //if( vDir == Vector3.left)
