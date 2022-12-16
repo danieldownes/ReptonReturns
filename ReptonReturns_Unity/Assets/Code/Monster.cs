@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Monster : Moveable
+public class Monster : Movable
 {
     public Game rr2gameObject;
 
@@ -27,7 +27,7 @@ public class Monster : Moveable
     {
         PieceType = Level.Piece.Monster;
 
-        TimeToMove = 0.45f;
+        timeToMove = 0.45f;
 
         cOnPiece = '0';
         iOnId = -1;
@@ -77,7 +77,7 @@ public class Monster : Moveable
         cLastOnPiece = cOnPiece;
         iLastOnId = iOnId;
 
-        LastTime = TimeToMove;
+        LastTime = timeToMove;
 
 
         //cOnPiece = rr2gameObject.loadedLevel.GetMapP(vPosition);
@@ -106,7 +106,7 @@ public class Monster : Moveable
         Quaternion from = Quaternion.LookRotation(Vector3.back);
 
         // Interpolate
-        transform.position = Vector3.Lerp(rr2gameObject.loadedLevel.AddSlant(LastPosition), rr2gameObject.loadedLevel.AddSlant(Position), (TimeToMove - LastTime) / TimeToMove);
+        transform.position = Vector3.Lerp(rr2gameObject.loadedLevel.AddSlant(LastPosition), rr2gameObject.loadedLevel.AddSlant(Position), (timeToMove - LastTime) / timeToMove);
 
         /*
 		if( vLastDirection != vDirection )

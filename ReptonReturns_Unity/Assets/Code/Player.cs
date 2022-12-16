@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class Player : Moveable
+public class Player : Movable
 {
     public GameObject ReptonMesh;
 
@@ -39,7 +39,7 @@ public class Player : Moveable
         Lives = 3;
         PlayerState = State.Stoped;
         LastTime = 0.0f;
-        TimeToMove = 0.3f;
+        timeToMove = 0.3f;
         LastDirection = Vector3.forward;
         Direction = Vector3.back;
         Position = transform.position;
@@ -47,10 +47,10 @@ public class Player : Moveable
         
     private new void Update()
     {
-        LastTime -= UnityEngine.Time.deltaTime;
+        LastTime -= Time.deltaTime;
 
         // Inter-mediate move (half way)
-        if (LastTime < (TimeToMove * 0.4f) && InterMove)
+        if (LastTime < (timeToMove * 0.4f) && InterMove)
         {
             // Almost finished move (interval-move)? 
             InterMove = false;
@@ -127,35 +127,32 @@ public class Player : Moveable
         LastPosition = Position = vNewPos;
     }
 
-    public new void Move(Vector3 DirectionToMove)
+    public new void Move(Vector3 direction)
     {
         if (PlayerState != State.Stoped && PlayerState != State.PushNoWalk)
             return;
 
-        if (MoveableTo(Position, DirectionToMove))
+        Piece piece = MovableTo<Piece>(Position, direction);
+        if (piece != null)
         {
-            LastTime = TimeToMove;
-            LastPosition = Position;
-            //iPlayerState = enmPlayerState.Walk;
-
-            LastDirection = Direction;
-            Direction = DirectionToMove;
-
-            // Add the movement
-            Position += DirectionToMove;
-
-            updatedMove = false;
-
-            //rr2gameObject.guiObject.sInventory = vDirectionToMove.x.ToString();
-            //Debug.Log("sInventory=" + vDirectionToMove.x.ToString());
-
-
-            PlayerState = State.Walk;
+            if (piece.Traversable == false)
+                return;
         }
-        else
+
+        // Can not push a movable if obstructed
+        Movable movable = MovableTo<Movable>(Position, direction);
+        if (movable != null)
         {
-            //iPlayerState = enmPlayerState.PushNoWalk;
+            Piece movableNext = movable.MovableTo<Piece>(movable.Position, direction);
+            if (movableNext != null)
+                return;
+
+            movable.Move(direction);
         }
+
+        base.Move(direction);
+
+        PlayerState = State.Walk;
     }
 
     public void Move3D()
@@ -168,7 +165,7 @@ public class Player : Moveable
         Quaternion vRotFrom = Quaternion.LookRotation(Vector3.back);
 
         // Interpolate //
-        transform.position = Vector3.Lerp(LastPosition, Position, (TimeToMove - LastTime) / TimeToMove);
+        transform.position = Vector3.Lerp(LastPosition, Position, (timeToMove - LastTime) / timeToMove);
 
         if (LastDirection != Direction)
         {
@@ -184,7 +181,7 @@ public class Player : Moveable
 
             // Apply the rotation
             ReptonMesh.transform.rotation = Quaternion.identity;
-            ReptonMesh.transform.rotation = Quaternion.Lerp(vRotFrom, vRotTo, (TimeToMove - LastTime) / TimeToMove);
+            ReptonMesh.transform.rotation = Quaternion.Lerp(vRotFrom, vRotTo, (timeToMove - LastTime) / timeToMove);
 
         }
     }

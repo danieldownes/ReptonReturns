@@ -374,7 +374,7 @@ public class Level : MonoBehaviour
 
                         if (cT == (char)Piece.Rock)
                         {
-                            Moveable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as Moveable;
+                            Movable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as Movable;
                             if (oScript)
                             {
                                 //oScript.Init(Piece.Rock, vThisPos);
@@ -385,7 +385,7 @@ public class Level : MonoBehaviour
 						
 						else if (cT == (char)Piece.Egg)
                         {
-                            Moveable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as Moveable;
+                            Movable oScript = lObjects3[iObjTot].GetComponent("rr2moveable") as Movable;
                             if (oScript)
                             {
                                 //oScript.Init(Piece.Egg, vThisPos);

@@ -1,21 +1,21 @@
 using UnityEngine;
 
-public class Moveable : Piece
+public abstract class Movable : Piece
 {
-    public Vector3 LastPosition;
-    public Vector3 vLastPositionAbs;    // Last absolute position (repton shuffle + smoother tweens)
+    [HideInInspector] public Vector3 LastPosition;
+    [HideInInspector] public Vector3 vLastPositionAbs;    // Last absolute position (repton shuffle + smoother tweens)
 
-    public Vector3 Direction;
-    public Vector3 LastDirection;
+    [HideInInspector] public Vector3 Direction;
+    [HideInInspector] public Vector3 LastDirection;
 
-    public float LastTime;
-    public float TimeToMove;
+    [HideInInspector] public float LastTime;
+    [HideInInspector] protected float timeToMove;
 
-    public void Init()
+    public new void Init()
     {
         base.Init();
         LastTime = 0f;
-        TimeToMove = 0.3f;
+        timeToMove = 0.3f;
     }
 
     public void Update()
@@ -24,28 +24,18 @@ public class Moveable : Piece
             move();
     }
 
-    public bool MoveableTo(Vector3 vPos, Vector3 vDir)
+    public T MovableTo<T>(Vector3 vPos, Vector3 vDir)
     {
-        bool moveableTo = true;
-        bool bUpdateMap = true;
-
         RaycastHit hit;
         Physics.Raycast(vPos, vDir, out hit, 1f);
 
         if (hit.collider == null)
-            return true;
+            return default;
 
         Debug.DrawRay(vPos, vDir * hit.distance, Color.red, 3f);
-        Debug.Log("Did Hit");
 
-        Moveable rock = hit.collider.gameObject.GetComponent<Moveable>();
+        return (T)hit.collider.gameObject.GetComponent<T>();
 
-        if (rock == null)
-            return true;
-
-        //if( rock.MoveableTo(rock.Position + vDir, vDir))
-
-        rock.Move(vDir);
 
         /*
         // Static pieces...
@@ -75,19 +65,19 @@ public class Moveable : Piece
             case Level.Piece.Fungus:
                 DontReplace = 2;
                 break;
+        }
                 */
 
-        return true;
+
     }
 
 
-    public bool Move(Vector3 direction)
+    public virtual bool Move(Vector3 direction)
     {
-        Vector3 vNewPos;
+        LastTime = timeToMove;
 
-        vNewPos = Position + direction;
-
-        LastTime = TimeToMove;
+        LastDirection = Direction;
+        Direction = direction;
 
         LastPosition = Position;
         vLastPositionAbs = transform.position;
@@ -98,7 +88,7 @@ public class Moveable : Piece
 
     private void move()
     {
-        transform.position = Vector3.Lerp(vLastPositionAbs, Position, (TimeToMove - LastTime) / TimeToMove);
+        transform.position = Vector3.Lerp(vLastPositionAbs, Position, (timeToMove - LastTime) / timeToMove);
         LastTime -= UnityEngine.Time.deltaTime;
     }
 
