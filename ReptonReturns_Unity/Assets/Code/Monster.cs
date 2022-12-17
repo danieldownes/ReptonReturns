@@ -43,8 +43,7 @@ public class Monster : Movable
         //rr2gameObject.loadedLevel.ReplacePiece(vPos, (char)pPieceType);
     }
 
-    // Update is called once per frame
-    void Update()
+    private new void  Update()
     {
         if (LastTime > 0.0f)
             LastTime -= UnityEngine.Time.deltaTime;
@@ -64,21 +63,9 @@ public class Monster : Movable
     }
 
 
-    void Move(Vector3 vDir)
+    public override bool Move(Vector3 directin)
     {
-        // Update local info
-
-        LastPosition = Position;
-        LastDirection = Direction;
-
-        Position += vDir;
-        Direction = vDir;
-
-        cLastOnPiece = cOnPiece;
-        iLastOnId = iOnId;
-
-        LastTime = timeToMove;
-
+        base.Move(directin);
 
         //cOnPiece = rr2gameObject.loadedLevel.GetMapP(vPosition);
         iOnId = rr2gameObject.loadedLevel.GetMapPId(Position);
@@ -91,8 +78,7 @@ public class Monster : Movable
             //cOnPiece = '0';
         }
 
-        //rr2gameObject.loadedLevel.SetMapP(LastPosition, cOnPiece, iOnId);
-        //rr2gameObject.loadedLevel.SetMapP(Position, (char)PieceType, iId);
+        return true;
     }
 
     public void Move3D()

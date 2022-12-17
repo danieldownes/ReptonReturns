@@ -1,62 +1,53 @@
+using System;
 using UnityEngine;
 
-public class Rock : Fallable
+public class Fallable : Movable
 {
-    public bool PlayingSnd;
+    public event Action StoppedFalling;
+
+    public bool Falling;
+    public bool WasFalling;
+    public bool FreeFall;
 
     //public bool EggCracking;  //Public bEggCracking As Boolean
 
-    private void Start()
+
+    public new void Init()
     {
         base.Init();
+
+        Falling = false;
+        CheckIfFall();
     }
 
     private new void Update()
     {
         base.Update();
+    }
 
-        CheckFall();
+    public void CheckFall()
+    {
+        if (LastTime > 0.00f)
+            return;
 
-        // Stop sound?
-        if (Falling == false && PlayingSnd)
-        {
-            this.GetComponent<AudioSource>().Stop();
-            PlayingSnd = false;
-        }
+        CheckIfFall();
     }
 
     public override bool Move(Vector3 direction)
     {
-        // Space for the rock to move?
-
-        Piece piece = MovableTo<Piece>(Position, direction);
-        if (piece != null)
+        // Not currently moving down?
+        if (direction == Vector3.back && LastTime > 0.01f)
             return false;
 
-        //TODO: Check Traversable list, eg, Repton monster
-
+        // Can't move up
+        if (direction == Vector3.up)
+            return false;
 
         // Ok, start the move...
 
-        if (base.Move(direction) == false)
-            return false;
+        base.Move(direction);
 
-
-        // Play Rock Sound
-        if (!PlayingSnd)
-        {
-            this.GetComponent<AudioSource>().Play();
-            PlayingSnd = true;
-        }
-
-
-        // Before we do though, are there any monsters in the way? if so they should die..
-
-        // Is monster under rock?
-        //if (game.loadedLevel.GetMapP(Position) == (char)Level.Piece.Monster)
-        //{
-        //game.loadedLevel.KillMonsters(Position);
-        //}
+        CheckIfFall();
 
         return true;
     }
@@ -66,9 +57,30 @@ public class Rock : Fallable
         // overridden
     }
 
-    public override void CheckIfFall()
+    public virtual void CheckIfFall()
     {
-        base.CheckIfFall();
+        // Have we stopped falling?
+        WasFalling = false;
+
+        if (Falling && LastTime <= 0.0f)
+        {
+            Falling = false;
+            WasFalling = true;
+
+            StoppedFalling?.Invoke();
+        }
+        else if (Falling)
+            return;
+
+        // Fall straight down?
+        Piece piece = MovableTo<Piece>(Position, Vector3.down);
+        if (piece != null)
+            return;
+
+
+        // It is ok to make rock fall
+        Falling = true;
+        Move(Vector3.down);
 
 
         // Is a monster currently moving under rock?

@@ -21,7 +21,7 @@ public class Player : Movable
     private State LastAction;
 
     public bool CanMove = true;
-    private bool updatedMove = true;
+    //private bool updatedMove = true;
 
     public int Lives;
 
@@ -29,7 +29,7 @@ public class Player : Movable
     private int WantMoveMe;
 
     // If set, wont replace old map piece with a space (eg monster, fungus, etc..)
-    private int DontReplace = 0;
+    //private int DontReplace = 0;
 
     public List<string> Inventory = new List<string>();
     public string[] playerVars;
@@ -154,12 +154,19 @@ public class Player : Movable
             Piece movableNext = movable.MovableTo<Piece>(movable.Position, direction);
             if (movableNext != null)
                 return;
-
-            movable.Move(direction);
         }
 
-        base.Move(direction);
+        // Removing a piece that is supporting a fallable, Repton should hold it
+        Fallable fallable = MovableTo<Fallable>(Position + direction, Vector3.up);
+        if (fallable != null)
+            fallable.Move(Vector3.zero);
 
+        // Push Movable
+        if (movable != null)
+            movable.Move(direction);
+
+        // Move Player
+        base.Move(direction);
 
         PlayerState = State.Walk;
     }

@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 958220417917109058}
   - component: {fileID: 5668748353853517183}
   - component: {fileID: 5668748353853517168}
+  - component: {fileID: 6361038723932545613}
   m_Layer: 0
   m_Name: Rock
   m_TagString: Untagged
@@ -109,7 +110,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2765835634271210753}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -167,7 +168,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 5d5b23eac383d144a967e75684e67e6c, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.135
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -251,3 +252,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6361038723932545613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2765835634271210753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7861fd39184b74841873bde99c180180, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rock: {fileID: 5668748353853517183}
+  mesh: {fileID: 1009211863275720914}
+  falling: {fileID: 8300000, guid: 5d5b23eac383d144a967e75684e67e6c, type: 3}
+  crash: {fileID: 8300000, guid: 55662d0faea85154f9efea876fec1311, type: 3}
+  audioSource: {fileID: 5668748353853517168}

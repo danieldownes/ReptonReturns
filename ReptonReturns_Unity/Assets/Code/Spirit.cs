@@ -4,9 +4,9 @@ public class Spirit : Movable
 {
     public int State;               // 0 = Seek (check direction), 1 = Moving
 
-    private bool firstMove;         // Helps to make sure the first move of the spirit is the same as origonal version of Repton
+    //private bool firstMove;         // Helps to make sure the first move of the spirit is the same as origonal version of Repton
 
-    private int cornTry;            // If spirit did not move (ie, determined new direct) this is > 0, stops
+    //private int cornTry;            // If spirit did not move (ie, determined new direct) this is > 0, stops
                                     //  spirit from 'waiting' while turning around corners.
                                     //  Will try to 'move' spirit upto 4 times per function call to
                                     //  keep in sync. with other spirts 
@@ -25,7 +25,7 @@ public class Spirit : Movable
         State = 1;
         LastTime = 1.0f;
         Position = LastPosition = vPos;
-        firstMove = true;
+        //firstMove = true;
         LastDirection = Direction;
     }
     /*
