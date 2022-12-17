@@ -7,8 +7,13 @@ public class Piece : MonoBehaviour
 
     [HideInInspector] public Vector3 Position;
 
-    public void Init()
+    public virtual void Init()
     {
         Position = transform.position;
+    }
+
+    public virtual void Traverse()
+    {
+        Destroy(this.gameObject);
     }
 }

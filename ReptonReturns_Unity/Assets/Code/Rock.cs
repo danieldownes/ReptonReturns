@@ -76,6 +76,10 @@ public class Rock : Movable
         return true;
     }
 
+    public override void Traverse()
+    {
+        // overridden
+    }
 
     public void CheckIfFall()
     {
@@ -107,21 +111,15 @@ public class Rock : Movable
         if (piece != null)
             return;
 
+        // Is player currently moving under rock?
+
+
+
+        // It is ok to make rock fall
         Falling = true;
         Move(Vector3.down);
 
 
-        //if (sTemp == (char)Level.Piece.Space)
-        //{
-        /*
-        // Is player currently moving under rock?
-        if (game.playerObject.Position != (Position + Vector3.back))
-        {
-            // It is ok to make rock fall
-            bFalling = true;
-            this.Move(Vector3.back);
-        }
-        */
         // Is a monster currently moving under rock?
 
         // Is player already under moving rock?

@@ -143,6 +143,8 @@ public class Player : Movable
         {
             if (piece.Traversable == false)
                 return;
+            else
+                piece.Traverse();
         }
 
         // Can not push a movable if obstructed
@@ -157,6 +159,7 @@ public class Player : Movable
         }
 
         base.Move(direction);
+
 
         PlayerState = State.Walk;
     }
