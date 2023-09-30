@@ -1,61 +1,62 @@
-using UnityEngine;
+using ReptonReturnsLogic.World;
 
-public class Fire : MonoBehaviour
+namespace ReptonReturnsLogic;
+
+/// <summary>
+/// Possible methods to determine/select fungus growth:
+///  1)  Scan whole map, choosing one fungus to check for possible growth
+///  2)  Use an array of all fungus's, selecting one to check for growth
+///  3)  Each fungus has its own class instance, checking its self for possible growth
+///  4)  There is a class instance for each cluster of fungus's, each with an array of their fungus's
+///  
+/// I'll try method '1', as it uses less memory and is easiest to implement;
+///    this method could be quite slow though.
+/// </summary>
+public class Fungus
 {
-    public Game game;
+    public static int iFires;				// Needed for fire growth determination
 
     private float time;
     private float timeToMove;
 
+    private IRandom random;
     //Private timFungus As New exTools_Timer      ' Control Timing of fungus growth thoughout map
     //Private sngNextFungusTime As Single
 
 
-    void Start()
+    public void Start()
     {
         NewTime();
     }
 
-    void Update()
+    public void Update(float timeDelta)
     {
-        time -= Time.deltaTime;
+        time -= timeDelta;
 
         if (time <= 0.0f)
-            GrowFire();
+            Grow();
     }
 
-    void NewTime()
+    public void NewTime()
     {
-        time = Random.Range(1, 2); //* rrGame.sngGameSpeed;
+        //time = IRandom.Range(1, 2);
     }
 
 
-    /*
-Function GrowFunguses()
-    Dim intX As Integer
-    Dim intY As Integer
-    Dim intFungusToGrow As Integer
-    Dim n As Integer
-    Dim n2 As Integer
-    Dim n3 As Integer
-    Dim bCanGrow(4) As Boolean
-    Dim sTemp As String * 1
+        /*
     
-    ' Check if there has been sufficent time since last growth
-    If timFungus.LocalTime >= sngNextFungusTime Then
+        Dim intX As Integer
+        Dim intY As Integer
+        Dim intFungusToGrow As Integer
+        Dim n As Integer
+        Dim n2 As Integer
+        Dim n3 As Integer
+        Dim bCanGrow(4) As Boolean
+        Dim sTemp As String * 1
+    
         
-        ' Possible methods to determine/select fungus growth:
-        '   1)  Scan whole map, choosing one fungus to check for possible growth
-        '   2)  Use an array of all funguses, selecting one to check for growth
-        '   3)  Each fungus has its own class instence, checking its self for possible growth
-        '   4)  There is a class instence for each cluster of funguses, each with an array of their funguses
-        '
-        '  I'll try method '1', as it uses less memory and is easiest to implement;
-        '   this method could be quite slow though.
-        
-        
-        ' Randomaly choose a fungus to possibly grow
-        intFungusToGrow = Int(Rnd() * (rrMap.intTotFunguses - 1)) + 1
+        // Randomaly choose a fungus to possibly grow
+        //intFungusToGrow = Int(Rnd() * (rrMap.intTotFunguses - 1)) + 1
         
         ' Find this fungus'es map coords.
         n = 0
@@ -188,7 +189,7 @@ End Function
 
 	 */
 
-    void GrowFire()
+    public void Grow()
     {
         int x, y, iFireToGrow, n, n2, n3;
         bool[] bGrow = { false, false, false, false };
@@ -207,7 +208,7 @@ End Function
 
         // Randomaly choose a fire to possibly grow
         int iFires = game.loadedLevel.iPieceTot[102 - 32]; //((int)(char)rr2level.enmPiece.Fungus)
-        iFireToGrow = Random.Range(0, iFires) + 1;
+        iFireToGrow = IRandom.Range(0, iFires) + 1;
 
 
 

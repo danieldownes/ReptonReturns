@@ -1,10 +1,8 @@
-using UnityEngine;
-using System.Collections.Generic;
+using ReptonReturnsLogic.World;
+using ReptonReturnsLogic.Pieces;
 
 public class Player : Movable
 {
-    public GameObject ReptonMesh;
-
     public enum State
     {
         Stoped = 0,
@@ -15,7 +13,7 @@ public class Player : Movable
         Board = 5
     };
 
-    public Vector3 StartPos;
+    public Object StartPos;
     public State PlayerState;
     private State OldState;
     //private State LastAction;
@@ -40,8 +38,8 @@ public class Player : Movable
         PlayerState = State.Stoped;
         LastTime = 0.0f;
         timeToMove = 0.3f;
-        LastDirection = Vector3.forward;
-        Direction = Vector3.back;
+        LastDirection = IVector.forward;
+        Direction = IVector.back;
         Position = transform.position;
     }
         
@@ -95,20 +93,21 @@ public class Player : Movable
             */
         }
 
-
+        /*
+        // Get continuous Move intent
         if (Input.GetAxis("Horizontal") < 0)
-            Move(Vector3.left);
+            Move(IVector.left);
 
         else if (Input.GetAxis("Horizontal") > 0)
-            Move(Vector3.right);
+            Move(IVector.right);
 
         else if (Input.GetAxis("Vertical") > 0)
-            Move(Vector3.forward);
+            Move(IVector.forward);
 
         else if (Input.GetAxis("Vertical") < 0)
-            Move(Vector3.back);
+            Move(IVector.back);
 
-        Move3D();
+        */
 
         // Was pushing (continuously), and now stopped?
         if (OldState == State.Push && PlayerState != State.Push)
@@ -122,18 +121,18 @@ public class Player : Movable
     }
 
 
-    public void MoveToPos(Vector3 vNewPos)
+    public void MoveToPos(IVector vNewPos)
     {
         LastPosition = Position = vNewPos;
     }
 
-    public new void Move(Vector3 direction)
+    public new void Move(IVector direction)
     {
         if (PlayerState != State.Stoped && PlayerState != State.PushNoWalk)
             return;
 
         // Walkable floor over intended direction?
-        Piece piece = MovableTo<Piece>(Position + direction, Vector3.down * 2, Color.green);
+        Piece piece = MovableTo<Piece>(Position.Add(direction), IVector.Down * 2, Color.green);
         if (piece == null)
             return;
 
@@ -162,7 +161,7 @@ public class Player : Movable
         }
 
         // Removing a piece that is supporting a fallable, Repton should hold it
-        Fallable fallable = MovableTo<Fallable>(Position + direction, Vector3.up, Color.green);
+        Fallable fallable = MovableTo<Fallable>(Position + direction, IVector.up, Color.green);
         if (fallable != null)
         {
 
@@ -176,7 +175,7 @@ public class Player : Movable
             else
             {
                 // Just hold above piece
-                fallable.Move(Vector3.zero);
+                fallable.Move(IVector.zero);
                 print("LastDirection = " + LastDirection);
             }
 
@@ -191,37 +190,6 @@ public class Player : Movable
         base.Move(direction);
 
         PlayerState = State.Walk;
-    }
-
-    public void Move3D()
-    {
-        // This is needed to force player to turn towards camera when going left>right & right>left
-        Vector3 vLeft = new Vector3(-0.99f, 0f, -0.01f);
-        Vector3 vRight = new Vector3(0.99f, 0f, -0.01f);
-
-        Quaternion vRotTo = Quaternion.LookRotation(Vector3.forward);
-        Quaternion vRotFrom = Quaternion.LookRotation(Vector3.back);
-
-        // Interpolate
-        transform.position = Vector3.Lerp(LastPosition, Position, (timeToMove - LastTime) / timeToMove);
-
-        if (LastDirection != Direction)
-        {
-            vRotFrom = Quaternion.LookRotation(LastDirection);
-            vRotTo = Quaternion.LookRotation(Direction);
-
-            // Special case to ensure Repton moves in the right direction
-            if (LastDirection == Vector3.left)
-                vRotFrom = Quaternion.LookRotation(vLeft);
-
-            if (LastDirection == Vector3.right)
-                vRotFrom = Quaternion.LookRotation(vRight);
-
-            // Apply the rotation
-            ReptonMesh.transform.rotation = Quaternion.identity;
-            ReptonMesh.transform.rotation = Quaternion.Lerp(vRotFrom, vRotTo, (timeToMove - LastTime) / timeToMove);
-
-        }
     }
 
 
@@ -250,42 +218,14 @@ public class Player : Movable
                 lInventory.Add("Coloured Key:" + cPiece.iRef.ToString());
                 break;
 
-            case Level.Piece.Bomb:
-
-                // Already cheked if objectives are completed in MoveableTo
-
-                break;
-
             case Level.Piece.Monster:
                 //If rrMonster(rrPieces(intX, intY).intMonsterID).blnEarth Then MoveableTo = False
                 bUpdateMap = false;
                 DontReplace = 2;
                 break;
 
-            case Level.Piece.Skull:
-            case Level.Piece.Fungus:
-                bUpdateMap = false;
-                Die();
 
-                break;
-
-            case Level.Piece.Transporter:
-                //game.loadedLevel.MapDetail[(int)LastPosition.x, (int)-LastPosition.z].TypeID = (char)Level.Piece.Space;
-                LastPosition = Position;
-                //Position = StartPos = game.loadedLevel.tTransporter[cPiece.iRef];
-                Direction = Vector3.back;
-
-                cPiece.iRef = 0;
-
-                // Set to update position of player
-                LastTime = 0.2f;
-
-                // Start pause
-                //rrGame.Pause 2.5
-
-                // Start FX
-
-                break;
+            
         }
 
         if (bUpdateMap)
@@ -306,7 +246,7 @@ public class Player : Movable
         // Reset to starting position]
         //game.loadedLevel.SetMapP(Position, '0');
         MoveToPos(StartPos);
-        Direction = Vector3.back;
+        Direction = IVector.back;
 
         // Reset bomb?
 

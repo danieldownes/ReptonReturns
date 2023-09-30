@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReptonReturnsLogic", "ReptonReturnsLogic\ReptonReturnsLogic.csproj", "{60415AD9-9D09-46BF-917C-80B96003796A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReptonReturnsTestSuite", "..\ReptonReturnsTestSuite\ReptonReturnsTestSuite.csproj", "{50869611-C968-4025-AD48-A5FC21894521}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5815CFE5-43B3-4D18-BBF7-47D99C06BF0B}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{60415AD9-9D09-46BF-917C-80B96003796A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60415AD9-9D09-46BF-917C-80B96003796A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60415AD9-9D09-46BF-917C-80B96003796A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60415AD9-9D09-46BF-917C-80B96003796A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50869611-C968-4025-AD48-A5FC21894521}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50869611-C968-4025-AD48-A5FC21894521}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50869611-C968-4025-AD48-A5FC21894521}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50869611-C968-4025-AD48-A5FC21894521}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {63330AEF-01F2-4D2D-B1F1-AF580BC2948B}
+	EndGlobalSection
+EndGlobal
