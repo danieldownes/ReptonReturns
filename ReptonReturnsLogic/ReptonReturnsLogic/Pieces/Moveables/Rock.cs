@@ -5,14 +5,12 @@ public class Rock : Fallable
 {
     public bool PlayingSnd;
 
-    //public bool EggCracking;  //Public bEggCracking As Boolean
-
-    private void Start()
+    public void Start()
     {
         base.Init();
     }
 
-    private new void Update()
+    public new void Update()
     {
         base.Update();
 

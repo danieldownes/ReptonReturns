@@ -1,6 +1,6 @@
 using ReptonReturnsLogic.World;
-using ReptonReturnsLogic.Pieces;
 
+namespace ReptonReturnsLogic.Pieces;
 public class Egg : Rock
 {
     public event Action OnCrack;
@@ -12,12 +12,11 @@ public class Egg : Rock
         base.Init();
     }
 
-    private new void Update()
+    public new void Update()
     {
         base.Update();
 
         CheckFall();
-
     }
 
     public override bool Move(IVector direction)

@@ -1,5 +1,6 @@
 using ReptonReturnsLogic.World;
 
+namespace ReptonReturnsLogic.Pieces;
 public class Fallable : Movable
 {
     public event Action StoppedFalling;
