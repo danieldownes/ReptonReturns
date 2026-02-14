@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(\"C:\\\\Godot_v4.6-stable_win64.exe\\\\Godot_v4.6-stable_win64.exe\" --headless --check-only)",
+      "Bash(\"C:\\\\Godot_v4.6-stable_win64.exe\\\\Godot_v4.6-stable_win64.exe\" --headless --path \"c:\\\\_prj\\\\godot-test\" --quit)",
+      "Bash(test:*)"
+    ]
+  }
+}

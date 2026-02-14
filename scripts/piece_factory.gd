@@ -1,0 +1,241 @@
+# piece_factory.gd
+# Repton Returns - Godot 4.6 Port
+# Factory for creating piece meshes using FBX models where available,
+# falling back to primitive shapes for pieces without FBX models
+
+class_name PieceFactory
+
+
+const FBX_PATH = "res://models/ReptonReturnsFbx.fbx"
+const FBX_SCALE = Vector3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0)
+
+# Maps piece type characters to FBX node names
+const FBX_MODEL_MAP: Dictionary = {
+	"b": "Bomb",
+	"c": "Cage",
+	"d": "Diamond",
+	"g": "Egg",
+	"k": "Key",
+	"C": "Key",        # ColourKey uses Key model
+	"x": "MessageBoard",
+	"m": "Monster",
+	"i": "Repton",
+	"r": "Rock",
+	"t": "TheCrown",
+	"z": "TimeCapsule",
+}
+
+# Cached node subtrees duplicated from FBX (templates, not in scene tree)
+static var _fbx_templates: Dictionary = {}
+static var _fbx_loaded: bool = false
+
+
+# Color palette for piece types (used for primitive fallbacks)
+const COLORS: Dictionary = {
+	"5": Color(0.5, 0.5, 0.5),       # Wall - gray
+	"1": Color(0.45, 0.45, 0.45),    # Wall variant
+	"2": Color(0.5, 0.5, 0.5),       # Wall variant
+	"3": Color(0.45, 0.45, 0.45),    # Wall variant
+	"4": Color(0.5, 0.5, 0.5),       # Wall variant
+	"6": Color(0.48, 0.48, 0.48),    # Wall variant
+	"7": Color(0.45, 0.45, 0.45),    # Wall variant
+	"8": Color(0.48, 0.48, 0.48),    # Wall variant
+	"9": Color(0.52, 0.52, 0.52),    # Wall variant
+	"%": Color(0.35, 0.35, 0.35),    # FilledWall - dark gray
+	"&": Color(0.35, 0.35, 0.35),    # FilledWall7
+	"(": Color(0.35, 0.35, 0.35),    # FilledWall9
+	"!": Color(0.35, 0.35, 0.35),    # FilledWall1
+	"e": Color(0.55, 0.35, 0.15),    # Earth - brown
+	"d": Color(0.0, 0.9, 1.0),       # Diamond - cyan
+	"r": Color(0.6, 0.25, 0.15),     # Rock - dark red
+	"i": Color(0.0, 0.8, 0.2),       # Player/Repton - green
+	"s": Color(0.9, 0.85, 0.2),      # Safe - yellow
+	"k": Color(1.0, 0.84, 0.0),      # Key - gold
+	"g": Color(0.95, 0.95, 0.9),     # Egg - white
+	"t": Color(0.7, 0.2, 0.9),       # Crown - purple
+	"c": Color(1.0, 1.0, 1.0),       # Cage - white
+	"p": Color(0.5, 0.7, 1.0),       # Spirit - light blue
+	"b": Color(1.0, 0.0, 0.0),       # Bomb - red
+	"f": Color(0.1, 0.4, 0.1),       # Fungus - dark green
+	"u": Color(1.0, 1.0, 1.0),       # Skull - white
+	"a": Color(0.9, 0.5, 0.1),       # Barrier - orange
+	"m": Color(0.8, 0.1, 0.1),       # Monster - red
+	"n": Color(0.8, 0.0, 0.8),       # Transporter - magenta
+	"z": Color(0.2, 0.3, 0.9),       # TimeCapsule - blue
+	"x": Color(0.8, 0.8, 0.8),       # Map - light gray
+	"y": Color(1.0, 1.0, 1.0),       # LevelTransport - white
+	"C": Color(0.9, 0.9, 0.0),       # ColourKey - yellow (base)
+	"D": Color(0.9, 0.9, 0.0),       # Door - yellow (base)
+}
+
+const WALL_CHARS: Array = ["5", "1", "2", "3", "4", "6", "7", "8", "9", "%", "&", "(", "!", "a"]
+
+
+static func _ensure_fbx_loaded() -> void:
+	if _fbx_loaded:
+		return
+	_fbx_loaded = true
+
+	var fbx_scene: PackedScene = load(FBX_PATH)
+	if fbx_scene == null:
+		push_warning("PieceFactory: Could not load FBX at " + FBX_PATH)
+		return
+
+	var instance = fbx_scene.instantiate()
+
+	# Track which model names we've already duplicated (for shared models like Key)
+	var duplicated_models: Dictionary = {}
+
+	for type_char in FBX_MODEL_MAP:
+		var model_name: String = FBX_MODEL_MAP[type_char]
+		if model_name in duplicated_models:
+			# Reuse the same template for shared models (e.g. Key for "k" and "C")
+			_fbx_templates[type_char] = duplicated_models[model_name]
+			continue
+		var source_node = _find_node(instance, model_name)
+		if source_node:
+			var template = source_node.duplicate()
+			_fbx_templates[type_char] = template
+			duplicated_models[model_name] = template
+		else:
+			push_warning("PieceFactory: FBX node '" + model_name + "' not found for type '" + type_char + "'")
+
+	instance.free()
+	print("PieceFactory: Loaded ", _fbx_templates.size(), " models from FBX")
+
+
+static func _find_node(parent: Node, target_name: String) -> Node:
+	for child in parent.get_children():
+		if child.name == target_name:
+			return child
+		var result = _find_node(child, target_name)
+		if result:
+			return result
+	return null
+
+
+static func get_fbx_node(type_char: String) -> Node3D:
+	_ensure_fbx_loaded()
+	var template = _fbx_templates.get(type_char)
+	if template:
+		var node = template.duplicate()
+		_setup_animation_autoplay(node)
+		return node
+	return null
+
+
+static func _find_animation_player(node: Node) -> AnimationPlayer:
+	if node is AnimationPlayer:
+		return node
+	for child in node.get_children():
+		var result = _find_animation_player(child)
+		if result:
+			return result
+	return null
+
+
+static func _setup_animation_autoplay(node: Node) -> void:
+	var anim_player = _find_animation_player(node)
+	if anim_player == null:
+		return
+	# Find the first animation name and set it as autoplay
+	var anim_list = anim_player.get_animation_list()
+	if anim_list.size() > 0:
+		anim_player.autoplay = anim_list[0]
+
+
+static func create_piece(type_char: String) -> Node3D:
+	if type_char == "0":
+		return null
+
+	_ensure_fbx_loaded()
+
+	# Active pieces get their own typed nodes so _process() runs
+	var node: Node3D
+	match type_char:
+		"r":
+			node = Rock.new()
+		"g":
+			node = Egg.new()
+		"m":
+			node = Monster.new()
+		"p":
+			node = Spirit.new()
+		_:
+			node = Node3D.new()
+
+	# Try FBX model first (full node subtree with sub-meshes and animations)
+	if type_char in _fbx_templates:
+		var fbx_node: Node3D = _fbx_templates[type_char].duplicate()
+		fbx_node.name = "Mesh"
+		fbx_node.scale = FBX_SCALE
+		fbx_node.position.y = 0.5
+		_setup_animation_autoplay(fbx_node)
+		node.add_child(fbx_node)
+		return node
+
+	# Fallback to primitive meshes for types without FBX models
+	var mesh_instance := MeshInstance3D.new()
+	mesh_instance.name = "Mesh"
+
+	var material := StandardMaterial3D.new()
+	material.albedo_color = COLORS.get(type_char, Color(1.0, 0.0, 1.0))  # Magenta fallback
+
+	var mesh: Mesh
+	var mesh_y_offset: float = 0.5
+
+	match type_char:
+		"p":  # Spirit - sphere (no FBX model)
+			var sphere := SphereMesh.new()
+			sphere.radius = 0.35
+			sphere.height = 0.7
+			mesh = sphere
+			mesh_y_offset = 0.35
+
+		"u":  # Skull - sphere
+			var sphere := SphereMesh.new()
+			sphere.radius = 0.35
+			sphere.height = 0.7
+			mesh = sphere
+			mesh_y_offset = 0.35
+
+		"n", "y":  # Transporter, LevelTransport - cylinder (flat disc)
+			var cyl := CylinderMesh.new()
+			cyl.top_radius = 0.4
+			cyl.bottom_radius = 0.4
+			cyl.height = 0.1
+			mesh = cyl
+			mesh_y_offset = 0.05
+
+		"e":  # Earth - slightly smaller box
+			var box := BoxMesh.new()
+			box.size = Vector3(0.9, 0.9, 0.9)
+			mesh = box
+			mesh_y_offset = 0.45
+
+		"s":  # Safe - slightly smaller box
+			var box := BoxMesh.new()
+			box.size = Vector3(0.9, 0.9, 0.9)
+			mesh = box
+			mesh_y_offset = 0.45
+
+		"f":  # Fungus
+			var box := BoxMesh.new()
+			box.size = Vector3(0.8, 0.8, 0.8)
+			mesh = box
+			mesh_y_offset = 0.4
+
+		_:  # Default: walls, barriers, filled walls - full box
+			var box := BoxMesh.new()
+			if type_char in WALL_CHARS:
+				box.size = Vector3(1.0, 1.0, 1.0)
+			else:
+				box.size = Vector3(0.8, 0.8, 0.8)
+			mesh = box
+
+	mesh_instance.mesh = mesh
+	mesh_instance.material_override = material
+	mesh_instance.position.y = mesh_y_offset
+
+	node.add_child(mesh_instance)
+	return node
