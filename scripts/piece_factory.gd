@@ -170,7 +170,7 @@ static func create_piece(type_char: String, is_3d: bool = false) -> Node3D:
 	if type_char in _fbx_templates:
 		var fbx_node: Node3D = _fbx_templates[type_char].duplicate()
 		fbx_node.name = "Mesh"
-		fbx_node.scale = Vector3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0)
+		fbx_node.scale *= 0.3 #Vector3(1.0 / 2.0, 1.0 / 2.0, 1.0 / 2.0)
 		if is_3d:
 			fbx_node.position.y = 0.5
 		else:

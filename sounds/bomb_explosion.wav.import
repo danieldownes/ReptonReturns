@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://c2gb66jqswa4o"
-path="res://.godot/imported/bomb_explosion.wav-c17e38e9588d5fe0ae528a312e70884f.sample"
+path="res://.godot/imported/bomb_explosion.wav-4ee4ad4e1fbc34340732ab21489d6dd1.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/bomb_explosion.wav"
-dest_files=["res://.godot/imported/bomb_explosion.wav-c17e38e9588d5fe0ae528a312e70884f.sample"]
+source_file="res://sounds/bomb_explosion.wav"
+dest_files=["res://.godot/imported/bomb_explosion.wav-4ee4ad4e1fbc34340732ab21489d6dd1.sample"]
 
 [params]
 

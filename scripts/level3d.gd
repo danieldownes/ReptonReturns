@@ -302,24 +302,20 @@ func load_file_level_3d(file_path: String) -> bool:
 		var c: String = parts[3]
 		_inc_piece_total(c)
 
-	# Set up transporter destinations from pairs
-	# Each line: x1,y1,z1,x2,y2,z2  — bidirectional pair
-	var total_transporters: int = _get_piece_total("n")
-	transporter.resize(total_transporters)
-	var t_idx: int = 0
+	# Set up transporter destinations
+	# Each line: src_x,src_y,src_z,dest_x,dest_y,dest_z
+	# Stored in a temp dict keyed by source pos, resolved to ref indices in second pass
+	var _transporter_dest_map: Dictionary = {}  # "x,y,z" -> Vector3 dest
 	for pair_line in transporter_pairs:
 		var parts = pair_line.split(",")
 		if parts.size() < 6:
 			continue
-		var pos_a := Vector3(int(parts[0]), int(parts[1]), int(parts[2]))
-		var pos_b := Vector3(int(parts[3]), int(parts[4]), int(parts[5]))
-		# Transporter at pos_a goes to pos_b, and vice versa
-		if t_idx < total_transporters:
-			transporter[t_idx] = pos_b
-			t_idx += 1
-		if t_idx < total_transporters:
-			transporter[t_idx] = pos_a
-			t_idx += 1
+		var src_key: String = parts[0] + "," + parts[1] + "," + parts[2]
+		var dest := Vector3(int(parts[3]), int(parts[4]), int(parts[5]))
+		_transporter_dest_map[src_key] = dest
+
+	var total_transporters: int = _get_piece_total("n")
+	transporter.resize(total_transporters)
 
 	_set_piece_total("C", 0)
 	_set_piece_total("D", 0)
@@ -342,6 +338,10 @@ func load_file_level_3d(file_path: String) -> bool:
 
 		if c_t == "n":
 			_cells[k]["ref"] = transporter_idx
+			# Resolve destination from saved transporter data
+			var src_key := str(x) + "," + str(y) + "," + str(z)
+			if _transporter_dest_map.has(src_key) and transporter_idx < total_transporters:
+				transporter[transporter_idx] = _transporter_dest_map[src_key]
 			transporter_idx += 1
 
 		if c_t == "C":

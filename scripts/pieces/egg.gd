@@ -47,8 +47,12 @@ func traverse() -> void:
 
 
 func _on_stopped_falling() -> void:
-	# Egg cracks after free fall (fell more than 1 cell)
-	if free_fall:
+	# In 2D: egg cracks after free fall (fell more than 1 cell)
+	# In 3D: egg cracks after any fall (gravity limits to 1 block at a time)
+	var should_crack: bool = free_fall
+	if level != null and level.has_player_gravity():
+		should_crack = true  # 3D: always crack after a fall
+	if should_crack:
 		# Defer the crack so check_if_fall() finishes first
 		call_deferred("_check_crack")
 
@@ -62,6 +66,16 @@ func _check_crack() -> void:
 func _crack() -> void:
 	if level == null:
 		return
+
+	# Play egg cracking sound (parented to level so it survives queue_free)
+	var snd := AudioStreamPlayer3D.new()
+	snd.stream = SFX.egg_cracking
+	snd.max_distance = 40.0
+	snd.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+	snd.position = position
+	level.add_child(snd)
+	snd.finished.connect(snd.queue_free)
+	snd.play()
 
 	var my_id: int = level.get_map_id_at(grid_position)
 

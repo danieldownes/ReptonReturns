@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://ckpcdqwb288no"
-path="res://.godot/imported/rock_fall.wav-ef388587c3eb52a915b4318762a6d3f3.sample"
+path="res://.godot/imported/rock_fall.wav-6246c15b87a8b3f2ab2359dc59872acd.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/rock_fall.wav"
-dest_files=["res://.godot/imported/rock_fall.wav-ef388587c3eb52a915b4318762a6d3f3.sample"]
+source_file="res://sounds/rock_fall.wav"
+dest_files=["res://.godot/imported/rock_fall.wav-6246c15b87a8b3f2ab2359dc59872acd.sample"]
 
 [params]
 
@@ -18,7 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop_mode=0
+edit/loop_mode=1
 edit/loop_begin=0
 edit/loop_end=-1
 compress/mode=2

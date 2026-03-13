@@ -8,12 +8,21 @@ extends Fallable
 
 
 var playing_snd: bool = false    # public bool PlayingSnd;
+var _fall_audio: AudioStreamPlayer3D = null
 
 
 func _ready() -> void:
 	# private void Start()
 	init()
 	stopped_falling.connect(_on_stopped_falling)
+
+	# Create 3D audio emitter for looping fall sound
+	_fall_audio = AudioStreamPlayer3D.new()
+	_fall_audio.stream = SFX.rock_fall
+	_fall_audio.max_distance = 40.0
+	_fall_audio.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+	_fall_audio.autoplay = false
+	add_child(_fall_audio)
 
 
 func _process(delta: float) -> void:
@@ -22,9 +31,12 @@ func _process(delta: float) -> void:
 
 	check_fall()
 
-	# Stop sound?
-	if falling == false and playing_snd:
-		# this.GetComponent<AudioSource>().Stop();
+	# Start/stop looping fall sound
+	if falling and not playing_snd:
+		_fall_audio.play()
+		playing_snd = true
+	elif not falling and playing_snd:
+		_fall_audio.stop()
 		playing_snd = false
 
 
@@ -54,11 +66,6 @@ func move(dir: Vector3) -> bool:
 	if super.move(dir) == false:
 		return false
 
-	# Play Rock Sound
-	if !playing_snd:
-		# this.GetComponent<AudioSource>().Play();
-		playing_snd = true
-
 	return true
 
 
@@ -68,6 +75,9 @@ func traverse() -> void:
 
 
 func _on_stopped_falling() -> void:
+	# Play crash sound
+	SFX.play_at(self, SFX.rock_crash)
+
 	# Check for crush when rock lands
 	if level == null:
 		return

@@ -27,6 +27,9 @@ var _level_editor: Node3D = null
 # Message overlay (game over, level complete)
 var _message_overlay: CanvasLayer = null
 
+# Music
+var _music: Music = null
+
 
 func _ready() -> void:
 	# Check command line for direct level path
@@ -95,6 +98,14 @@ func _load_and_start(level_path: String) -> void:
 		_setup_orbit_camera()
 
 	game_state = 0
+
+	# Play startup sound
+	SFX.play_global(get_tree(), SFX.startup)
+
+	# Play random music track
+	_music = Music.new()
+	add_child(_music)
+	_music.play_random()
 
 	print("Player start position: ", loaded_level.start_pos)
 	print("Objectives — Diamonds:", loaded_level.diamonds,
@@ -232,6 +243,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func level_complete() -> void:
 	game_state = 1
 	print("LEVEL COMPLETE!")
+	SFX.play_global(get_tree(), SFX.level_trans)
 	_show_message("LEVEL COMPLETE!", Color(0.3, 1.0, 0.3))
 
 
@@ -277,8 +289,17 @@ func _show_message(text: String, color: Color) -> void:
 	vbox.add_child(hint)
 
 
+func _stop_music() -> void:
+	if _music != null:
+		_music.stop()
+		_music.queue_free()
+		_music = null
+
+
 func _return_to_level_select() -> void:
 	# Clean up current game state
+	_stop_music()
+
 	if _message_overlay != null:
 		_message_overlay.queue_free()
 		_message_overlay = null

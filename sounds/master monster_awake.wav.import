@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://ckdyo60x50svs"
-path="res://.godot/imported/master monster_awake.wav-8739557768dad3bad1db6b248e7c9345.sample"
+path="res://.godot/imported/master monster_awake.wav-9ff0acf45cbc4b7b74f41a51d3060560.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/master monster_awake.wav"
-dest_files=["res://.godot/imported/master monster_awake.wav-8739557768dad3bad1db6b248e7c9345.sample"]
+source_file="res://sounds/master monster_awake.wav"
+dest_files=["res://.godot/imported/master monster_awake.wav-9ff0acf45cbc4b7b74f41a51d3060560.sample"]
 
 [params]
 

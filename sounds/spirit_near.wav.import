@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://db66oq7xegkrk"
-path="res://.godot/imported/spirit_near.wav-19e600096000287f0ecf9733b740f211.sample"
+path="res://.godot/imported/spirit_near.wav-3c4597d94a44077b75371c1e7bd79030.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/spirit_near.wav"
-dest_files=["res://.godot/imported/spirit_near.wav-19e600096000287f0ecf9733b740f211.sample"]
+source_file="res://sounds/spirit_near.wav"
+dest_files=["res://.godot/imported/spirit_near.wav-3c4597d94a44077b75371c1e7bd79030.sample"]
 
 [params]
 

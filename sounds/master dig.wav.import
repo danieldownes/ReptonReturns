@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://b8bwg343y4v76"
-path="res://.godot/imported/master dig.wav-3c2066bfdf034f4b44f84e756dc5d18d.sample"
+path="res://.godot/imported/master dig.wav-4dc12b0cc73bf218b3669326e911da93.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/master dig.wav"
-dest_files=["res://.godot/imported/master dig.wav-3c2066bfdf034f4b44f84e756dc5d18d.sample"]
+source_file="res://sounds/master dig.wav"
+dest_files=["res://.godot/imported/master dig.wav-4dc12b0cc73bf218b3669326e911da93.sample"]
 
 [params]
 

@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://qsdxkcm7exf5"
-path="res://.godot/imported/egg_cracking.wav-1cc053074755053f6226f6ff1bc0a9f4.sample"
+path="res://.godot/imported/egg_cracking.wav-1482a796ef834e5184bb02570df51f3b.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/egg_cracking.wav"
-dest_files=["res://.godot/imported/egg_cracking.wav-1cc053074755053f6226f6ff1bc0a9f4.sample"]
+source_file="res://sounds/egg_cracking.wav"
+dest_files=["res://.godot/imported/egg_cracking.wav-1482a796ef834e5184bb02570df51f3b.sample"]
 
 [params]
 

@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://gjm6rw7bn2uu"
-path="res://.godot/imported/time_cap.wav-3cfea838ff6b395881704e23e3430d84.sample"
+path="res://.godot/imported/time_cap.wav-67dd4f7c6c44348186a6aaca1c5e76d6.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/time_cap.wav"
-dest_files=["res://.godot/imported/time_cap.wav-3cfea838ff6b395881704e23e3430d84.sample"]
+source_file="res://sounds/time_cap.wav"
+dest_files=["res://.godot/imported/time_cap.wav-67dd4f7c6c44348186a6aaca1c5e76d6.sample"]
 
 [params]
 

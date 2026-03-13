@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://gew565s024wg"
-path="res://.godot/imported/egg_crunch.wav-2a986d9b053857759c069ca8d10e8cfa.sample"
+path="res://.godot/imported/egg_crunch.wav-d2a4cb2ea7f5ea92d5f38ebae7b699b9.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/egg_crunch.wav"
-dest_files=["res://.godot/imported/egg_crunch.wav-2a986d9b053857759c069ca8d10e8cfa.sample"]
+source_file="res://sounds/egg_crunch.wav"
+dest_files=["res://.godot/imported/egg_crunch.wav-d2a4cb2ea7f5ea92d5f38ebae7b699b9.sample"]
 
 [params]
 

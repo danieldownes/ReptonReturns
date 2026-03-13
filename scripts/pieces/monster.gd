@@ -70,6 +70,7 @@ func _process(delta: float) -> void:
 	if monster_state == State.WAKING:
 		if last_time <= 0.0:
 			monster_state = State.SEEKING
+			SFX.play_at(self, SFX.monster_awake)
 	else:
 		# Check gravity first (3D levels)
 		if not _check_monster_gravity():
@@ -213,6 +214,8 @@ func _check_monster_gravity() -> bool:
 
 func _has_support_at(target_pos: Vector3) -> bool:
 	# Check if a position has ground support within a 1-block fall
+	if level == null:
+		return true
 	var below: Vector3 = level.get_below(target_pos)
 	var below_piece: String = level.get_map_at(below)
 	if below_piece != "0":
@@ -233,6 +236,17 @@ func die() -> bool:
 
 func _die_forced() -> void:
 	# void DieForced()
+	# Play death sound at this position (parented to level so it survives queue_free)
+	if level != null:
+		var snd := AudioStreamPlayer3D.new()
+		snd.stream = SFX.monster_die
+		snd.max_distance = 40.0
+		snd.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+		snd.position = position
+		level.add_child(snd)
+		snd.finished.connect(snd.queue_free)
+		snd.play()
+
 	if level != null:
 		level.monsters_alive -= 1
 		# Clear from map — restore what was under us

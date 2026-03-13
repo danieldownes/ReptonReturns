@@ -3,12 +3,12 @@
 importer="mp3"
 type="AudioStreamMP3"
 uid="uid://da7gdbmx8br4o"
-path="res://.godot/imported/Persistence.mp3-b76b9eddcc71baf0d576a1fe28b637ab.mp3str"
+path="res://.godot/imported/Persistence.mp3-73fb789322453eb5b4bc0e1eca3845c0.mp3str"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Music/Persistence.mp3"
-dest_files=["res://.godot/imported/Persistence.mp3-b76b9eddcc71baf0d576a1fe28b637ab.mp3str"]
+source_file="res://music/Persistence.mp3"
+dest_files=["res://.godot/imported/Persistence.mp3-73fb789322453eb5b4bc0e1eca3845c0.mp3str"]
 
 [params]
 

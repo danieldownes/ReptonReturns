@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://cdeu2u53pins7"
-path="res://.godot/imported/level-trans.wav-af4409790aff9f412284813b5a788c6f.sample"
+path="res://.godot/imported/level-trans.wav-9d90d57c55da95a562a2fc1562ff0857.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/level-trans.wav"
-dest_files=["res://.godot/imported/level-trans.wav-af4409790aff9f412284813b5a788c6f.sample"]
+source_file="res://sounds/level-trans.wav"
+dest_files=["res://.godot/imported/level-trans.wav-9d90d57c55da95a562a2fc1562ff0857.sample"]
 
 [params]
 

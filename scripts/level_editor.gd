@@ -54,6 +54,13 @@ var _pieces: Dictionary = {}
 # Undo stack: Array of {"action": "place"/"delete", "pos_key": String, "char": String}
 var _undo_stack: Array = []
 
+# Transporter pairs: key = pos_key of transporter "n", value = pos_key of destination
+var _transporter_dest: Dictionary = {}
+# Pending transporter placement: after placing "n", next click sets destination
+var _transporter_pending: String = ""  # pos_key of transporter awaiting destination
+# Visual lines connecting transporter pairs
+var _transporter_lines: Dictionary = {}  # key = pos_key of transporter, value = MeshInstance3D
+
 # Visual
 var _cursor_mesh: MeshInstance3D
 var _preview_node: Node3D = null  # Ghost preview of selected piece at cursor
@@ -302,6 +309,12 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("editor_y_down"):
 		_change_layer(-1)
 	if Input.is_action_just_pressed("editor_escape"):
+		if _transporter_pending != "":
+			# Cancel pending transporter — remove the placed transporter
+			_remove_piece_at_key(_transporter_pending)
+			_transporter_pending = ""
+			_show_status("Transporter cancelled")
+			return
 		editor_closed.emit()
 		return
 
@@ -311,8 +324,10 @@ func _process(delta: float) -> void:
 	# Smooth camera
 	_update_camera()
 
-	# Status fade
-	if _status_label.modulate.a > 0:
+	# Status fade (don't fade while waiting for transporter dest)
+	if _transporter_pending != "":
+		_status_label.modulate.a = 1.0
+	elif _status_label.modulate.a > 0:
 		_status_label.modulate.a -= delta * 0.4
 
 	# Info
@@ -323,7 +338,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			if not _mouse_over_panel and cursor_valid:
-				_place_piece()
+				if _transporter_pending != "":
+					_set_transporter_dest()
+				else:
+					_place_piece()
 		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 			if not _mouse_over_panel and cursor_valid:
 				_delete_piece()
@@ -583,6 +601,12 @@ func _place_piece() -> void:
 
 	_pieces[k] = {"char": piece_char, "node": piece_node}
 
+	# Transporter: enter pending mode for destination
+	if piece_char == "n":
+		_transporter_pending = k
+		_show_status("Click destination for transporter")
+		return
+
 	# Warnings
 	var status_msg: String = "Placed: " + PALETTE[selected_idx]["name"]
 	if piece_char == "s" and _count_pieces("k") == 0:
@@ -598,9 +622,24 @@ func _place_piece() -> void:
 
 func _delete_piece() -> void:
 	var k := _pos_key(cursor_pos)
+
+	# Cancel pending transporter placement on right-click
+	if _transporter_pending != "":
+		# Remove the transporter that was just placed
+		_remove_piece_at_key(_transporter_pending)
+		_show_status("Transporter cancelled")
+		_transporter_pending = ""
+		return
+
 	if _pieces.has(k):
 		var old_char: String = _pieces[k]["char"]
 		_undo_stack.append({"action": "delete", "pos_key": k, "old_char": old_char, "new_char": "", "pos": cursor_pos})
+
+		# If deleting a transporter, also remove its line and destination data
+		if old_char == "n":
+			_remove_transporter_line(k)
+			_transporter_dest.erase(k)
+
 		if _pieces[k]["node"] != null:
 			_pieces[k]["node"].queue_free()
 		_pieces.erase(k)
@@ -639,6 +678,62 @@ func _undo() -> void:
 		_pieces[k] = {"char": entry["old_char"], "node": piece_node}
 
 	_show_status("Undo")
+
+
+func _set_transporter_dest() -> void:
+	var dest_key := _pos_key(cursor_pos)
+
+	# Can't set destination to the transporter itself
+	if dest_key == _transporter_pending:
+		_show_status("Destination can't be the transporter itself")
+		return
+
+	# Store the pair
+	_transporter_dest[_transporter_pending] = dest_key
+
+	# Draw connection line
+	_draw_transporter_line(_transporter_pending, dest_key)
+
+	_show_status("Transporter linked to " + dest_key)
+	_transporter_pending = ""
+
+
+func _draw_transporter_line(from_key: String, to_key: String) -> void:
+	# Remove old line if any
+	_remove_transporter_line(from_key)
+
+	var from_parts = from_key.split(",")
+	var to_parts = to_key.split(",")
+	var from_pos := Vector3(int(from_parts[0]), int(from_parts[1]), int(from_parts[2])) + Vector3(0, 0.5, 0)
+	var to_pos := Vector3(int(to_parts[0]), int(to_parts[1]), int(to_parts[2])) + Vector3(0, 0.5, 0)
+
+	# Build line using ImmediateMesh
+	var mesh_inst := MeshInstance3D.new()
+	mesh_inst.name = "TransLine_" + from_key
+	var imm := ImmediateMesh.new()
+	mesh_inst.mesh = imm
+
+	imm.surface_begin(Mesh.PRIMITIVE_LINES)
+	imm.surface_set_color(Color(0.8, 0.0, 0.8, 0.8))
+	imm.surface_add_vertex(from_pos)
+	imm.surface_add_vertex(to_pos)
+	imm.surface_end()
+
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.8, 0.0, 0.8, 0.8)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.vertex_color_use_as_albedo = true
+	mesh_inst.material_override = mat
+
+	add_child(mesh_inst)
+	_transporter_lines[from_key] = mesh_inst
+
+
+func _remove_transporter_line(pos_key: String) -> void:
+	if _transporter_lines.has(pos_key):
+		_transporter_lines[pos_key].queue_free()
+		_transporter_lines.erase(pos_key)
 
 
 func _show_status(msg: String) -> void:
@@ -683,6 +778,10 @@ func _save_level() -> void:
 		file.store_line(k + "," + _pieces[k]["char"])
 
 	file.store_line("---TRANSPORTERS---")
+	for t_key in _transporter_dest:
+		var dest_key: String = _transporter_dest[t_key]
+		# Format: x1,y1,z1,x2,y2,z2 (both keys are already "x,y,z")
+		file.store_line(t_key + "," + dest_key)
 	file.store_line("---COLOURKEYS---")
 	file.store_line("---END---")
 
@@ -696,6 +795,11 @@ func _new_level() -> void:
 			_pieces[k]["node"].queue_free()
 	_pieces.clear()
 	_undo_stack.clear()
+	_transporter_dest.clear()
+	_transporter_pending = ""
+	for line_key in _transporter_lines:
+		_transporter_lines[line_key].queue_free()
+	_transporter_lines.clear()
 	cursor_pos = Vector3.ZERO
 	current_layer_y = 0
 	_layer_label.text = "Y: 0"
@@ -740,6 +844,13 @@ func load_level(file_path: String) -> void:
 					piece_node.name = c + "_" + k
 					_pieces_container.add_child(piece_node)
 				_pieces[k] = {"char": c, "node": piece_node}
+		elif section == "---TRANSPORTERS---":
+			var parts = line.split(",")
+			if parts.size() >= 6:
+				var from_key: String = parts[0] + "," + parts[1] + "," + parts[2]
+				var to_key: String = parts[3] + "," + parts[4] + "," + parts[5]
+				_transporter_dest[from_key] = to_key
+				_draw_transporter_line(from_key, to_key)
 		elif section == "---END---":
 			break
 

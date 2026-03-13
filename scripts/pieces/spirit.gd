@@ -16,9 +16,10 @@ var on_id: int = -1             # public int OnId;
 var last_on_id: int = -1        # public int LastOnId;
 
 var first_move: bool = true     # First move uses special direction logic
+var _seeking_edge: bool = false  # 3D: moving right to find an edge to hug
 
 # Pieces spirits can move through
-const PASSABLE: Array = ["0", "e", "c"]
+const PASSABLE: Array = ["0", "e", "c", "p"]
 
 
 func _ready() -> void:
@@ -52,9 +53,7 @@ func _process(delta: float) -> void:
 		spirit_state = 0
 
 	if spirit_state == 0:
-		# Check gravity first (3D levels)
-		if not _check_spirit_gravity():
-			_control_seek()
+		_control_seek()
 
 	# Interpolate visual position
 	_move_3d()
@@ -80,8 +79,14 @@ func move(dir: Vector3) -> bool:
 		return true
 
 	var new_pos: Vector3 = grid_position
+	var dest_piece: String = level.get_map_at(new_pos)
 	on_id = level.get_map_id_at(new_pos)
-	on_piece = level.get_map_at(new_pos)
+
+	# If another spirit is here, get the real underlying piece from that spirit
+	if dest_piece == "p":
+		on_piece = _get_spirit_on_piece_at(new_pos)
+	else:
+		on_piece = dest_piece
 
 	# Does Repton die as a result of this move?
 	if level.game != null and level.game.player != null:
@@ -90,8 +95,13 @@ func move(dir: Vector3) -> bool:
 			player.die()
 
 	# Update map: restore old position
-	level.set_map_at(last_position, last_on_piece)
-	level.set_map_id_at(last_position, last_on_id)
+	# If another spirit is still at our old position, keep "p" on the map
+	var old_map: String = level.get_map_at(last_position)
+	if old_map == "p" and _has_other_spirit_at(last_position):
+		pass  # Another spirit is there — don't overwrite
+	else:
+		level.set_map_at(last_position, last_on_piece)
+		level.set_map_id_at(last_position, last_on_id)
 
 	# Place spirit on map at new position
 	level.set_map_at(new_pos, "p")
@@ -129,37 +139,78 @@ func _moveable_to(v_pos: Vector3, v_dir: Vector3) -> bool:
 	var check_pos: Vector3 = v_pos + v_dir
 	var piece: String = level.get_map_at(check_pos)
 
-	return piece in PASSABLE or piece == "i"
+	if not (piece in PASSABLE or piece == "i"):
+		return false
+
+	# In 3D levels, spirit can only move to supported positions (no falling/climbing)
+	if level.has_player_gravity():
+		var below: Vector3 = level.get_below(check_pos)
+		var below_piece: String = level.get_map_at(below)
+		if below_piece == "0":
+			return false  # No ground — spirit can't go there
+
+	return true
 
 
 func _control_seek() -> void:
+	# 3D seeking-edge mode: keep moving right until we find a wall or edge to hug
+	if _seeking_edge:
+		# Check if there's now something to hug (a blocked direction nearby)
+		for test_dir in [Vector3(0, 0, -1), Vector3.RIGHT, Vector3(0, 0, 1), Vector3.LEFT]:
+			if not _moveable_to(grid_position, test_dir):
+				# Found a wall/edge — face so wall is to our left
+				direction = _turn_ccw(test_dir)
+				_seeking_edge = false
+				break
+		if _seeking_edge:
+			# Still no edge — keep moving right
+			if _moveable_to(grid_position, Vector3.RIGHT):
+				move(Vector3.RIGHT)
+			else:
+				# Can't move right — stop seeking, fall through to wall-following
+				_seeking_edge = false
+			return
+
 	# Wall-following AI (left-hand rule / CCW preference)
 	var can_move: bool = false
 	var corn_try: int = 0
 
 	while corn_try < 4 and not can_move:
 		if first_move:
-			# Determine starting direction
-			# Default to grid up (-z)
-			direction = Vector3(0, 0, -1)
-			last_direction = direction
-
-			# Try up, then right, then down, then left
-			if not _moveable_to(grid_position, Vector3(0, 0, -1)):
-				direction = Vector3.RIGHT
-			if not _moveable_to(grid_position, Vector3.RIGHT):
-				direction = Vector3(0, 0, 1)
-			if not _moveable_to(grid_position, Vector3(0, 0, 1)):
-				direction = Vector3.LEFT
-
 			first_move = false
+			if level != null and level.has_player_gravity():
+				# 3D: check if we have something to hug (wall or edge nearby)
+				var has_neighbour: bool = false
+				for test_dir in [Vector3(0, 0, -1), Vector3.RIGHT, Vector3(0, 0, 1), Vector3.LEFT]:
+					if not _moveable_to(grid_position, test_dir):
+						# Found a wall/edge — face so wall is to our left
+						direction = _turn_ccw(test_dir)
+						has_neighbour = true
+						break
+				if not has_neighbour:
+					# Open ground — move right until we find an edge
+					_seeking_edge = true
+					if _moveable_to(grid_position, Vector3.RIGHT):
+						move(Vector3.RIGHT)
+					return
+			else:
+				# 2D: original logic
+				direction = Vector3(0, 0, -1)
+				last_direction = direction
+				if not _moveable_to(grid_position, Vector3(0, 0, -1)):
+					direction = Vector3.RIGHT
+				if not _moveable_to(grid_position, Vector3.RIGHT):
+					direction = Vector3(0, 0, 1)
+				if not _moveable_to(grid_position, Vector3(0, 0, 1)):
+					direction = Vector3.LEFT
 		else:
-			# Is there a wall to the right (CCW of current dir) that we should hug?
-			can_move = _moveable_to(grid_position, _turn_ccw(direction))
+			# Hug-wall-left: check if wall to our left is still there
+			# by testing CW (right) — if open, turn right into it
+			can_move = _moveable_to(grid_position, _turn_cw(direction))
 
 			if can_move:
-				# No wall there! Turn CCW (hug wall left)
-				direction = _turn_ccw(direction)
+				# Opening to the right — turn CW to keep wall on left
+				direction = _turn_cw(direction)
 
 		# Can we move forward in current direction?
 		can_move = _moveable_to(grid_position, direction)
@@ -167,8 +218,8 @@ func _control_seek() -> void:
 		if can_move:
 			move(direction)
 		else:
-			# Blocked — turn clockwise and try again
-			direction = _turn_cw(direction)
+			# Blocked — turn CCW (left) and try again
+			direction = _turn_ccw(direction)
 			corn_try += 1
 
 
@@ -198,42 +249,74 @@ func _turn_ccw(v_dir: Vector3) -> Vector3:
 	return v_dir
 
 
-func _check_spirit_gravity() -> bool:
-	# Check if spirit should fall (3D levels only)
-	if level == null or not level.has_player_gravity():
+
+func _has_other_spirit_at(pos: Vector3) -> bool:
+	# Check if any other spirit is currently at this position
+	if level == null:
 		return false
-	if last_time > 0.0:
-		return false
-	var below_pos: Vector3 = level.get_below(grid_position)
-	var below_piece: String = level.get_map_at(below_pos)
-	if below_piece == "0":
-		move(level.get_gravity_dir())
-		return true
+	for obj in level.objects:
+		if obj != null and obj is Spirit and obj != self:
+			if int(obj.grid_position.x) == int(pos.x) \
+					and int(obj.grid_position.y) == int(pos.y) \
+					and int(obj.grid_position.z) == int(pos.z):
+				return true
 	return false
+
+
+func _get_spirit_on_piece_at(pos: Vector3) -> String:
+	# Find another spirit at this position and return what's under it
+	if level == null:
+		return "0"
+	for obj in level.objects:
+		if obj != null and obj is Spirit and obj != self:
+			if int(obj.grid_position.x) == int(pos.x) \
+					and int(obj.grid_position.y) == int(pos.y) \
+					and int(obj.grid_position.z) == int(pos.z):
+				return obj.on_piece
+	return "0"
+
+
+func _play_sound_on_level(stream: AudioStream) -> void:
+	# Play sound parented to level so it survives queue_free
+	var snd := AudioStreamPlayer3D.new()
+	snd.stream = stream
+	snd.max_distance = 40.0
+	snd.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+	snd.position = position
+	level.add_child(snd)
+	snd.finished.connect(snd.queue_free)
+	snd.play()
 
 
 func _enter_cage(x: int, y: int) -> void:
 	# Spirit enters a cage — becomes a diamond (2D)
-	level.set_map_at(Vector3(x, 0, y), "d")
-	level.set_map_id_at(Vector3(x, 0, y), -1)
+	_play_sound_on_level(SFX.spirit_caught)
 
-	# Replace the cage mesh with a diamond
+	# Restore the cage on the map first (spirit overwrote it with "p")
+	level.set_map_at(Vector3(x, 0, y), "c")
+
+	# replace_piece removes the cage mesh, sets map to "d", creates diamond mesh
 	level.replace_piece(x, y, "d")
 
 	level.spirits -= 1
 	level.diamonds += 1
 
+	# Remove spirit
 	queue_free()
 
 
 func _enter_cage_3d(pos: Vector3) -> void:
 	# Spirit enters a cage — becomes a diamond (3D)
-	level.set_map_at(pos, "d")
-	level.set_map_id_at(pos, -1)
+	_play_sound_on_level(SFX.spirit_caught)
 
+	# Restore the cage on the map first (spirit overwrote it with "p")
+	level.set_map_at(pos, "c")
+
+	# replace_piece_v removes the cage mesh, sets map to "d", creates diamond mesh
 	level.replace_piece_v(pos, "d")
 
 	level.spirits -= 1
 	level.diamonds += 1
 
+	# Remove spirit
 	queue_free()

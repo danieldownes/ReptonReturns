@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://hqal2tewf86"
-path="res://.godot/imported/key.wav-a1e590ebd6195230fe3a9596c419f399.sample"
+path="res://.godot/imported/key.wav-d1b8115dfb198a0e8e0bc0e71ffc78da.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/key.wav"
-dest_files=["res://.godot/imported/key.wav-a1e590ebd6195230fe3a9596c419f399.sample"]
+source_file="res://sounds/key.wav"
+dest_files=["res://.godot/imported/key.wav-d1b8115dfb198a0e8e0bc0e71ffc78da.sample"]
 
 [params]
 

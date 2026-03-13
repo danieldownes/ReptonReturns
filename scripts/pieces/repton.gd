@@ -129,8 +129,14 @@ func try_move(dir: Vector3) -> void:
 			# Also check there's room above Repton's current position
 			var above_grid: Vector3 = grid_position + Vector3(0, 1, 0)
 			var above_piece: String = level.get_map_at(above_grid)
-			if climb_piece == "0" and above_piece == "0":
-				# Step up onto the wall
+			var climb_ok: bool = (climb_piece == "0" or climb_piece in TRAVERSABLE_PIECES)
+			var above_ok: bool = (above_piece == "0" or above_piece in TRAVERSABLE_PIECES)
+			if climb_ok and above_ok:
+				# Collect traversable pieces along the climb path
+				if above_piece in TRAVERSABLE_PIECES:
+					_collect_piece(above_grid, above_piece)
+				if climb_piece in TRAVERSABLE_PIECES:
+					_collect_piece(climb_grid, climb_piece)
 				player_state = State.WALK
 				_face_direction(dir)
 				move(dir + Vector3(0, 1, 0))
@@ -150,6 +156,7 @@ func try_move(dir: Vector3) -> void:
 			level.set_map_at(target_grid, "0")
 			player_state = State.WALK
 			_do_grid_move(dir)
+			SFX.play_at(self, SFX.bomb_explosion)
 			if level.game != null:
 				level.game.level_complete()
 		return
@@ -215,39 +222,12 @@ func try_move(dir: Vector3) -> void:
 			position = _grid_to_world(dest)
 			last_time = 0.0
 			player_state = State.STOPPED
+			SFX.play_at(self, SFX.transporter)
 		return
 
 	# Traversable piece? Remove it and move in
 	if target_piece in TRAVERSABLE_PIECES:
-		# Handle special pickups
-		match target_piece:
-			"d":
-				# Diamond collected
-				level.diamonds -= 1
-			"k":
-				# Key collected — open safes
-				level.open_safes()
-			"t":
-				# Crown collected
-				level.crowns -= 1
-			"C":
-				# Coloured key — add to inventory
-				var ref_val: int = level.get_map_ref_at(target_grid)
-				inventory.append("Coloured Key:" + str(ref_val))
-			"z":
-				# Time capsule — add time to bomb timer
-				if level.time_bomb > 0:
-					level.time_bomb += 30.0  # Add 30 seconds
-			"x":
-				# Map — reveals level map (UI feature)
-				pass
-			"s":
-				# Safe — just collect
-				pass
-
-		# Remove the piece from map and scene
-		level.remove_piece_v(target_grid)
-		level.set_map_at(target_grid, "0")
+		_collect_piece(target_grid, target_piece)
 
 		if target_piece == "e":
 			player_state = State.DIG_AND_WALK
@@ -366,3 +346,43 @@ func die() -> int:
 	last_time = 0.0
 
 	return lives
+
+
+func _wear_crown() -> void:
+	var crown_node: Node3D = PieceFactory.get_fbx_node("t")
+	if crown_node == null:
+		return
+	crown_node.name = "Crown"
+	crown_node.scale = Vector3(0.5, 0.5, 0.5)
+	crown_node.position = Vector3(0, 2.5, 0)
+	if _mesh_node != null:
+		_mesh_node.add_child(crown_node)
+	else:
+		add_child(crown_node)
+
+
+func _collect_piece(pos: Vector3, piece: String) -> void:
+	# Collect a traversable piece at the given position (pickup logic + remove)
+	match piece:
+		"d":
+			level.diamonds -= 1
+			SFX.play_at(self, SFX.diamond)
+		"k":
+			level.open_safes()
+			SFX.play_at(self, SFX.key)
+		"t":
+			level.crowns -= 1
+			SFX.play_at(self, SFX.crown)
+			_wear_crown()
+		"C":
+			var ref_val: int = level.get_map_ref_at(pos)
+			inventory.append("Coloured Key:" + str(ref_val))
+			SFX.play_at(self, SFX.key)
+		"z":
+			if level.time_bomb > 0:
+				level.time_bomb += 30.0
+			SFX.play_at(self, SFX.time_capsule)
+		"e":
+			SFX.play_at(self, SFX.dig)
+	level.remove_piece_v(pos)
+	level.set_map_at(pos, "0")

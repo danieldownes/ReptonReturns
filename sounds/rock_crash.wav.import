@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://dnxex17y18d06"
-path="res://.godot/imported/rock_crash.wav-944ee11c0d2522d9e1fc9f8714f3ce93.sample"
+path="res://.godot/imported/rock_crash.wav-8ba8bda0740bb00223ba466cc150ae12.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/rock_crash.wav"
-dest_files=["res://.godot/imported/rock_crash.wav-944ee11c0d2522d9e1fc9f8714f3ce93.sample"]
+source_file="res://sounds/rock_crash.wav"
+dest_files=["res://.godot/imported/rock_crash.wav-8ba8bda0740bb00223ba466cc150ae12.sample"]
 
 [params]
 

@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://cliamttf7q14i"
-path="res://.godot/imported/dimond.wav-9703a2ab7fa3af0d099ae6a333b2743e.sample"
+path="res://.godot/imported/dimond.wav-783e23050b49eba7628a9d2a678114e1.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/dimond.wav"
-dest_files=["res://.godot/imported/dimond.wav-9703a2ab7fa3af0d099ae6a333b2743e.sample"]
+source_file="res://sounds/dimond.wav"
+dest_files=["res://.godot/imported/dimond.wav-783e23050b49eba7628a9d2a678114e1.sample"]
 
 [params]
 

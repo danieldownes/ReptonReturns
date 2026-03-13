@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://bqwmyihf80gd1"
-path="res://.godot/imported/fungus.wav-f8c5cd61f661ecfe6942a83e845908e7.sample"
+path="res://.godot/imported/fungus.wav-2397781d3b22cccce35440008a3e9fad.sample"
 
 [deps]
 
-source_file="res://RR2/ReptonReturns_Unity/Assets/Sounds/fungus.wav"
-dest_files=["res://.godot/imported/fungus.wav-f8c5cd61f661ecfe6942a83e845908e7.sample"]
+source_file="res://sounds/fungus.wav"
+dest_files=["res://.godot/imported/fungus.wav-2397781d3b22cccce35440008a3e9fad.sample"]
 
 [params]
 
