@@ -37,12 +37,15 @@ func move(dir: Vector3) -> bool:
 		return false
 
 	# Check if destination is empty
-	var target_x: int = int(grid_position.x + dir.x)
-	var target_y: int = int(grid_position.z + dir.z)
-	var target_piece: String = level.get_map_p_xy(target_x, target_y)
+	var target_pos: Vector3 = grid_position + dir
+	var target_piece: String = level.get_map_at(target_pos)
 
-	if target_piece != "0":
+	if target_piece != "0" and target_piece != "m":
 		return false  # Blocked
+
+	# Kill monster at destination if present
+	if target_piece == "m":
+		_kill_monster_at_v(target_pos)
 
 	# Update map data for the push
 	_update_map_for_move(dir)
@@ -76,16 +79,22 @@ func _on_stopped_falling() -> void:
 			player.die()
 
 	# Check if a monster is at this position
-	var grid_x: int = int(grid_position.x)
-	var grid_y: int = int(grid_position.z)
-	var piece_at: String = level.get_map_p_xy(grid_x, grid_y)
-	if piece_at == "m":
-		_kill_monster_at(grid_x, grid_y)
+	_kill_monster_at_v(grid_position)
 
 
-func _kill_monster_at(x: int, y: int) -> void:
-	var piece_id: int = level.map_detail[x][y]["id"]
+func _kill_monster_at_v(pos: Vector3) -> void:
+	# Try map id lookup first
+	var piece_id: int = level.get_map_id_at(pos)
 	if piece_id >= 0 and piece_id < level.objects.size():
 		var obj = level.objects[piece_id]
 		if obj is Monster:
 			obj.die()
+			return
+	# Fallback: scan all objects for a monster at this position
+	for obj in level.objects:
+		if obj != null and obj is Monster and obj.monster_state != Monster.State.DEAD:
+			if int(obj.grid_position.x) == int(pos.x) \
+					and int(obj.grid_position.y) == int(pos.y) \
+					and int(obj.grid_position.z) == int(pos.z):
+				obj.die()
+				return

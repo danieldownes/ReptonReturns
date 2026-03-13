@@ -24,13 +24,15 @@ var on_id: int = -1             # public int iOnId;
 var last_on_id: int = -1        # public int iLastOnId;
 
 var is_earth: bool = false      # bool bEarth = false;  (monster inside earth = protected from crush)
+var object_id: int = -1         # Index in level.objects array
 
 # Pieces monsters can move through
 const PASSABLE: Array = ["0"]
 
 
 func _ready() -> void:
-	pass
+	# Monsters must process after player and rocks so pushes resolve first
+	process_priority = 100
 
 
 func monster_init(v_pos: Vector3) -> void:
@@ -51,6 +53,10 @@ func monster_init(v_pos: Vector3) -> void:
 	direction = Vector3(0, 0, 1)    # Facing down on grid (increasing grid_y)
 	last_direction = Vector3(0, 0, 1)
 
+	# Read our object id from the map (set by level during loading)
+	if level != null:
+		object_id = level.get_map_id_at(v_pos)
+
 
 func _process(delta: float) -> void:
 	# private new void Update()
@@ -65,7 +71,15 @@ func _process(delta: float) -> void:
 		if last_time <= 0.0:
 			monster_state = State.SEEKING
 	else:
-		_control_seek()
+		# Check gravity first (3D levels)
+		if not _check_monster_gravity():
+			# Monster can only seek if it has ground support
+			if level != null and level.has_player_gravity():
+				var below_pos: Vector3 = level.get_below(grid_position)
+				var below_piece: String = level.get_map_at(below_pos)
+				if below_piece == "0":
+					return  # No ground under monster — can't move
+			_control_seek()
 
 	# Interpolate position (Monster has its own Move3D using AddSlant)
 	_move_3d()
@@ -82,30 +96,27 @@ func move(dir: Vector3) -> bool:
 	last_on_id = on_id
 
 	# Update map: restore what was under us at old position
-	var old_x: int = int(grid_position.x)
-	var old_y: int = int(grid_position.z)
-	level.map_detail[old_x][old_y]["type_id"] = on_piece
-	level.map_detail[old_x][old_y]["id"] = on_id
+	var old_pos: Vector3 = grid_position
+	level.set_map_at(old_pos, on_piece)
+	level.set_map_id_at(old_pos, on_id)
 
 	# Call base move (updates grid_position, sets up animation timing)
 	super.move(dir)
 
 	# Record what's at the new position (before we overwrite it)
-	var new_x: int = int(grid_position.x)
-	var new_y: int = int(grid_position.z)
-	on_piece = level.map_detail[new_x][new_y]["type_id"]
-	on_id = level.map_detail[new_x][new_y]["id"]
+	var new_pos: Vector3 = grid_position
+	on_piece = level.get_map_at(new_pos)
+	on_id = level.get_map_id_at(new_pos)
 
 	# Track if monster is inside earth
 	is_earth = (on_piece == "e")
 
 	# Place monster on map at new position
-	var my_id: int = level.map_detail[old_x][old_y].get("_monster_obj_id", -1)
-	# Find our object id from the old position backup or objects array
-	level.map_detail[new_x][new_y]["type_id"] = "m"
+	level.set_map_at(new_pos, "m")
+	level.set_map_id_at(new_pos, object_id)
 
 	# Does Repton die as a result of this move?
-	if level.game != null and level.game.player != null:
+	if monster_state != State.DEAD and level.game != null and level.game.player != null:
 		var player = level.game.player
 		if player.grid_position == grid_position or player.grid_position == last_position:
 			player.die()
@@ -114,16 +125,15 @@ func move(dir: Vector3) -> bool:
 
 
 func _move_3d() -> void:
-	# Interpolate visual position using AddSlant
-	# Monster.cs uses game.loadedLevel.AddSlant() for both positions
+	# Interpolate visual position
 	if last_time > 0.0 and level != null:
-		var from_world: Vector3 = level.add_slant(last_position)
-		var to_world: Vector3 = level.add_slant(grid_position)
+		var from_world: Vector3 = level.grid_to_world_v(last_position)
+		var to_world: Vector3 = level.grid_to_world_v(grid_position)
 		var t: float = (time_to_move - last_time) / time_to_move
 		t = clampf(t, 0.0, 1.0)
 		position = from_world.lerp(to_world, t)
 	elif level != null:
-		position = level.add_slant(grid_position)
+		position = level.grid_to_world_v(grid_position)
 
 
 func _control_seek() -> void:
@@ -172,12 +182,44 @@ func _control_seek() -> void:
 
 			# Check if it is okay to move in this direction
 			var target_pos: Vector3 = grid_position + move_dir
-			var target_x: int = int(target_pos.x)
-			var target_y: int = int(target_pos.z)
-			var target_piece: String = level.get_map_p_xy(target_x, target_y)
+			var target_piece: String = level.get_map_at(target_pos)
 
 			if target_piece in PASSABLE or target_piece == "i":
+				# In 3D levels, don't move to unsupported positions
+				if level.has_player_gravity() and not _has_support_at(target_pos):
+					return
 				move(move_dir)
+
+
+func _check_monster_gravity() -> bool:
+	# Check if monster should fall (3D levels only)
+	# Monster can only fall 1 block — must have support below
+	if level == null or not level.has_player_gravity():
+		return false
+	if last_time > 0.0:
+		return false
+	var below_pos: Vector3 = level.get_below(grid_position)
+	var below_piece: String = level.get_map_at(below_pos)
+	if below_piece == "0":
+		# Check there is support 1 block down (2 below current)
+		var two_below: Vector3 = level.get_below(below_pos)
+		var two_below_piece: String = level.get_map_at(two_below)
+		if two_below_piece != "0":
+			move(level.get_gravity_dir())
+			return true
+		# No support — monster stays put
+	return false
+
+
+func _has_support_at(target_pos: Vector3) -> bool:
+	# Check if a position has ground support within a 1-block fall
+	var below: Vector3 = level.get_below(target_pos)
+	var below_piece: String = level.get_map_at(below)
+	if below_piece != "0":
+		return true
+	var two_below: Vector3 = level.get_below(below)
+	var two_below_piece: String = level.get_map_at(two_below)
+	return two_below_piece != "0"
 
 
 func die() -> bool:
@@ -193,11 +235,15 @@ func _die_forced() -> void:
 	# void DieForced()
 	if level != null:
 		level.monsters_alive -= 1
-		# Clear from map
-		var grid_x: int = int(grid_position.x)
-		var grid_y: int = int(grid_position.z)
-		level.map_detail[grid_x][grid_y]["type_id"] = "0"
-		level.map_detail[grid_x][grid_y]["id"] = -1
+		# Clear from map — restore what was under us
+		level.set_map_at(grid_position, on_piece)
+		level.set_map_id_at(grid_position, on_id)
+		# If mid-move, also clear the old position
+		if last_position != grid_position:
+			var old_piece: String = level.get_map_at(last_position)
+			if old_piece == "m":
+				level.set_map_at(last_position, "0")
+				level.set_map_id_at(last_position, -1)
 
 	monster_state = State.DEAD
 	queue_free()

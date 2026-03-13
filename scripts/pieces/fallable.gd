@@ -13,11 +13,6 @@ var falling: bool = false       # public bool Falling;
 var was_falling: bool = false   # public bool WasFalling;
 var free_fall: bool = false     # public bool FreeFall;
 
-# Grid directions (grid_position.z = grid_y, so down = +z)
-const GRID_DOWN := Vector3(0, 0, 1)        # Increasing grid_y = increasing z
-const GRID_LEFT_DOWN := Vector3(-1, 0, 1)
-const GRID_RIGHT_DOWN := Vector3(1, 0, 1)
-
 # Piece types that rocks/eggs can slide off of diagonally
 const CURVED_PIECES: Array = ["r", "g", "d"]  # Symmetric: can slide either direction
 
@@ -50,7 +45,8 @@ func move(dir: Vector3) -> bool:
 	# public override bool Move(Vector3 direction)
 
 	# Not currently moving down? (Unity: Vector3.back = (0,0,-1))
-	if dir == GRID_DOWN and last_time > 0.01:
+	var gravity_dir: Vector3 = level.get_gravity_dir() if level != null else Vector3(0, 0, 1)
+	if dir == gravity_dir and last_time > 0.01:
 		return false
 
 	# Can't move up in 3D space (never happens in grid movement)
@@ -86,13 +82,13 @@ func check_if_fall() -> void:
 	elif falling:
 		return
 
-	var grid_x: int = int(grid_position.x)
-	var grid_y: int = int(grid_position.z)
+	var gravity_dir: Vector3 = level.get_gravity_dir()
 
 	# Fall straight down?
-	var below: String = level.get_map_p_xy(grid_x, grid_y + 1)
+	var below_pos: Vector3 = level.get_below(grid_position)
+	var below: String = level.get_map_at(below_pos)
 
-	if below == "0" and not _is_player_at(grid_x, grid_y + 1):
+	if (below == "0" or below == "m") and not _is_player_at_v(below_pos):
 		# Empty below and player not supporting - fall straight down
 		falling = true
 		# Track free fall (consecutive fall = fell more than 1 cell)
@@ -101,43 +97,56 @@ func check_if_fall() -> void:
 		else:
 			free_fall = false
 
-		_do_fall(GRID_DOWN)
+		_do_fall(gravity_dir)
 		return
 
 	# Diagonal sliding based on what we're resting on
+	var slide_dirs: Array = level.get_slide_directions()
+
+	# In 2D, slide_dirs[0] = left-down, slide_dirs[1] = right-down
+	# Determine slide eligibility based on what's below
 	var can_slide_left: bool = below in CURVED_PIECES or below in SLOPES_LEFT
 	var can_slide_right: bool = below in CURVED_PIECES or below in SLOPES_RIGHT
 
-	if can_slide_left:
-		var left: String = level.get_map_p_xy(grid_x - 1, grid_y)
-		var left_below: String = level.get_map_p_xy(grid_x - 1, grid_y + 1)
+	if can_slide_left and slide_dirs.size() > 0:
+		var slide_dir: Vector3 = slide_dirs[0]
+		var side_pos: Vector3 = grid_position + (slide_dir - gravity_dir)  # horizontal component
+		var slide_pos: Vector3 = grid_position + slide_dir
 
-		if left == "0" and left_below == "0" \
-				and not _is_player_at(grid_x - 1, grid_y) \
-				and not _is_player_at(grid_x - 1, grid_y + 1):
+		if level.get_map_at(side_pos) == "0" and level.get_map_at(slide_pos) == "0" \
+				and not _is_player_at_v(side_pos) \
+				and not _is_player_at_v(slide_pos):
 			falling = true
 			free_fall = was_falling
-			_do_fall(GRID_LEFT_DOWN)
+			_do_fall(slide_dir)
 			return
 
-	if can_slide_right:
-		var right: String = level.get_map_p_xy(grid_x + 1, grid_y)
-		var right_below: String = level.get_map_p_xy(grid_x + 1, grid_y + 1)
+	if can_slide_right and slide_dirs.size() > 1:
+		var slide_dir: Vector3 = slide_dirs[1]
+		var side_pos: Vector3 = grid_position + (slide_dir - gravity_dir)  # horizontal component
+		var slide_pos: Vector3 = grid_position + slide_dir
 
-		if right == "0" and right_below == "0" \
-				and not _is_player_at(grid_x + 1, grid_y) \
-				and not _is_player_at(grid_x + 1, grid_y + 1):
+		if level.get_map_at(side_pos) == "0" and level.get_map_at(slide_pos) == "0" \
+				and not _is_player_at_v(side_pos) \
+				and not _is_player_at_v(slide_pos):
 			falling = true
 			free_fall = was_falling
-			_do_fall(GRID_RIGHT_DOWN)
+			_do_fall(slide_dir)
 			return
 
 
 func _do_fall(dir: Vector3) -> void:
+	# Kill monster at destination if present
+	if level != null:
+		var dest: Vector3 = grid_position + dir
+		var dest_piece: String = level.get_map_at(dest)
+		if dest_piece == "m":
+			_kill_monster_at_fall(dest)
+
 	# Update map data then start the animated move
 	_update_map_for_move(dir)
 	# Call Movable.move() directly to avoid Rock's obstacle check
-	# (we already know the destination is empty)
+	# (we already know the destination is empty/cleared)
 	super.move(dir)
 	# Re-check for continued falling
 	check_if_fall()
@@ -150,20 +159,45 @@ func _is_player_at(x: int, y: int) -> bool:
 	var player = level.game.player
 	return int(player.grid_position.x) == x and int(player.grid_position.z) == y
 
+func _is_player_at_v(pos: Vector3) -> bool:
+	# Check if Repton is at the given grid position (Vector3 version)
+	if level.game == null or level.game.player == null:
+		return false
+	var player = level.game.player
+	return int(player.grid_position.x) == int(pos.x) \
+		and int(player.grid_position.y) == int(pos.y) \
+		and int(player.grid_position.z) == int(pos.z)
+
+
+func _kill_monster_at_fall(pos: Vector3) -> void:
+	# Kill a monster at the given position (called during fall)
+	var piece_id: int = level.get_map_id_at(pos)
+	if piece_id >= 0 and piece_id < level.objects.size():
+		var obj = level.objects[piece_id]
+		if obj is Monster:
+			obj.die()
+			return
+	# Fallback: scan all objects for a monster at this position
+	for obj in level.objects:
+		if obj != null and obj is Monster and obj.monster_state != Monster.State.DEAD:
+			if int(obj.grid_position.x) == int(pos.x) \
+					and int(obj.grid_position.y) == int(pos.y) \
+					and int(obj.grid_position.z) == int(pos.z):
+				obj.die()
+				return
+
 
 func _update_map_for_move(dir: Vector3) -> void:
 	# Move piece data in the map from current cell to destination cell
 	if level == null:
 		return
 
-	var old_x: int = int(grid_position.x)
-	var old_y: int = int(grid_position.z)
-	var new_x: int = int(grid_position.x + dir.x)
-	var new_y: int = int(grid_position.z + dir.z)
+	var old_pos: Vector3 = grid_position
+	var new_pos: Vector3 = grid_position + dir
 
-	var my_id: int = level.map_detail[old_x][old_y]["id"]
+	var my_id: int = level.get_map_id_at(old_pos)
 
-	level.map_detail[new_x][new_y]["type_id"] = piece_type
-	level.map_detail[new_x][new_y]["id"] = my_id
-	level.map_detail[old_x][old_y]["type_id"] = "0"
-	level.map_detail[old_x][old_y]["id"] = -1
+	level.set_map_at(new_pos, piece_type)
+	level.set_map_id_at(new_pos, my_id)
+	level.set_map_at(old_pos, "0")
+	level.set_map_id_at(old_pos, -1)

@@ -19,8 +19,6 @@ var time_to_move: float = 0.3                        # [HideInInspector] protect
 # Reference to level for map lookups (set by level.gd or game.gd at creation)
 var level  # Untyped to avoid circular dependency with Level class
 
-# Map slant constant (same as Level.MAP_SLANT)
-const MAP_SLANT: float = 0.35
 
 
 func init() -> void:
@@ -89,7 +87,8 @@ func is_moving() -> bool:
 
 
 func _grid_to_world(gp: Vector3) -> Vector3:
-	# Convert grid_position (x, 0, grid_y) to world position
-	# World: (x, -grid_y, grid_y * slant)
-	# Since gp.z = grid_y: world = (gp.x, -gp.z, gp.z * MAP_SLANT)
-	return Vector3(gp.x, -gp.z, gp.z * MAP_SLANT)
+	# Delegate to level's coordinate conversion for 2D/3D compatibility
+	if level != null:
+		return level.grid_to_world_v(gp)
+	# Fallback if level not set (2D default)
+	return Vector3(gp.x, -gp.z, gp.z * 0.35)

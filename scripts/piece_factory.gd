@@ -7,9 +7,9 @@ class_name PieceFactory
 
 
 const FBX_PATH = "res://models/ReptonReturnsFbx.fbx"
-const FBX_SCALE = Vector3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0)
+const REPTON_FBX_PATH = "res://models/Repton.fbx"
 
-# Maps piece type characters to FBX node names
+# Maps piece type characters to FBX node names (in ReptonReturnsFbx.fbx)
 const FBX_MODEL_MAP: Dictionary = {
 	"b": "Bomb",
 	"c": "Cage",
@@ -19,7 +19,6 @@ const FBX_MODEL_MAP: Dictionary = {
 	"C": "Key",        # ColourKey uses Key model
 	"x": "MessageBoard",
 	"m": "Monster",
-	"i": "Repton",
 	"r": "Rock",
 	"t": "TheCrown",
 	"z": "TimeCapsule",
@@ -28,6 +27,10 @@ const FBX_MODEL_MAP: Dictionary = {
 # Cached node subtrees duplicated from FBX (templates, not in scene tree)
 static var _fbx_templates: Dictionary = {}
 static var _fbx_loaded: bool = false
+
+# Cached Repton model from separate FBX
+static var _repton_template: Node3D = null
+static var _repton_loaded: bool = false
 
 
 # Color palette for piece types (used for primitive fallbacks)
@@ -89,7 +92,6 @@ static func _ensure_fbx_loaded() -> void:
 	for type_char in FBX_MODEL_MAP:
 		var model_name: String = FBX_MODEL_MAP[type_char]
 		if model_name in duplicated_models:
-			# Reuse the same template for shared models (e.g. Key for "k" and "C")
 			_fbx_templates[type_char] = duplicated_models[model_name]
 			continue
 		var source_node = _find_node(instance, model_name)
@@ -102,6 +104,21 @@ static func _ensure_fbx_loaded() -> void:
 
 	instance.free()
 	print("PieceFactory: Loaded ", _fbx_templates.size(), " models from FBX")
+
+
+static func _ensure_repton_loaded() -> void:
+	if _repton_loaded:
+		return
+	_repton_loaded = true
+
+	var fbx_scene: PackedScene = load(REPTON_FBX_PATH)
+	if fbx_scene == null:
+		push_warning("PieceFactory: Could not load Repton FBX at " + REPTON_FBX_PATH)
+		return
+
+	var instance = fbx_scene.instantiate()
+	_repton_template = instance
+	print("PieceFactory: Loaded Repton model from ", REPTON_FBX_PATH)
 
 
 static func _find_node(parent: Node, target_name: String) -> Node:
@@ -118,33 +135,18 @@ static func get_fbx_node(type_char: String) -> Node3D:
 	_ensure_fbx_loaded()
 	var template = _fbx_templates.get(type_char)
 	if template:
-		var node = template.duplicate()
-		_setup_animation_autoplay(node)
-		return node
+		return template.duplicate()
 	return null
 
 
-static func _find_animation_player(node: Node) -> AnimationPlayer:
-	if node is AnimationPlayer:
-		return node
-	for child in node.get_children():
-		var result = _find_animation_player(child)
-		if result:
-			return result
+static func get_repton_node() -> Node3D:
+	_ensure_repton_loaded()
+	if _repton_template:
+		return _repton_template.duplicate()
 	return null
 
 
-static func _setup_animation_autoplay(node: Node) -> void:
-	var anim_player = _find_animation_player(node)
-	if anim_player == null:
-		return
-	# Find the first animation name and set it as autoplay
-	var anim_list = anim_player.get_animation_list()
-	if anim_list.size() > 0:
-		anim_player.autoplay = anim_list[0]
-
-
-static func create_piece(type_char: String) -> Node3D:
+static func create_piece(type_char: String, is_3d: bool = false) -> Node3D:
 	if type_char == "0":
 		return null
 
@@ -164,13 +166,15 @@ static func create_piece(type_char: String) -> Node3D:
 		_:
 			node = Node3D.new()
 
-	# Try FBX model first (full node subtree with sub-meshes and animations)
+	# Try FBX model first (full node subtree with sub-meshes)
 	if type_char in _fbx_templates:
 		var fbx_node: Node3D = _fbx_templates[type_char].duplicate()
 		fbx_node.name = "Mesh"
-		fbx_node.scale = FBX_SCALE
-		fbx_node.position.y = 0.5
-		_setup_animation_autoplay(fbx_node)
+		fbx_node.scale = Vector3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0)
+		if is_3d:
+			fbx_node.position.y = 0.5
+		else:
+			fbx_node.position.y = 0.5
 		node.add_child(fbx_node)
 		return node
 
@@ -180,6 +184,35 @@ static func create_piece(type_char: String) -> Node3D:
 
 	var material := StandardMaterial3D.new()
 	material.albedo_color = COLORS.get(type_char, Color(1.0, 0.0, 1.0))  # Magenta fallback
+	material.roughness = 0.7
+
+	# Per-type material tweaks
+	match type_char:
+		"d":  # Diamond — shiny
+			material.roughness = 0.15
+			material.metallic = 0.6
+		"k", "C":  # Keys — metallic
+			material.roughness = 0.3
+			material.metallic = 0.8
+		"b":  # Bomb — slight sheen
+			material.roughness = 0.4
+			material.metallic = 0.3
+		"p":  # Spirit — glowing
+			material.roughness = 0.2
+			material.emission_enabled = true
+			material.emission = COLORS.get("p", Color(0.5, 0.7, 1.0))
+			material.emission_energy_multiplier = 0.5
+		"u":  # Skull — bone-like
+			material.roughness = 0.9
+		"n", "y":  # Transporter — slight glow
+			material.roughness = 0.3
+			material.emission_enabled = true
+			material.emission = COLORS.get("n", Color(0.8, 0.0, 0.8))
+			material.emission_energy_multiplier = 0.4
+		"5", "1", "2", "3", "4", "6", "7", "8", "9", "%", "&", "(", "!":  # Walls
+			material.roughness = 0.85
+		"e":  # Earth — matte
+			material.roughness = 0.95
 
 	var mesh: Mesh
 	var mesh_y_offset: float = 0.5

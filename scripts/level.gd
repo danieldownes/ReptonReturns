@@ -482,3 +482,55 @@ func open_safes() -> void:
 		for x in range(map_size_x):
 			if map_detail[x][y]["type_id"] == "s":
 				replace_piece(x, y, "d")
+
+
+# === Abstraction layer for 2D/3D compatibility ===
+# These methods provide a unified interface that Level3D overrides.
+# Default implementations preserve exact 2D behavior.
+
+func grid_to_world_v(gp: Vector3) -> Vector3:
+	# Convert grid position to world position (2D: slanted isometric)
+	return Vector3(gp.x, -gp.z, gp.z * MAP_SLANT)
+
+func get_map_at(grid_pos: Vector3) -> String:
+	# Unified map access — wraps existing get_map_p_xy
+	return get_map_p_xy(int(grid_pos.x), int(grid_pos.z))
+
+func set_map_at(grid_pos: Vector3, type: String) -> void:
+	set_map_p(grid_pos, type)
+
+func get_map_id_at(grid_pos: Vector3) -> int:
+	var x := int(grid_pos.x)
+	var z := int(grid_pos.z)
+	if x >= 0 and x < map_size_x and z >= 0 and z < map_size_y:
+		return map_detail[x][z]["id"]
+	return -1
+
+func set_map_id_at(grid_pos: Vector3, id: int) -> void:
+	map_detail[int(grid_pos.x)][int(grid_pos.z)]["id"] = id
+
+func get_map_ref_at(grid_pos: Vector3) -> int:
+	var x := int(grid_pos.x)
+	var z := int(grid_pos.z)
+	if x >= 0 and x < map_size_x and z >= 0 and z < map_size_y:
+		return map_detail[x][z]["ref"]
+	return 0
+
+func get_gravity_dir() -> Vector3:
+	# 2D: "down" is +z in grid
+	return Vector3(0, 0, 1)
+
+func get_below(grid_pos: Vector3) -> Vector3:
+	return grid_pos + Vector3(0, 0, 1)
+
+func get_slide_directions() -> Array:
+	# left-down, right-down (2D diagonal slides)
+	return [Vector3(-1, 0, 1), Vector3(1, 0, 1)]
+
+func is_in_bounds(grid_pos: Vector3) -> bool:
+	var x := int(grid_pos.x)
+	var z := int(grid_pos.z)
+	return x >= 0 and x < map_size_x and z >= 0 and z < map_size_y
+
+func has_player_gravity() -> bool:
+	return false

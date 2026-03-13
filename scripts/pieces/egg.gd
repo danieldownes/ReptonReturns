@@ -25,9 +25,8 @@ func move(dir: Vector3) -> bool:
 		return false
 
 	# Check if destination is empty
-	var target_x: int = int(grid_position.x + dir.x)
-	var target_y: int = int(grid_position.z + dir.z)
-	var target_piece: String = level.get_map_p_xy(target_x, target_y)
+	var target_pos: Vector3 = grid_position + dir
+	var target_piece: String = level.get_map_at(target_pos)
 
 	if target_piece != "0":
 		return false  # Blocked
@@ -64,9 +63,7 @@ func _crack() -> void:
 	if level == null:
 		return
 
-	var grid_x: int = int(grid_position.x)
-	var grid_y: int = int(grid_position.z)
-	var my_id: int = level.map_detail[grid_x][grid_y]["id"]
+	var my_id: int = level.get_map_id_at(grid_position)
 
 	# Create monster at this position
 	var monster_node: Node3D = PieceFactory.create_piece("m")
@@ -74,19 +71,24 @@ func _crack() -> void:
 		return
 
 	monster_node.position = _grid_to_world(grid_position)
-	monster_node.name = "m_" + str(grid_x) + "_" + str(grid_y)
+	monster_node.name = "m_" + str(int(grid_position.x)) + "_" + str(int(grid_position.z))
 
 	if monster_node is Monster:
 		monster_node.level = level
 		monster_node.piece_type = "m"
 		monster_node.monster_init(grid_position)
 
-	# Update map
-	level.map_detail[grid_x][grid_y]["type_id"] = "m"
-
 	# Replace in objects array
 	if my_id >= 0 and my_id < level.objects.size():
 		level.objects[my_id] = monster_node
+
+	# Update map with monster type and id
+	level.set_map_at(grid_position, "m")
+	level.set_map_id_at(grid_position, my_id)
+
+	# Set monster's object_id so it writes correct id on future moves
+	if monster_node is Monster:
+		monster_node.object_id = my_id
 
 	level.pieces_container.add_child(monster_node)
 	level.monsters_alive += 1

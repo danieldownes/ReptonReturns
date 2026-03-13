@@ -15,6 +15,10 @@ run/main_scene="uid://ckgclxivks3ol"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 
+[filesystem]
+
+import/blender/enabled=false
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
