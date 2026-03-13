@@ -385,6 +385,10 @@ func load_file_level_3d(file_path: String) -> bool:
 			piece_node.grid_position = pos
 			piece_node.level = self
 
+		# Fallables process bottom-up so lower rocks fall first
+		if piece_node is Fallable:
+			piece_node.process_priority = y - 1000
+
 		if piece_node is Monster:
 			piece_node.monster_init(pos)
 		elif piece_node is Spirit:

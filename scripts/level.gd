@@ -97,41 +97,20 @@ func _ready() -> void:
 func load_file_level(file_path: String) -> bool:
 	# public bool LoadFileLevel()
 
-	map_size_x = 30
-	map_size_y = 30
-
-	# Initialize map_detail as 2D array [x][y]
-	map_detail = []
-	for x in range(map_size_x):
-		var column: Array = []
-		for y in range(map_size_y):
-			column.append({
-				"type_id": "0",  # char TypeID
-				"id": -1,        # int id
-				"ref": 0         # int iRef
-			})
-		map_detail.append(column)
-
 	objects.clear()
 	_obj_tot = 0
-
-	# iPieceTot = new int[110];
 	piece_totals.clear()
-
-	# colourKey = new int[5];
 	colour_key = [0, 0, 0, 0, 0]
 
 	var s_temp: String
 
-	# Read file using Godot FileAccess
-	# Original used Unity TextAsset/StringReader
 	var file := FileAccess.open(file_path, FileAccess.READ)
 	if file == null:
 		push_error("Level file not found or not readable: " + file_path)
 		return false
 
 	# RR file version
-	s_temp = file.get_line()  # expecting "ReptonReturnsLevelV1.1"
+	s_temp = file.get_line()
 	print("Level version: ", s_temp)
 
 	# Level Name
@@ -139,7 +118,7 @@ func load_file_level(file_path: String) -> bool:
 	print("Level name: ", s_temp)
 
 	# Time allowed
-	s_temp = file.get_line()  # sngTimeBombOut
+	s_temp = file.get_line()
 	time_bomb = float(s_temp) if s_temp != "" else -1.0
 
 	# Map Size
@@ -148,28 +127,34 @@ func load_file_level(file_path: String) -> bool:
 	var dim_parts := s_temp.split(",")
 	map_size_x = int(dim_parts[0])
 	map_size_y = int(dim_parts[1])
-
 	print(str(map_size_x) + ":" + str(map_size_y))
+
+	# Initialize map_detail as 2D array [x][y] using actual map size
+	map_detail = []
+	for x in range(map_size_x):
+		var column: Array = []
+		for y in range(map_size_y):
+			column.append({
+				"type_id": "0",
+				"id": -1,
+				"ref": 0
+			})
+		map_detail.append(column)
 
 
 	# Get map layout data
 	for y in range(map_size_y):
 		s_temp = file.get_line()
-		print(s_temp)
 
 		for x in range(map_size_x):
-			if x < 0 or x >= (map_size_x - 2) or y < 0 or y >= (map_size_y - 2):
-				pass
-			else:
-				# Else use read in value
-				if x < s_temp.length():
-					map_detail[x][y]["type_id"] = s_temp[x]
+			if x < s_temp.length():
+				map_detail[x][y]["type_id"] = s_temp[x]
 
-					if s_temp[x] == "n":  # Transporter
-						map_detail[x][y]["ref"] = _get_piece_total("n")
+				if s_temp[x] == "n":  # Transporter
+					map_detail[x][y]["ref"] = _get_piece_total("n")
 
-					# Count piece types
-					_inc_piece_total(s_temp[x])
+				# Count piece types
+				_inc_piece_total(s_temp[x])
 
 
 	# Transporter info (indexed in order as from map)
@@ -226,76 +211,71 @@ func load_file_level(file_path: String) -> bool:
 	for y in range(map_size_y):
 		for x in range(map_size_x):
 			var world_pos: Vector3 = Vector3(x * 1.0, -y , y * MAP_SLANT)
+			var c_t: String = map_detail[x][y]["type_id"]
 
-			# Skip border padding (border walls are created outside the map)
-			if x < 0 or x >= (map_size_x - 2) or y < 0 or y >= (map_size_y - 2):
-				pass
-			else:
-				var c_t: String = map_detail[x][y]["type_id"]
-				var s_extra: String = ""
+			# Coloured Key
+			if c_t == "C":
+				map_detail[x][y]["ref"] = _get_piece_total("C")
+				_inc_piece_total("C")
 
-				# Coloured Key
-				if c_t == "C":
-					s_extra = str(_get_piece_total("C"))
-					map_detail[x][y]["ref"] = _get_piece_total("C")
-					_inc_piece_total("C")
+			# Door
+			if c_t == "D":
+				var door_idx: int = _get_piece_total("D")
+				map_detail[x][y]["ref"] = door_idx
+				_inc_piece_total("D")
 
-				# Door
-				if c_t == "D":
-					var door_idx: int = _get_piece_total("D")
-					s_extra = str(colour_key[door_idx])
-					map_detail[x][y]["ref"] = door_idx
-					_inc_piece_total("D")
+			# Skip empty space
+			if c_t == "0":
+				continue
 
-				# Skip empty space
-				if c_t == "0":
-					continue
+			# Player start position - record but don't create a mesh
+			if c_t == "i":
+				start_pos.x = x
+				start_pos.z = y
+				map_detail[x][y]["type_id"] = "0"
+				continue
 
-				# Player start position - record but don't create a mesh
-				# (player is created separately by Game)
-				if c_t == "i":
-					start_pos.x = x
-					start_pos.z = y
-					map_detail[x][y]["type_id"] = "0"  # Clear from map
-					continue
+			# Count objectives
+			if c_t == "d" or c_t == "s" or c_t == "c":
+				diamonds += 1
+			elif c_t == "t":
+				crowns += 1
+			elif c_t == "g":
+				eggs += 1
+			elif c_t == "m":
+				monsters_alive += 1
+			elif c_t == "p":
+				spirits += 1
 
-				# Count objectives
-				if c_t == "d":
-					diamonds += 1
-				elif c_t == "t":
-					crowns += 1
-				elif c_t == "g":
-					eggs += 1
-				elif c_t == "m":
-					monsters_alive += 1
-				elif c_t == "p":
-					spirits += 1
+			# Create piece
+			var piece_node: Node3D = PieceFactory.create_piece(c_t)
+			if piece_node == null:
+				map_detail[x][y]["id"] = -1
+				continue
 
-				# Create piece
-				var piece_node: Node3D = PieceFactory.create_piece(c_t)
-				if piece_node == null:
-					map_detail[x][y]["id"] = -1
-					continue
+			piece_node.position = world_pos
+			piece_node.name = c_t + "_" + str(x) + "_" + str(y)
+			map_detail[x][y]["id"] = _obj_tot
 
-				piece_node.position = world_pos
-				piece_node.name = c_t + "_" + str(x) + "_" + str(y)
-				map_detail[x][y]["id"] = _obj_tot
+			# Pass level reference to active pieces
+			if piece_node is Movable:
+				piece_node.piece_type = c_t
+				piece_node.grid_position = Vector3(x, 0, y)
+				piece_node.level = self
 
-				# Pass level reference to active pieces
-				if piece_node is Movable:
-					piece_node.piece_type = c_t
-					piece_node.grid_position = Vector3(x, 0, y)
-					piece_node.level = self
+			# Fallables process bottom-up so lower rocks fall first
+			if piece_node is Fallable:
+				piece_node.process_priority = -(y + 1)
 
-				# Type-specific initialization
-				if piece_node is Monster:
-					piece_node.monster_init(Vector3(x, 0, y))
-				elif piece_node is Spirit:
-					piece_node.spirit_init(Vector3(x, 0, y))
+			# Type-specific initialization
+			if piece_node is Monster:
+				piece_node.monster_init(Vector3(x, 0, y))
+			elif piece_node is Spirit:
+				piece_node.spirit_init(Vector3(x, 0, y))
 
-				pieces_container.add_child(piece_node)
-				objects.append(piece_node)
-				_obj_tot += 1
+			pieces_container.add_child(piece_node)
+			objects.append(piece_node)
+			_obj_tot += 1
 
 	# Create border walls around the outside of the map
 	_create_border_walls()
@@ -420,6 +400,7 @@ func _create_border_walls() -> void:
 	# Place wall pieces around the outside perimeter of the map.
 	# Wall type: '5' if the adjacent interior cell is a wall, otherwise
 	# edge-specific type (6=left, 4=right, 2=top, 8=bottom, corners=7/9/1/3).
+	print("Border walls: map_size=", map_size_x, "x", map_size_y)
 
 	# Top + bottom rows (x from -1 to map_size_x)
 	for x in range(-1, map_size_x + 1):

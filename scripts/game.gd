@@ -128,7 +128,7 @@ func _create_player() -> void:
 		if _is_3d_level:
 			fbx_node.position.y = 0.0
 		else:
-			fbx_node.position.y = 0.5
+			fbx_node.position.y = 0.0
 		player.add_child(fbx_node)
 	else:
 		var mesh_instance := MeshInstance3D.new()
@@ -143,7 +143,7 @@ func _create_player() -> void:
 		if _is_3d_level:
 			mesh_instance.position.y = 0.0
 		else:
-			mesh_instance.position.y = 0.4
+			mesh_instance.position.y = 0.0
 		player.add_child(mesh_instance)
 
 	add_child(player)

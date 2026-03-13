@@ -7,6 +7,12 @@ class_name Egg
 extends Fallable
 
 
+const CRACK_TIME: float = 0.8  # seconds of visible cracking before monster spawns
+
+var _cracking: bool = false
+var _crack_timer: float = 0.0
+
+
 func _ready() -> void:
 	init()
 	stopped_falling.connect(_on_stopped_falling)
@@ -14,6 +20,14 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	super._process(delta)
+
+	if _cracking:
+		_crack_timer -= delta
+		if _crack_timer <= 0.0:
+			_cracking = false
+			_hatch()
+		return
+
 	check_fall()
 
 
@@ -47,27 +61,24 @@ func traverse() -> void:
 
 
 func _on_stopped_falling() -> void:
-	# In 2D: egg cracks after free fall (fell more than 1 cell)
-	# In 3D: egg cracks after any fall (gravity limits to 1 block at a time)
-	var should_crack: bool = free_fall
-	if level != null and level.has_player_gravity():
-		should_crack = true  # 3D: always crack after a fall
-	if should_crack:
-		# Defer the crack so check_if_fall() finishes first
-		call_deferred("_check_crack")
+	# Egg cracks after any fall (1 cell or more)
+	call_deferred("_check_crack")
 
 
 func _check_crack() -> void:
 	# Only crack if truly stopped (not continuing to fall)
-	if not falling:
-		_crack()
+	if not falling and not _cracking:
+		_start_cracking()
 
 
-func _crack() -> void:
+func _start_cracking() -> void:
 	if level == null:
 		return
 
-	# Play egg cracking sound (parented to level so it survives queue_free)
+	_cracking = true
+	_crack_timer = CRACK_TIME
+
+	# Play egg cracking sound
 	var snd := AudioStreamPlayer3D.new()
 	snd.stream = SFX.egg_cracking
 	snd.max_distance = 40.0
@@ -76,6 +87,19 @@ func _crack() -> void:
 	level.add_child(snd)
 	snd.finished.connect(snd.queue_free)
 	snd.play()
+
+	# Visual feedback: shrink/shake the egg during cracking
+	var mesh_node = get_node_or_null("Mesh")
+	if mesh_node:
+		var tween := create_tween()
+		tween.set_loops(4)
+		tween.tween_property(mesh_node, "rotation_degrees:z", 10.0, CRACK_TIME / 8.0)
+		tween.tween_property(mesh_node, "rotation_degrees:z", -10.0, CRACK_TIME / 8.0)
+
+
+func _hatch() -> void:
+	if level == null:
+		return
 
 	var my_id: int = level.get_map_id_at(grid_position)
 

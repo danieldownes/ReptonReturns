@@ -19,6 +19,7 @@ enum State {
 }
 
 var start_pos: Vector3           # public Vector3 StartPos;
+var respawn_pos: Vector3         # Last safe respawn point (start or transporter dest)
 var player_state: int = State.STOPPED  # public State PlayerState;
 var old_state: int = State.STOPPED     # private State OldState;
 
@@ -28,6 +29,10 @@ var want_move_me: int = 0        # private int WantMoveMe;
 
 var inventory: Array[String] = []  # public List<string> Inventory = new List<string>();
 var is_falling: bool = false  # True when player is falling due to gravity (3D levels)
+
+# Input buffer for shuffle moves — allows queuing next move slightly early
+var _buffered_dirs: Array = []
+const INPUT_BUFFER_WINDOW: float = 0.08  # seconds before move ends to accept next input
 
 # Facing direction (tween rotation)
 var _mesh_node: Node3D = null
@@ -48,6 +53,8 @@ func _ready() -> void:
 	player_state = State.STOPPED
 	last_time = 0.0
 	time_to_move = 0.3
+	# Process before fallables so Repton can push rocks before they chain-fall
+	process_priority = -2000
 
 	# Register input actions
 	_setup_input_actions()
@@ -79,6 +86,9 @@ func _add_action(action_name: String, keys: Array) -> void:
 func _process(delta: float) -> void:
 	# Handle movement interpolation (from Movable base)
 	if last_time > 0.0:
+		# Buffer input near the end of the current move (enables shuffle)
+		if last_time <= INPUT_BUFFER_WINDOW:
+			_buffered_dirs = _read_input_dirs()
 		_do_move(delta)
 		return  # Don't accept input while moving
 
@@ -91,16 +101,14 @@ func _process(delta: float) -> void:
 	if level != null and level.has_player_gravity() and _check_player_gravity():
 		return  # Falling — don't accept input
 
-	# Input handling
+	# Execute buffered input or read fresh input
+	# Try each pressed direction — if one is blocked, try the next
 	if player_state == State.STOPPED or player_state == State.PUSH_NO_WALK:
-		if Input.is_action_pressed("move_left"):
-			try_move(Vector3.LEFT)
-		elif Input.is_action_pressed("move_right"):
-			try_move(Vector3.RIGHT)
-		elif Input.is_action_pressed("move_forward"):
-			try_move(Vector3(0, 0, -1))
-		elif Input.is_action_pressed("move_back"):
-			try_move(Vector3(0, 0, 1))
+		var dirs: Array = _buffered_dirs if not _buffered_dirs.is_empty() else _read_input_dirs()
+		_buffered_dirs = []
+		for dir in dirs:
+			if try_move(dir):
+				break
 
 	# Was pushing (continuously), and now stopped?
 	if old_state == State.PUSH and player_state != State.PUSH:
@@ -110,29 +118,37 @@ func _process(delta: float) -> void:
 		want_move_me -= 1
 
 
-func try_move(dir: Vector3) -> void:
-	# public new void Move(Vector3 direction)
+func _read_input_dirs() -> Array:
+	# Returns all currently pressed directions (ordered by priority)
+	var dirs: Array = []
+	if Input.is_action_pressed("move_left"):
+		dirs.append(Vector3.LEFT)
+	if Input.is_action_pressed("move_right"):
+		dirs.append(Vector3.RIGHT)
+	if Input.is_action_pressed("move_forward"):
+		dirs.append(Vector3(0, 0, -1))
+	if Input.is_action_pressed("move_back"):
+		dirs.append(Vector3(0, 0, 1))
+	return dirs
 
+
+func try_move(dir: Vector3) -> bool:
 	if level == null:
-		return
+		return false
 
 	var target_grid: Vector3 = grid_position + dir
-
 	var target_piece: String = level.get_map_at(target_grid)
 
 	# Wall or barrier? Can't move — unless it's a 1-high step in 3D levels
 	if target_piece in WALL_PIECES:
 		if level.has_player_gravity():
-			# Try to climb: move forward + up 1
 			var climb_grid: Vector3 = target_grid + Vector3(0, 1, 0)
 			var climb_piece: String = level.get_map_at(climb_grid)
-			# Also check there's room above Repton's current position
 			var above_grid: Vector3 = grid_position + Vector3(0, 1, 0)
 			var above_piece: String = level.get_map_at(above_grid)
 			var climb_ok: bool = (climb_piece == "0" or climb_piece in TRAVERSABLE_PIECES)
 			var above_ok: bool = (above_piece == "0" or above_piece in TRAVERSABLE_PIECES)
 			if climb_ok and above_ok:
-				# Collect traversable pieces along the climb path
 				if above_piece in TRAVERSABLE_PIECES:
 					_collect_piece(above_grid, above_piece)
 				if climb_piece in TRAVERSABLE_PIECES:
@@ -140,18 +156,17 @@ func try_move(dir: Vector3) -> void:
 				player_state = State.WALK
 				_face_direction(dir)
 				move(dir + Vector3(0, 1, 0))
-				return
-		return
+				return true
+		return false
 
 	# Deadly piece? Player dies
 	if target_piece in DEADLY_PIECES:
 		die()
-		return
+		return true
 
 	# Bomb? Only traversable when all objectives complete
 	if target_piece == "b":
-		if level.diamonds <= 0 and level.crowns <= 0 and level.eggs <= 0 and level.monsters_alive <= 0:
-			# Defuse bomb — level complete!
+		if level.diamonds <= 0 and level.crowns <= 0 and level.eggs <= 0 and level.monsters_alive <= 0 and level.spirits <= 0:
 			level.remove_piece_v(target_grid)
 			level.set_map_at(target_grid, "0")
 			player_state = State.WALK
@@ -159,57 +174,58 @@ func try_move(dir: Vector3) -> void:
 			SFX.play_at(self, SFX.bomb_explosion)
 			if level.game != null:
 				level.game.level_complete()
-		return
+			return true
+		return false
 
-	# Cage? Can't enter directly (spirits turn into diamonds here)
+	# Cage? Can't enter directly
 	if target_piece == "c":
-		return
+		return false
 
 	# Monster? Player dies on contact
 	if target_piece == "m":
 		die()
-		return
+		return true
 
 	# Spirit? Player dies on contact
 	if target_piece == "p":
 		die()
-		return
+		return true
 
 	# Rock or Egg? Try to push
 	if target_piece == "r" or target_piece == "g":
+		var gravity_dir: Vector3 = level.get_gravity_dir()
+		if dir == gravity_dir or dir == -gravity_dir:
+			return false
+
 		var behind_grid: Vector3 = target_grid + dir
 		var behind_piece: String = level.get_map_at(behind_grid)
 
 		if behind_piece != "0" and behind_piece != "m":
-			return  # Can't push — something behind it
+			return false
 
-		# Can only push horizontally (not up/down)
-		# (In classic Repton, rocks fall, they don't get pushed vertically)
-
-		# Get the fallable node and animate the push
 		var piece_id: int = level.get_map_id_at(target_grid)
 		if piece_id >= 0 and piece_id < level.objects.size():
 			var pushed_piece = level.objects[piece_id]
 			if pushed_piece is Fallable:
 				if not pushed_piece.move(dir):
-					return  # Rock couldn't move — don't walk into it
+					return false
 
 		player_state = State.PUSH
 		_do_grid_move(dir)
-		return
+		return true
 
 	# Door? Check for matching coloured key in inventory
 	if target_piece == "D":
 		var door_ref: int = level.get_map_ref_at(target_grid)
 		var key_name: String = "Coloured Key:" + str(door_ref)
 		if key_name in inventory:
-			# Open the door
 			inventory.erase(key_name)
 			level.remove_piece_v(target_grid)
 			level.set_map_at(target_grid, "0")
 			player_state = State.WALK
 			_do_grid_move(dir)
-		return
+			return true
+		return false
 
 	# Transporter? Teleport player
 	if target_piece == "n":
@@ -218,12 +234,14 @@ func try_move(dir: Vector3) -> void:
 			var dest: Vector3 = level.transporter[ref_val]
 			last_position = grid_position
 			grid_position = dest
-			direction = Vector3(0, 0, 1)   # Face down after transport (increasing grid_y)
+			respawn_pos = dest
+			direction = Vector3(0, 0, 1)
 			position = _grid_to_world(dest)
 			last_time = 0.0
 			player_state = State.STOPPED
 			SFX.play_at(self, SFX.transporter)
-		return
+			return true
+		return false
 
 	# Traversable piece? Remove it and move in
 	if target_piece in TRAVERSABLE_PIECES:
@@ -234,18 +252,60 @@ func try_move(dir: Vector3) -> void:
 		else:
 			player_state = State.WALK
 		_do_grid_move(dir)
-		return
+		return true
 
 	# Empty space — just move (but check support in 3D levels)
 	if target_piece == "0" or target_piece == "i":
 		if level.has_player_gravity() and not _has_support_at(target_grid):
-			return  # No ground within 1-block fall — can't move there
+			return false
 		player_state = State.WALK
 		_do_grid_move(dir)
-		return
+		return true
+
+	return false
 
 
 func _do_grid_move(dir: Vector3) -> void:
+	# In 2D levels, check if moving in gravity direction while supporting a rock/egg
+	if level != null and not level.has_player_gravity():
+		var gravity_dir: Vector3 = level.get_gravity_dir()
+		if dir == gravity_dir:
+			var dominated: bool = false
+			# Check directly above
+			var above_pos: Vector3 = grid_position - gravity_dir
+			var above_piece: String = level.get_map_at(above_pos)
+			if above_piece == "r" or above_piece == "g":
+				dominated = true
+			# Check diagonal-above (top-left and top-right)
+			# A rock at top-left can slide right-down onto Repton's current cell
+			# A rock at top-right can slide left-down onto Repton's current cell
+			if not dominated:
+				# above_pos is directly above Repton — must be empty for diagonal slide
+				if above_piece == "0":
+					# Top-left rock: grid + (-1,0,-1) slides right-down via (1,0,1)
+					var top_left: Vector3 = grid_position + Vector3(-1, 0, -1)
+					var tl_piece: String = level.get_map_at(top_left)
+					if tl_piece == "r" or tl_piece == "g":
+						# Rock needs to be on a curved/slope piece to slide
+						var tl_below: Vector3 = level.get_below(top_left)
+						var tl_below_piece: String = level.get_map_at(tl_below)
+						if tl_below_piece in Fallable.CURVED_PIECES or tl_below_piece in Fallable.SLOPES_RIGHT:
+							dominated = true
+					if not dominated:
+						# Top-right rock: grid + (1,0,-1) slides left-down via (-1,0,1)
+						var top_right: Vector3 = grid_position + Vector3(1, 0, -1)
+						var tr_piece: String = level.get_map_at(top_right)
+						if tr_piece == "r" or tr_piece == "g":
+							var tr_below: Vector3 = level.get_below(top_right)
+							var tr_below_piece: String = level.get_map_at(tr_below)
+							if tr_below_piece in Fallable.CURVED_PIECES or tr_below_piece in Fallable.SLOPES_LEFT:
+								dominated = true
+			if dominated:
+				_face_direction(dir)
+				move(dir)
+				die()
+				return
+
 	_face_direction(dir)
 	move(dir)
 
@@ -262,6 +322,7 @@ func _on_move_finished() -> void:
 func move_to_pos(new_pos: Vector3) -> void:
 	# public void MoveToPos(Vector3 vNewPos)
 	start_pos = new_pos
+	respawn_pos = new_pos
 	last_position = new_pos
 	grid_position = new_pos
 	position = _grid_to_world(new_pos)
@@ -339,8 +400,11 @@ func die() -> int:
 			level.game.game_over()
 		return 0
 
-	# Reset to starting position
-	move_to_pos(start_pos)
+	# Reset to last safe position (start or transporter destination)
+	var safe_pos: Vector3 = respawn_pos
+	last_position = safe_pos
+	grid_position = safe_pos
+	position = _grid_to_world(safe_pos)
 	direction = Vector3(0, 0, 1)   # Facing "down" (increasing grid_y)
 	player_state = State.STOPPED
 	last_time = 0.0

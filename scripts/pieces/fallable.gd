@@ -53,10 +53,16 @@ func move(dir: Vector3) -> bool:
 	if dir == Vector3(0, 1, 0):
 		return false
 
+	# If pushed horizontally while falling, reset fall state
+	if falling and dir != gravity_dir:
+		falling = false
+		was_falling = false
+
 	# Ok, start the move...
 	super.move(dir)
 
-	check_if_fall()
+	# Don't chain check_if_fall() here — let the move animation complete first.
+	# Fall checks happen naturally via _process -> check_fall().
 
 	return true
 
@@ -78,6 +84,11 @@ func check_if_fall() -> void:
 	if falling and last_time <= 0.0:
 		falling = false
 		was_falling = true
+		# Update process priority so bottom rocks always fall first
+		if level.has_player_gravity():
+			process_priority = int(grid_position.y) - 1000
+		else:
+			process_priority = -int(grid_position.z) - 1
 		stopped_falling.emit()
 	elif falling:
 		return
@@ -112,8 +123,9 @@ func check_if_fall() -> void:
 		var slide_dir: Vector3 = slide_dirs[0]
 		var side_pos: Vector3 = grid_position + (slide_dir - gravity_dir)  # horizontal component
 		var slide_pos: Vector3 = grid_position + slide_dir
+		var slide_piece: String = level.get_map_at(slide_pos)
 
-		if level.get_map_at(side_pos) == "0" and level.get_map_at(slide_pos) == "0" \
+		if level.get_map_at(side_pos) == "0" and (slide_piece == "0" or slide_piece == "m") \
 				and not _is_player_at_v(side_pos) \
 				and not _is_player_at_v(slide_pos):
 			falling = true
@@ -125,8 +137,9 @@ func check_if_fall() -> void:
 		var slide_dir: Vector3 = slide_dirs[1]
 		var side_pos: Vector3 = grid_position + (slide_dir - gravity_dir)  # horizontal component
 		var slide_pos: Vector3 = grid_position + slide_dir
+		var slide_piece: String = level.get_map_at(slide_pos)
 
-		if level.get_map_at(side_pos) == "0" and level.get_map_at(slide_pos) == "0" \
+		if level.get_map_at(side_pos) == "0" and (slide_piece == "0" or slide_piece == "m") \
 				and not _is_player_at_v(side_pos) \
 				and not _is_player_at_v(slide_pos):
 			falling = true
@@ -148,8 +161,9 @@ func _do_fall(dir: Vector3) -> void:
 	# Call Movable.move() directly to avoid Rock's obstacle check
 	# (we already know the destination is empty/cleared)
 	super.move(dir)
-	# Re-check for continued falling
-	check_if_fall()
+	# Don't chain check_if_fall() here — let the fall animation complete first.
+	# The next fall check happens naturally via _process -> check_fall().
+	# This gives Repton a window to push the rock mid-fall (the "Repton shuffle").
 
 
 func _is_player_at(x: int, y: int) -> bool:

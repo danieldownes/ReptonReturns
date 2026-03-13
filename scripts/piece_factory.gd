@@ -178,6 +178,10 @@ static func create_piece(type_char: String, is_3d: bool = false) -> Node3D:
 		node.add_child(fbx_node)
 		return node
 
+	# Spirit — plasma orb shader (special case)
+	if type_char == "p":
+		return _create_spirit_orb(node, is_3d)
+
 	# Fallback to primitive meshes for types without FBX models
 	var mesh_instance := MeshInstance3D.new()
 	mesh_instance.name = "Mesh"
@@ -197,11 +201,6 @@ static func create_piece(type_char: String, is_3d: bool = false) -> Node3D:
 		"b":  # Bomb — slight sheen
 			material.roughness = 0.4
 			material.metallic = 0.3
-		"p":  # Spirit — glowing
-			material.roughness = 0.2
-			material.emission_enabled = true
-			material.emission = COLORS.get("p", Color(0.5, 0.7, 1.0))
-			material.emission_energy_multiplier = 0.5
 		"u":  # Skull — bone-like
 			material.roughness = 0.9
 		"n", "y":  # Transporter — slight glow
@@ -218,13 +217,6 @@ static func create_piece(type_char: String, is_3d: bool = false) -> Node3D:
 	var mesh_y_offset: float = 0.5
 
 	match type_char:
-		"p":  # Spirit - sphere (no FBX model)
-			var sphere := SphereMesh.new()
-			sphere.radius = 0.35
-			sphere.height = 0.7
-			mesh = sphere
-			mesh_y_offset = 0.35
-
 		"u":  # Skull - sphere
 			var sphere := SphereMesh.new()
 			sphere.radius = 0.35
@@ -271,4 +263,61 @@ static func create_piece(type_char: String, is_3d: bool = false) -> Node3D:
 	mesh_instance.position.y = mesh_y_offset
 
 	node.add_child(mesh_instance)
+	return node
+
+
+static var _plasma_shader: Shader = null
+
+static func _create_spirit_orb(node: Node3D, is_3d: bool) -> Node3D:
+	# Create a plasma orb spirit with custom shader
+	var mesh_instance := MeshInstance3D.new()
+	mesh_instance.name = "Mesh"
+
+	# High-subdivision sphere for smooth vertex displacement
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.35
+	sphere.height = 0.7
+	sphere.radial_segments = 32
+	sphere.rings = 24
+	mesh_instance.mesh = sphere
+	mesh_instance.position.y = 0.35
+
+	# Load shader (cached)
+	if _plasma_shader == null:
+		_plasma_shader = load("res://shaders/plasma_orb.gdshader")
+
+	var mat := ShaderMaterial.new()
+	mat.shader = _plasma_shader
+
+	# Set default uniform values
+	mat.set_shader_parameter("orb_color", Color(0.3, 0.5, 1.0, 1.0))
+	mat.set_shader_parameter("orb_alpha", 0.85)
+	mat.set_shader_parameter("glow_intensity", 1.2)
+	mat.set_shader_parameter("scroll_speed_1", 0.3)
+	mat.set_shader_parameter("scroll_speed_2", 0.2)
+	mat.set_shader_parameter("electric_scale", 3.0)
+	mat.set_shader_parameter("electric_brightness", 1.0)
+	mat.set_shader_parameter("displacement_strength", 0.06)
+	mat.set_shader_parameter("displacement_speed", 1.2)
+	mat.set_shader_parameter("displacement_scale", 2.5)
+	mat.set_shader_parameter("distortion_strength", 0.04)
+	mat.set_shader_parameter("distortion_speed", 0.5)
+	mat.set_shader_parameter("distortion_scale", 3.0)
+	mat.set_shader_parameter("fresnel_power", 2.5)
+	mat.set_shader_parameter("fresnel_intensity", 0.8)
+	mat.set_shader_parameter("fresnel_color", Color(0.6, 0.8, 1.0, 1.0))
+
+	mesh_instance.material_override = mat
+
+	# Add a subtle point light inside the orb for scene illumination
+	var light := OmniLight3D.new()
+	light.light_color = Color(0.4, 0.6, 1.0)
+	light.light_energy = 0.4
+	light.omni_range = 3.0
+	light.omni_attenuation = 2.0
+	light.position.y = 0.35
+	light.name = "OrbGlow"
+
+	node.add_child(mesh_instance)
+	node.add_child(light)
 	return node
