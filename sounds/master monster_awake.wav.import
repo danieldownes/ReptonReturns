@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://ckdyo60x50svs"
+path="res://.godot/imported/master monster_awake.wav-9ff0acf45cbc4b7b74f41a51d3060560.sample"
+
+[deps]
+
+source_file="res://sounds/master monster_awake.wav"
+dest_files=["res://.godot/imported/master monster_awake.wav-9ff0acf45cbc4b7b74f41a51d3060560.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

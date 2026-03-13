@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bk8k3h3w3qmn"
+path="res://.godot/imported/The Thunderous Intro for Repton Returns.mp3-6118d2da11abaa7cf154586c89ba69bf.mp3str"
+
+[deps]
+
+source_file="res://music/The Thunderous Intro for Repton Returns.mp3"
+dest_files=["res://.godot/imported/The Thunderous Intro for Repton Returns.mp3-6118d2da11abaa7cf154586c89ba69bf.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
