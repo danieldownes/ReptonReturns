@@ -103,8 +103,6 @@ func _kill_monster_at_v(pos: Vector3) -> void:
 	# Fallback: scan all objects for a monster at this position
 	for obj in level.objects:
 		if obj != null and obj is Monster and obj.monster_state != Monster.State.DEAD:
-			if int(obj.grid_position.x) == int(pos.x) \
-					and int(obj.grid_position.y) == int(pos.y) \
-					and int(obj.grid_position.z) == int(pos.z):
+			if obj.is_at_grid(pos):
 				obj.die()
 				return

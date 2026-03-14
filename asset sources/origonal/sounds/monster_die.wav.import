@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://01ty0gcg06w0"
+path="res://.godot/imported/monster_die.wav-30b2b96526a1a5490c35fe12a226b26e.sample"
+
+[deps]
+
+source_file="res://asset sources/origonal/sounds/monster_die.wav"
+dest_files=["res://.godot/imported/monster_die.wav-30b2b96526a1a5490c35fe12a226b26e.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bjuspu4xmjwc6"
+path="res://.godot/imported/crown.wav-d419d9358a305b255e4f915dcd1d99af.sample"
+
+[deps]
+
+source_file="res://asset sources/origonal/sounds/crown.wav"
+dest_files=["res://.godot/imported/crown.wav-d419d9358a305b255e4f915dcd1d99af.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

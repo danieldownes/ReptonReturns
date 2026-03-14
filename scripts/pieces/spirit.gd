@@ -108,13 +108,7 @@ func move(dir: Vector3) -> bool:
 
 	# If we went into a cage, turn into a diamond
 	if on_piece == "c":
-		var cx := int(new_pos.x)
-		var cy := int(new_pos.z)
-		if level.has_player_gravity():
-			# 3D: use y,z coords
-			_enter_cage_3d(new_pos)
-		else:
-			_enter_cage(cx, cy)
+		_enter_cage(new_pos)
 
 	return true
 
@@ -256,9 +250,7 @@ func _has_other_spirit_at(pos: Vector3) -> bool:
 		return false
 	for obj in level.objects:
 		if obj != null and obj is Spirit and obj != self:
-			if int(obj.grid_position.x) == int(pos.x) \
-					and int(obj.grid_position.y) == int(pos.y) \
-					and int(obj.grid_position.z) == int(pos.z):
+			if obj.is_at_grid(pos):
 				return true
 	return false
 
@@ -269,9 +261,7 @@ func _get_spirit_on_piece_at(pos: Vector3) -> String:
 		return "0"
 	for obj in level.objects:
 		if obj != null and obj is Spirit and obj != self:
-			if int(obj.grid_position.x) == int(pos.x) \
-					and int(obj.grid_position.y) == int(pos.y) \
-					and int(obj.grid_position.z) == int(pos.z):
+			if obj.is_at_grid(pos):
 				return obj.on_piece
 	return "0"
 
@@ -288,35 +278,17 @@ func _play_sound_on_level(stream: AudioStream) -> void:
 	snd.play()
 
 
-func _enter_cage(x: int, y: int) -> void:
-	# Spirit enters a cage — becomes a diamond (2D)
-	_play_sound_on_level(SFX.spirit_caught)
-
-	# Restore the cage on the map first (spirit overwrote it with "p")
-	level.set_map_at(Vector3(x, 0, y), "c")
-
-	# replace_piece removes the cage mesh, sets map to "d", creates diamond mesh
-	level.replace_piece(x, y, "d")
-
-	level.spirits -= 1
-	level.diamonds += 1
-
-	# Remove spirit
-	queue_free()
-
-
-func _enter_cage_3d(pos: Vector3) -> void:
-	# Spirit enters a cage — becomes a diamond (3D)
+func _enter_cage(pos: Vector3) -> void:
 	_play_sound_on_level(SFX.spirit_caught)
 
 	# Restore the cage on the map first (spirit overwrote it with "p")
 	level.set_map_at(pos, "c")
 
-	# replace_piece_v removes the cage mesh, sets map to "d", creates diamond mesh
+	# Replace cage mesh with diamond
 	level.replace_piece_v(pos, "d")
 
 	level.spirits -= 1
-	level.diamonds += 1
+	# Don't increment diamonds — the cage was already counted as a diamond at load time
 
 	# Remove spirit
 	queue_free()

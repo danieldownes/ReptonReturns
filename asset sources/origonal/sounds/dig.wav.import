@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dacxfexu84d7v"
+path="res://.godot/imported/dig.wav-0d422d3bb61ede22382657e871cd4851.sample"
+
+[deps]
+
+source_file="res://asset sources/origonal/sounds/dig.wav"
+dest_files=["res://.godot/imported/dig.wav-0d422d3bb61ede22382657e871cd4851.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

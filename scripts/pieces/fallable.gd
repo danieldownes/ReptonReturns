@@ -58,6 +58,9 @@ func move(dir: Vector3) -> bool:
 		falling = false
 		was_falling = false
 
+	# Reset to normal move speed for pushes
+	time_to_move = 0.3
+
 	# Ok, start the move...
 	super.move(dir)
 
@@ -158,6 +161,11 @@ func _do_fall(dir: Vector3) -> void:
 
 	# Update map data then start the animated move
 	_update_map_for_move(dir)
+	# Adjust fall speed: first fall is slow (gives time for shuffle), freefall is fast
+	if free_fall:
+		time_to_move = 0.2
+	else:
+		time_to_move = 0.4
 	# Call Movable.move() directly to avoid Rock's obstacle check
 	# (we already know the destination is empty/cleared)
 	super.move(dir)
@@ -194,9 +202,7 @@ func _kill_monster_at_fall(pos: Vector3) -> void:
 	# Fallback: scan all objects for a monster at this position
 	for obj in level.objects:
 		if obj != null and obj is Monster and obj.monster_state != Monster.State.DEAD:
-			if int(obj.grid_position.x) == int(pos.x) \
-					and int(obj.grid_position.y) == int(pos.y) \
-					and int(obj.grid_position.z) == int(pos.z):
+			if obj.is_at_grid(pos):
 				obj.die()
 				return
 

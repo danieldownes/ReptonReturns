@@ -21,6 +21,12 @@ func init() -> void:
 	pass
 
 
+func is_at_grid(pos: Vector3) -> bool:
+	return int(grid_position.x) == int(pos.x) \
+		and int(grid_position.y) == int(pos.y) \
+		and int(grid_position.z) == int(pos.z)
+
+
 func traverse() -> void:
 	# public virtual void Traverse()
 	queue_free()  # Destroy(this.gameObject);

@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bw66rto0notw6"
+path="res://.godot/imported/m_dimond.wav-61b7f4a7958d71c85e90ad97cb79a5f6.sample"
+
+[deps]
+
+source_file="res://asset sources/origonal/sounds/m_dimond.wav"
+dest_files=["res://.godot/imported/m_dimond.wav-61b7f4a7958d71c85e90ad97cb79a5f6.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

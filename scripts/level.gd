@@ -306,52 +306,41 @@ func add_slant(v: Vector3) -> Vector3:
 	return Vector3(v.x, -v.z, v.z * MAP_SLANT)
 
 
-func grid_to_world(grid_x: int, grid_y: int) -> Vector3:
-	return Vector3(grid_x * 1.0, -grid_y, grid_y * MAP_SLANT)
-
-
 # Map data functions
 
 func get_map_p(v: Vector3) -> String:
-	# public char GetMapP(Vector3 vP)
 	return get_map_p_xy(int(v.x), int(v.z))
 
 func get_map_p_xy(x: int, y: int) -> String:
-	# public char GetMapP(int x, int y)
 	if x >= 0 and x < map_size_x and y >= 0 and y < map_size_y:
 		return map_detail[x][y]["type_id"]
 	else:
 		return " "
 
 func get_map_p_id(v: Vector3) -> int:
-	# public int GetMapPId(Vector3 vP)
 	return map_detail[int(v.x)][int(v.z)]["id"]
 
 func set_map_p(v: Vector3, c_type: String) -> void:
-	# public void SetMapP(Vector3 vP, char cType)
 	map_detail[int(v.x)][int(v.z)]["type_id"] = c_type
 
 func set_map_p_with_id(v: Vector3, c_type: String, id: int) -> void:
-	# public void SetMapP(Vector3 vP, char cType, int id)
 	map_detail[int(v.x)][int(v.z)]["type_id"] = c_type
 	map_detail[int(v.x)][int(v.z)]["id"] = id
 
 
-func remove_piece(x: int, y: int) -> void:
-	# public void RemovePiece(int x, int y)
+func remove_piece_v(v: Vector3) -> void:
+	var x := int(v.x)
+	var y := int(v.z)
 	var p_id: int = map_detail[x][y]["id"]
 	if p_id != -1 and p_id < objects.size():
 		if objects[p_id] != null:
 			objects[p_id].queue_free()
 
-func remove_piece_v(v: Vector3) -> void:
-	# public void RemovePiece(Vector3 vP)
-	remove_piece(int(v.x), int(v.z))
 
-
-func replace_piece(x: int, y: int, new_type_id: String) -> void:
-	# public void ReplacePiece(int x, int y, char cNewTypeID)
-	var world_pos: Vector3 = grid_to_world(x, y)
+func replace_piece_v(v: Vector3, new_type_id: String) -> void:
+	var x := int(v.x)
+	var y := int(v.z)
+	var world_pos: Vector3 = grid_to_world_v(v)
 	var p_id: int = map_detail[x][y]["id"]
 
 	map_detail[x][y]["type_id"] = new_type_id
@@ -367,10 +356,6 @@ func replace_piece(x: int, y: int, new_type_id: String) -> void:
 			pieces_container.add_child(new_piece)
 			if p_id >= 0 and p_id < objects.size():
 				objects[p_id] = new_piece
-
-func replace_piece_v(v: Vector3, new_type_id: String) -> void:
-	# public void ReplacePiece(Vector3 vP, char cNewTypeID)
-	replace_piece(int(v.x), int(v.z), new_type_id)
 
 
 func move_piece(from_x: int, from_y: int, to_x: int, to_y: int) -> bool:
@@ -391,7 +376,7 @@ func move_piece(from_x: int, from_y: int, to_x: int, to_y: int) -> bool:
 
 	# Move the 3D object
 	if piece_id >= 0 and piece_id < objects.size() and objects[piece_id] != null:
-		objects[piece_id].position = grid_to_world(to_x, to_y)
+		objects[piece_id].position = grid_to_world_v(Vector3(to_x, 0, to_y))
 
 	return true
 
@@ -462,7 +447,7 @@ func open_safes() -> void:
 	for y in range(map_size_y):
 		for x in range(map_size_x):
 			if map_detail[x][y]["type_id"] == "s":
-				replace_piece(x, y, "d")
+				replace_piece_v(Vector3(x, 0, y), "d")
 
 
 # === Abstraction layer for 2D/3D compatibility ===

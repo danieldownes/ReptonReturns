@@ -146,18 +146,12 @@ func grid_to_world(grid_x: int, grid_y: int) -> Vector3:
 
 # === Piece management ===
 
-func remove_piece(x: int, y: int) -> void:
-	remove_piece_v(Vector3(x, 0, y))
-
 func remove_piece_v(v: Vector3) -> void:
 	var k := _key(v)
 	if _cells.has(k):
 		var p_id: int = _cells[k]["id"]
 		if p_id != -1 and p_id < objects.size() and objects[p_id] != null:
 			objects[p_id].queue_free()
-
-func replace_piece(x: int, y: int, new_type_id: String) -> void:
-	replace_piece_v(Vector3(x, 0, y), new_type_id)
 
 func replace_piece_v(v: Vector3, new_type_id: String) -> void:
 	var k := _key(v)
@@ -178,12 +172,7 @@ func replace_piece_v(v: Vector3, new_type_id: String) -> void:
 			if p_id >= 0 and p_id < objects.size():
 				objects[p_id] = new_piece
 
-func move_piece(from_x: int, from_y: int, to_x: int, to_y: int) -> bool:
-	var from_v := Vector3(from_x, 0, from_y)
-	var to_v := Vector3(to_x, 0, to_y)
-	return _move_piece_v(from_v, to_v)
-
-func _move_piece_v(from_v: Vector3, to_v: Vector3) -> bool:
+func move_piece_v(from_v: Vector3, to_v: Vector3) -> bool:
 	var from_type: String = get_map_at(from_v)
 	var to_type: String = get_map_at(to_v)
 	if to_type != "0":

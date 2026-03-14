@@ -197,13 +197,21 @@ func try_move(dir: Vector3) -> bool:
 		if dir == gravity_dir or dir == -gravity_dir:
 			return false
 
+		# Check if the rock is in freefall (fallen 2+ cells) — kills Repton
+		var piece_id: int = level.get_map_id_at(target_grid)
+		if piece_id >= 0 and piece_id < level.objects.size():
+			var pushed_piece = level.objects[piece_id]
+			if pushed_piece is Fallable:
+				if pushed_piece.free_fall:
+					die()
+					return true
+
 		var behind_grid: Vector3 = target_grid + dir
 		var behind_piece: String = level.get_map_at(behind_grid)
 
 		if behind_piece != "0" and behind_piece != "m":
 			return false
 
-		var piece_id: int = level.get_map_id_at(target_grid)
 		if piece_id >= 0 and piece_id < level.objects.size():
 			var pushed_piece = level.objects[piece_id]
 			if pushed_piece is Fallable:
@@ -357,14 +365,30 @@ func _check_player_gravity() -> bool:
 func _has_support_at(target: Vector3) -> bool:
 	# Check if a position has ground support within a 1-block fall.
 	# Returns true if target itself is on solid ground, or 1 block below is solid.
+	# A falling rock/egg does NOT count as support.
 	var below: Vector3 = level.get_below(target)
 	var below_piece: String = level.get_map_at(below)
 	if below_piece != "0":
-		return true  # Directly supported
+		if not _is_falling_piece_at(below):
+			return true  # Directly supported by a non-falling piece
 	# Check 1 block further down
 	var two_below: Vector3 = level.get_below(below)
 	var two_below_piece: String = level.get_map_at(two_below)
-	return two_below_piece != "0"
+	if two_below_piece != "0":
+		return not _is_falling_piece_at(two_below)
+	return false
+
+
+func _is_falling_piece_at(pos: Vector3) -> bool:
+	# Check if there's a falling or recently-fallen Fallable at the given position.
+	# A rock that just landed (was_falling) may be about to fall again,
+	# so it doesn't count as stable support either.
+	var piece_id: int = level.get_map_id_at(pos)
+	if piece_id >= 0 and piece_id < level.objects.size():
+		var obj = level.objects[piece_id]
+		if obj is Fallable and (obj.falling or obj.was_falling):
+			return true
+	return false
 
 
 func _face_direction(dir: Vector3) -> void:

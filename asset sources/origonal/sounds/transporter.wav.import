@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bi46nk3rgmr2p"
+path="res://.godot/imported/transporter.wav-ce87124fabdec90f3d84a8f306368808.sample"
+
+[deps]
+
+source_file="res://asset sources/origonal/sounds/transporter.wav"
+dest_files=["res://.godot/imported/transporter.wav-ce87124fabdec90f3d84a8f306368808.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
